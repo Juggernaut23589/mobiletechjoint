@@ -4,7 +4,9 @@ import { fetchRecentMedia, cleanCaption, deriveProductName } from "@/lib/instagr
 import slugify from "slugify";
 
 /**
- * Triggered every 3 hours by Vercel Cron (see vercel.json). Protected by
+ * Triggered once daily at 06:00 by Vercel Cron (see vercel.json — the
+ * Hobby plan caps cron at one run/day; bump the schedule if this project
+ * ever moves to Pro). Protected by
  * CRON_SECRET so it can't be invoked by anyone who finds the URL — Vercel
  * Cron sends this automatically as a Bearer token when CRON_SECRET is set
  * as a project env var.
