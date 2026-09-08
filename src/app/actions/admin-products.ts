@@ -62,3 +62,30 @@ export async function archiveProduct(formData: FormData): Promise<{ error?: stri
   revalidatePath("/admin/products");
   return {};
 }
+
+/** Toggles the hero-carousel / trending flags. Both are admin-curated, not
+ *  computed — there's no order history yet to derive real "hot selling"
+ *  data from (see the merchandising migration's comment). */
+export async function toggleMerchandisingFlag(formData: FormData): Promise<{ error?: string }> {
+  await assertAdmin();
+  const productId = formData.get("productId") as string;
+  const field = formData.get("field") as string;
+  const nextValue = formData.get("nextValue") === "true";
+
+  if (!productId) return { error: "Missing product." };
+  if (field !== "is_featured" && field !== "is_trending") {
+    return { error: "Invalid field." };
+  }
+
+  const supabase = createServiceClient();
+  const { error } = await supabase
+    .from("products")
+    .update({ [field]: nextValue })
+    .eq("id", productId);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin/products");
+  revalidatePath("/");
+  return {};
+}

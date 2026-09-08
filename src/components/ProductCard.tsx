@@ -14,7 +14,7 @@ export function ProductCard({ product }: { product: ProductWithImages }) {
   return (
     <Link
       href={`/products/${product.slug}`}
-      className="group flex flex-col rounded-lg border border-neutral-200 bg-white overflow-hidden transition-shadow hover:shadow-md"
+      className="group flex flex-col overflow-hidden rounded-xl border border-neutral-200 bg-white transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-brand-900/10"
     >
       <div className="relative aspect-square bg-neutral-100">
         {cover ? (
@@ -38,12 +38,12 @@ export function ProductCard({ product }: { product: ProductWithImages }) {
       </div>
       <div className="flex flex-1 flex-col gap-1 p-3">
         {product.category && (
-          <span className="text-xs text-neutral-500">{product.category.name}</span>
+          <span className="text-xs font-medium text-brand-600">{product.category.name}</span>
         )}
         <h3 className="line-clamp-2 text-sm font-medium text-neutral-900">
           {product.name}
         </h3>
-        <p className="mt-auto text-base font-semibold text-neutral-900">
+        <p className="mt-auto text-base font-bold text-brand-900">
           {/* price_kobo is NOT NULL for any product with status='published' —
               enforced by the price_required_when_published CHECK constraint. */}
           {formatNaira(product.price_kobo ?? 0)}

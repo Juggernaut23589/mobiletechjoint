@@ -3,10 +3,10 @@ import { CartLink } from "@/components/CartLink";
 
 export function SiteHeader() {
   return (
-    <header className="border-b border-neutral-200 bg-white">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-        <Link href="/" className="text-lg font-bold tracking-tight text-neutral-900">
-          MobileTechJoint
+    <header className="sticky top-0 z-40 border-b border-brand-900/10 bg-brand-900">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
+        <Link href="/" className="text-lg font-extrabold tracking-tight text-white">
+          MobileTech<span className="text-accent-400">Joint</span>
         </Link>
         <CartLink />
       </div>

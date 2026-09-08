@@ -13,10 +13,10 @@ export function CartLink() {
   useEffect(() => setMounted(true), []);
 
   return (
-    <Link href="/cart" className="relative text-sm font-medium text-neutral-900">
+    <Link href="/cart" className="relative text-sm font-medium text-white">
       Cart
       {mounted && count > 0 && (
-        <span className="absolute -right-3 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-neutral-900 text-xs text-white">
+        <span className="absolute -right-3 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-accent-500 text-xs font-semibold text-brand-900">
           {count}
         </span>
       )}

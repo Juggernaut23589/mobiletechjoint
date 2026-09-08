@@ -11,6 +11,7 @@ export function AddToCartForm({
   priceKobo,
   imageUrl,
   stockQuantity,
+  categoryId,
 }: {
   productId: string;
   slug: string;
@@ -18,6 +19,7 @@ export function AddToCartForm({
   priceKobo: number;
   imageUrl: string | null;
   stockQuantity: number;
+  categoryId: string | null;
 }) {
   const router = useRouter();
   const addItem = useCartStore((s) => s.addItem);
@@ -28,7 +30,7 @@ export function AddToCartForm({
 
   function handleAdd() {
     addItem(
-      { productId, slug, name, priceKoboSnapshot: priceKobo, imageUrl },
+      { productId, slug, name, priceKoboSnapshot: priceKobo, imageUrl, categoryId },
       quantity
     );
     setAdded(true);
@@ -37,7 +39,7 @@ export function AddToCartForm({
 
   function handleBuyNow() {
     addItem(
-      { productId, slug, name, priceKoboSnapshot: priceKobo, imageUrl },
+      { productId, slug, name, priceKoboSnapshot: priceKobo, imageUrl, categoryId },
       quantity
     );
     router.push("/cart");
@@ -75,13 +77,13 @@ export function AddToCartForm({
       <div className="flex gap-3">
         <button
           onClick={handleAdd}
-          className="flex-1 rounded-md border border-neutral-900 px-6 py-3 text-sm font-medium text-neutral-900 transition-colors hover:bg-neutral-100"
+          className="flex-1 rounded-md border border-brand-700 px-6 py-3 text-sm font-medium text-brand-700 transition-colors hover:bg-brand-50"
         >
           {added ? "Added ✓" : "Add to Cart"}
         </button>
         <button
           onClick={handleBuyNow}
-          className="flex-1 rounded-md bg-neutral-900 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-neutral-800"
+          className="flex-1 rounded-md bg-accent-500 px-6 py-3 text-sm font-semibold text-brand-900 transition-colors hover:bg-accent-400"
         >
           Buy Now
         </button>

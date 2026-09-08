@@ -18,6 +18,8 @@ export interface CartItem {
   priceKoboSnapshot: number;
   imageUrl: string | null;
   quantity: number;
+  /** Used only to fetch cross-sell suggestions on the cart page — not trusted for anything else. */
+  categoryId: string | null;
 }
 
 interface CartState {

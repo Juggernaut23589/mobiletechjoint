@@ -1,9 +1,10 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Image from "next/image";
-import { getPublishedProductBySlug } from "@/lib/products";
+import { getPublishedProductBySlug, getRelatedProducts } from "@/lib/products";
 import { formatNaira } from "@/lib/money";
 import { AddToCartForm } from "@/components/AddToCartForm";
+import { ProductSection } from "@/components/ProductSection";
 
 // See app/page.tsx — same reasoning: stock/price can change (admin edits,
 // the Instagram poller flipping a draft to published) between deploys.
@@ -32,6 +33,8 @@ export default async function ProductPage({
   const product = await getPublishedProductBySlug(slug);
 
   if (!product) notFound();
+
+  const related = await getRelatedProducts(product.category_id, product.id, 4);
 
   // price_kobo is NOT NULL for any product with status='published' — enforced
   // by the price_required_when_published CHECK constraint in the migration.
@@ -100,10 +103,10 @@ export default async function ProductPage({
         {/* Details + purchase */}
         <div className="flex flex-col gap-4">
           {product.category && (
-            <span className="text-sm text-neutral-500">{product.category.name}</span>
+            <span className="text-sm font-medium text-brand-600">{product.category.name}</span>
           )}
-          <h1 className="text-2xl font-bold tracking-tight">{product.name}</h1>
-          <p className="text-2xl font-semibold">{formatNaira(priceKobo)}</p>
+          <h1 className="text-2xl font-bold tracking-tight text-brand-900">{product.name}</h1>
+          <p className="text-2xl font-bold text-brand-900">{formatNaira(priceKobo)}</p>
 
           {product.description && (
             <p className="whitespace-pre-line text-neutral-700">
@@ -124,9 +127,16 @@ export default async function ProductPage({
             priceKobo={priceKobo}
             imageUrl={cover?.url ?? null}
             stockQuantity={product.stock_quantity}
+            categoryId={product.category_id}
           />
         </div>
       </div>
+
+      {related.length > 0 && (
+        <div className="mt-12 border-t border-neutral-200 pt-8">
+          <ProductSection title="You may also like" products={related} />
+        </div>
+      )}
     </div>
   );
 }

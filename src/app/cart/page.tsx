@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useCartStore } from "@/store/cart";
 import { formatNaira } from "@/lib/money";
+import { CrossSellSection } from "@/components/CrossSellSection";
 
 export default function CartPage() {
   // Cart state is persisted to localStorage, so it only exists client-side —
@@ -30,9 +31,14 @@ export default function CartPage() {
     );
   }
 
+  const categoryIds = Array.from(
+    new Set(items.map((i) => i.categoryId).filter((id): id is string => Boolean(id)))
+  );
+  const excludeIds = items.map((i) => i.productId);
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="mb-6 text-2xl font-bold tracking-tight">Your Cart</h1>
+      <h1 className="mb-6 text-2xl font-bold tracking-tight text-brand-900">Your Cart</h1>
 
       <div className="flex flex-col divide-y divide-neutral-200 border-y border-neutral-200">
         {items.map((item) => (
@@ -94,16 +100,20 @@ export default function CartPage() {
       </div>
 
       <div className="mt-4 flex items-center justify-between border-t border-neutral-200 pt-4">
-        <span className="text-lg font-semibold">Subtotal</span>
-        <span className="text-lg font-semibold">{formatNaira(subtotalKobo)}</span>
+        <span className="text-lg font-semibold text-brand-900">Subtotal</span>
+        <span className="text-lg font-semibold text-brand-900">{formatNaira(subtotalKobo)}</span>
       </div>
 
       <Link
         href="/checkout"
-        className="mt-6 block w-full rounded-md bg-neutral-900 px-6 py-3 text-center text-sm font-medium text-white transition-colors hover:bg-neutral-800"
+        className="mt-6 block w-full rounded-md bg-accent-500 px-6 py-3 text-center text-sm font-semibold text-brand-900 transition-colors hover:bg-accent-400"
       >
         Proceed to Checkout
       </Link>
+
+      <div className="mt-10">
+        <CrossSellSection categoryIds={categoryIds} excludeIds={excludeIds} />
+      </div>
     </div>
   );
 }

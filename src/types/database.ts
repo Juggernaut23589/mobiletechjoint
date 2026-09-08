@@ -14,6 +14,10 @@ export interface Category {
   created_at: string;
 }
 
+export interface CategoryWithCount extends Category {
+  product_count: number;
+}
+
 export interface ProductImage {
   id: string;
   product_id: string;
@@ -36,6 +40,12 @@ export interface Product {
   source: ProductSource;
   instagram_media_id: string | null;
   woocommerce_id: number | null;
+  /** Admin-curated, not computed — there's no order history yet to derive
+   *  real "hot selling" data from. Shown in the homepage hero carousel. */
+  is_featured: boolean;
+  /** Admin-curated, same reasoning as is_featured. Shown in the "Trending
+   *  Now" section. */
+  is_trending: boolean;
   created_at: string;
   updated_at: string;
 }
