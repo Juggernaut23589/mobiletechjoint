@@ -14,6 +14,7 @@ import { CategorySidebar } from "@/components/CategorySidebar";
 import { CategoryTiles } from "@/components/CategoryTiles";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { TrustStrip } from "@/components/TrustStrip";
+import { BouncingProductBackground } from "@/components/BouncingProductBackground";
 
 // Without this, the page is prerendered once at build time and never
 // reflects products added afterwards (manual entry, or the Instagram
@@ -33,13 +34,21 @@ export default async function HomePage() {
 
   return (
     <div>
-      <section className="mx-auto max-w-3xl px-4 pb-8 pt-16 text-center sm:pt-24">
-        <h1 className="font-display text-4xl font-semibold tracking-tight text-ink sm:text-5xl">
-          Gear for the work you make.
-        </h1>
-        <p className="mx-auto mt-4 max-w-xl text-lg text-neutral-500">
-          Cameras, lighting, audio, and rigging for creators and media teams.
-        </p>
+      <section className="relative overflow-hidden bg-brand-900 py-20 sm:py-28">
+        <div className="bg-grid-texture pointer-events-none absolute inset-0 opacity-30" />
+        <div className="pointer-events-none absolute left-1/2 top-0 h-96 w-96 -translate-x-1/2 rounded-full bg-brand-600/30 blur-3xl" />
+        <div className="pointer-events-none absolute bottom-0 right-0 h-72 w-72 rounded-full bg-cyan-500/20 blur-3xl" />
+
+        <BouncingProductBackground products={allProducts} />
+
+        <div className="relative mx-auto max-w-3xl px-4 text-center">
+          <h1 className="font-display text-4xl font-semibold tracking-tight text-white sm:text-5xl">
+            Gear for the work you make.
+          </h1>
+          <p className="mx-auto mt-4 max-w-xl text-lg text-white/70">
+            Cameras, lighting, audio, and rigging for creators and media teams.
+          </p>
+        </div>
       </section>
 
       <HeroCarousel products={featured} />

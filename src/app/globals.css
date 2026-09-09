@@ -1,34 +1,35 @@
 @import "tailwindcss";
 
 :root {
-  --color-surface: #fbfbfd;
+  --color-surface: #f7f6fb;
   --color-surface-raised: #ffffff;
-  --color-ink: #1d1d1f;
+  --color-ink: #150f24;
 
-  /* Apple-restrained "shell" palette: near-black ink + a single blue accent
-     for links/CTAs, instead of the previous saturated indigo. Merchandising
-     elements (deal badges, category tiles, the deals banner, hero carousel)
-     deliberately keep their own separate warm colors — see those
-     components — this palette only governs structural chrome. */
-  --color-brand-50: #f2f7fd;
-  --color-brand-100: #e4eefb;
-  --color-brand-200: #cfe3f9;
-  --color-brand-500: #2997ff;
-  --color-brand-600: #0071e3;
-  --color-brand-700: #0058b0;
-  --color-brand-900: #1d1d1f;
+  /* Vivid violet + electric cyan — a proper "tech ecommerce" palette
+     (gaming/gadget-brand energy) instead of the flatter blue/black shell
+     from the previous pass, which read as too plain. */
+  --color-brand-50: #f2edff;
+  --color-brand-100: #e4d9ff;
+  --color-brand-200: #c9b6ff;
+  --color-brand-500: #8b5cf6;
+  --color-brand-600: #7c3aed;
+  --color-brand-700: #6423c7;
+  --color-brand-900: #170f2e;
+
+  --color-cyan-400: #22d3ee;
+  --color-cyan-500: #06b6d4;
 
   --color-accent-400: #fbbf24;
   --color-accent-500: #f59e0b;
   --color-accent-600: #d97706;
 
-  /* Untouched by the Apple-restraint pass — the hero carousel and category
-     tiles keep their original indigo, deliberately kept as prominent as
-     before rather than folded into the new neutral "shell" palette. */
+  /* The hero carousel / category tiles keep this original indigo,
+     deliberately decoupled from the shell so they read as a distinct
+     "merchandising" moment regardless of how the shell palette shifts. */
   --color-merch-600: #4338ca;
   --color-merch-900: #15123a;
 
-  --shadow-color: 220 10% 15%;
+  --shadow-color: 262 55% 22%;
 }
 
 @theme inline {
@@ -43,6 +44,9 @@
   --color-brand-600: var(--color-brand-600);
   --color-brand-700: var(--color-brand-700);
   --color-brand-900: var(--color-brand-900);
+
+  --color-cyan-400: var(--color-cyan-400);
+  --color-cyan-500: var(--color-cyan-500);
 
   --color-accent-400: var(--color-accent-400);
   --color-accent-500: var(--color-accent-500);
@@ -72,7 +76,7 @@ h1, h2, h3, h4, .font-display {
 }
 
 .bg-brand-gradient {
-  background: linear-gradient(135deg, var(--color-brand-600), var(--color-brand-900) 70%);
+  background: linear-gradient(135deg, var(--color-brand-600), var(--color-cyan-500) 130%);
 }
 
 .bg-merch-gradient {
@@ -90,10 +94,15 @@ h1, h2, h3, h4, .font-display {
   color: transparent;
 }
 
-/* Neutral, understated — used for structural card hovers (product cards,
-   forms). Colored shadows are reserved for merchandising elements only. */
+.text-brand-gradient {
+  background: linear-gradient(90deg, var(--color-brand-500), var(--color-cyan-400));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
 .shadow-glow {
-  box-shadow: 0 12px 28px -10px hsl(var(--shadow-color) / 0.28);
+  box-shadow: 0 12px 28px -10px hsl(var(--shadow-color) / 0.35);
 }
 
 .shadow-glow-accent {

@@ -3,15 +3,10 @@
 import { motion, type HTMLMotionProps } from "framer-motion";
 import { forwardRef } from "react";
 
-// Flat, solid fills rather than gradients — Apple's own CTAs (a single
-// blue, occasionally black) rather than the more "energetic ecommerce"
-// gradient buttons this started as. Deal badges / the hero carousel /
-// category tiles are unaffected — see globals.css's separate --color-merch
-// tokens for those.
 const VARIANTS = {
-  primary: "bg-brand-600 text-white shadow-glow hover:bg-brand-700",
+  primary: "bg-brand-gradient text-white shadow-glow hover:brightness-110",
   secondary:
-    "border border-neutral-300 text-ink bg-white hover:border-brand-600 hover:text-brand-600",
+    "border border-brand-200 text-brand-700 bg-white hover:bg-brand-50",
   dark: "bg-brand-900 text-white shadow-glow hover:brightness-125",
   ghost: "text-neutral-500 hover:text-brand-600",
 } as const;
