@@ -13,7 +13,7 @@ export function HeroCarousel({ products }: { products: ProductWithImages[] }) {
   const track = [...products, ...products];
 
   return (
-    <section className="relative overflow-hidden bg-brand-gradient py-8">
+    <section className="relative overflow-hidden bg-merch-gradient py-8">
       <div className="bg-grid-texture pointer-events-none absolute inset-0 opacity-40" />
       <div className="pointer-events-none absolute -left-24 -top-24 h-64 w-64 rounded-full bg-brand-500/30 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-24 -right-24 h-64 w-64 rounded-full bg-accent-500/20 blur-3xl" />

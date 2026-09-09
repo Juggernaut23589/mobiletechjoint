@@ -43,7 +43,7 @@ export default function CartPage() {
   const excludeIds = items.map((i) => i.productId);
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8">
+    <div className="mx-auto max-w-3xl px-4 py-12 sm:py-16">
       <h1 className="font-display mb-6 text-2xl font-bold tracking-tight text-brand-900">
         Your Cart
       </h1>

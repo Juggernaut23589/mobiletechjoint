@@ -79,7 +79,7 @@ export function CheckoutForm({
   }
 
   return (
-    <div className="mx-auto max-w-md px-4 py-8">
+    <div className="mx-auto max-w-md px-4 py-12 sm:py-16">
       <h1 className="font-display mb-6 text-2xl font-bold tracking-tight text-brand-900">
         Checkout
       </h1>

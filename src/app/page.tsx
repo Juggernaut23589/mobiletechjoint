@@ -33,11 +33,20 @@ export default async function HomePage() {
 
   return (
     <div>
+      <section className="mx-auto max-w-3xl px-4 pb-8 pt-16 text-center sm:pt-24">
+        <h1 className="font-display text-4xl font-semibold tracking-tight text-ink sm:text-5xl">
+          Gear for the work you make.
+        </h1>
+        <p className="mx-auto mt-4 max-w-xl text-lg text-neutral-500">
+          Cameras, lighting, audio, and rigging for creators and media teams.
+        </p>
+      </section>
+
       <HeroCarousel products={featured} />
       <TrustStrip />
       <CategoryTiles categories={categories} />
 
-      <div className="mx-auto max-w-7xl px-4 py-8">
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:py-16">
         <div className="flex gap-8">
           <CategorySidebar categories={categories} />
 

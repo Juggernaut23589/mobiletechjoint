@@ -41,7 +41,7 @@ export function CategoryTiles({ categories }: { categories: CategoryWithCount[] 
                 href={`/category/${category.slug}`}
                 className="flex w-24 shrink-0 flex-col items-center gap-2 rounded-xl p-2 text-center transition-colors hover:bg-brand-50"
               >
-                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-gradient text-white">
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-merch-gradient text-white">
                   <Icon className="h-6 w-6" strokeWidth={1.75} />
                 </div>
                 <span className="line-clamp-2 text-xs font-medium text-neutral-700">

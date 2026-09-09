@@ -52,7 +52,7 @@ export default async function ProductPage({
   const discount = discountPercent(priceKobo, product.compare_at_price_kobo);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
+    <div className="mx-auto max-w-6xl px-4 py-12 sm:py-16">
       <div className="grid gap-8 md:grid-cols-2">
         <RevealOnScroll>
           <ProductGallery images={images} videos={videos} productName={product.name} />
