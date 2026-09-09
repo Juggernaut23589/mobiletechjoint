@@ -3,12 +3,15 @@ import {
   getFeaturedProducts,
   getTrendingProducts,
   getNewArrivals,
+  getDealsProducts,
   getCategoriesWithCounts,
 } from "@/lib/products";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductSection } from "@/components/ProductSection";
+import { DealsSection } from "@/components/DealsSection";
 import { HeroCarousel } from "@/components/HeroCarousel";
 import { CategorySidebar } from "@/components/CategorySidebar";
+import { CategoryTiles } from "@/components/CategoryTiles";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { TrustStrip } from "@/components/TrustStrip";
 
@@ -19,11 +22,12 @@ import { TrustStrip } from "@/components/TrustStrip";
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const [allProducts, featured, trending, newArrivals, categories] = await Promise.all([
+  const [allProducts, featured, trending, newArrivals, deals, categories] = await Promise.all([
     getPublishedProducts(),
     getFeaturedProducts(8),
     getTrendingProducts(8),
     getNewArrivals(8),
+    getDealsProducts(8),
     getCategoriesWithCounts(),
   ]);
 
@@ -31,12 +35,15 @@ export default async function HomePage() {
     <div>
       <HeroCarousel products={featured} />
       <TrustStrip />
+      <CategoryTiles categories={categories} />
 
       <div className="mx-auto max-w-7xl px-4 py-8">
         <div className="flex gap-8">
           <CategorySidebar categories={categories} />
 
           <div className="min-w-0 flex-1">
+            <DealsSection products={deals} />
+
             <ProductSection
               title="Trending Now"
               subtitle="Popular with shoppers right now"

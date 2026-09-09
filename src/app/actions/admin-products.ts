@@ -22,11 +22,16 @@ export async function publishDraftProduct(formData: FormData): Promise<{ error?:
   const productId = formData.get("productId") as string;
   const priceNaira = Number(formData.get("priceNaira"));
   const stockQuantity = Number(formData.get("stockQuantity"));
+  const compareAtPriceNairaRaw = formData.get("compareAtPriceNaira");
+  const compareAtPriceNaira = compareAtPriceNairaRaw ? Number(compareAtPriceNairaRaw) : null;
 
   if (!productId) return { error: "Missing product." };
   if (!priceNaira || priceNaira <= 0) return { error: "Enter a valid price." };
   if (!Number.isFinite(stockQuantity) || stockQuantity < 0) {
     return { error: "Enter a valid stock quantity." };
+  }
+  if (compareAtPriceNaira !== null && compareAtPriceNaira <= priceNaira) {
+    return { error: "The \"was\" price must be higher than the actual price." };
   }
 
   const supabase = createServiceClient();
@@ -34,6 +39,7 @@ export async function publishDraftProduct(formData: FormData): Promise<{ error?:
     .from("products")
     .update({
       price_kobo: nairaToKobo(priceNaira),
+      compare_at_price_kobo: compareAtPriceNaira ? nairaToKobo(compareAtPriceNaira) : null,
       stock_quantity: stockQuantity,
       status: "published",
     })
@@ -84,6 +90,45 @@ export async function assignProductBrand(formData: FormData): Promise<{ error?: 
 
   revalidatePath("/admin/products");
   revalidatePath("/category", "layout");
+  return {};
+}
+
+/** Sets or clears a "was" price on an already-published product, for the
+ *  real (never fabricated) discount badge on ProductCard. Empty input
+ *  clears it. */
+export async function setCompareAtPrice(formData: FormData): Promise<{ error?: string }> {
+  await assertAdmin();
+  const productId = formData.get("productId") as string;
+  const compareAtPriceNairaRaw = formData.get("compareAtPriceNaira");
+  const compareAtPriceNaira = compareAtPriceNairaRaw ? Number(compareAtPriceNairaRaw) : null;
+
+  if (!productId) return { error: "Missing product." };
+
+  const supabase = createServiceClient();
+  const { data: product } = await supabase
+    .from("products")
+    .select("price_kobo")
+    .eq("id", productId)
+    .maybeSingle();
+
+  if (compareAtPriceNaira !== null) {
+    if (!Number.isFinite(compareAtPriceNaira) || compareAtPriceNaira <= 0) {
+      return { error: "Enter a valid amount." };
+    }
+    if (product?.price_kobo != null && nairaToKobo(compareAtPriceNaira) <= product.price_kobo) {
+      return { error: "The \"was\" price must be higher than the actual price." };
+    }
+  }
+
+  const { error } = await supabase
+    .from("products")
+    .update({ compare_at_price_kobo: compareAtPriceNaira ? nairaToKobo(compareAtPriceNaira) : null })
+    .eq("id", productId);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin/products");
+  revalidatePath("/");
   return {};
 }
 

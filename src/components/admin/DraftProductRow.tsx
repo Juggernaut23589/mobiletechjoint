@@ -58,6 +58,19 @@ export function DraftProductRow({ product }: { product: ProductWithImages }) {
               className="w-20 rounded-md border border-neutral-300 px-2 py-1 text-sm"
             />
           </div>
+          <div>
+            <label className="block text-xs text-neutral-500">
+              &quot;Was&quot; price (₦, optional)
+            </label>
+            <input
+              name="compareAtPriceNaira"
+              type="number"
+              min={1}
+              step="1"
+              placeholder="For a discount badge"
+              className="w-36 rounded-md border border-neutral-300 px-2 py-1 text-sm"
+            />
+          </div>
           <button
             type="submit"
             disabled={publishing}

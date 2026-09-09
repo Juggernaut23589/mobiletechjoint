@@ -71,6 +71,9 @@ export interface Product {
   slug: string;
   description: string | null;
   price_kobo: number | null;
+  /** Admin-entered "was" price for a real discount badge — never computed
+   *  or guessed. Only shown when it's actually higher than price_kobo. */
+  compare_at_price_kobo: number | null;
   currency: string;
   category_id: string | null;
   stock_quantity: number;

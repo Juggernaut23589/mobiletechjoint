@@ -129,6 +129,26 @@ export async function getNewArrivals(limit = 8): Promise<ProductWithImages[]> {
   return getPublishedProducts(limit);
 }
 
+/** Products with a real admin-entered "was" price — never a fabricated
+ *  discount. Empty array (not a fallback) if nobody's set one yet. */
+export async function getDealsProducts(limit?: number): Promise<ProductWithImages[]> {
+  const supabase = createPublicClient();
+  let query = supabase
+    .from("products")
+    .select("*, product_images(*), category:categories(*), brand:brands(*)")
+    .eq("status", "published")
+    .not("compare_at_price_kobo", "is", null)
+    .order("created_at", { ascending: false });
+  if (limit) query = query.limit(limit);
+  const { data, error } = await query;
+
+  if (error) {
+    console.error("getDealsProducts failed:", error.message);
+    return [];
+  }
+  return (data ?? []) as unknown as ProductWithImages[];
+}
+
 /** Other published products in the same category — used for cross-sells on
  *  the product detail page and the cart. */
 export async function getRelatedProducts(

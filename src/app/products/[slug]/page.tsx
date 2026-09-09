@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getPublishedProductBySlug, getComplementaryProducts } from "@/lib/products";
-import { formatNaira } from "@/lib/money";
+import { formatNaira, discountPercent } from "@/lib/money";
 import { AddToCartForm } from "@/components/AddToCartForm";
 import { ProductSection } from "@/components/ProductSection";
 import { ProductGallery } from "@/components/ProductGallery";
@@ -49,6 +49,7 @@ export default async function ProductPage({
     .sort((a, b) => a.position - b.position);
 
   const lowStock = product.stock_quantity > 0 && product.stock_quantity <= 5;
+  const discount = discountPercent(priceKobo, product.compare_at_price_kobo);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
@@ -66,7 +67,21 @@ export default async function ProductPage({
           <h1 className="font-display text-2xl font-bold tracking-tight text-brand-900">
             {product.name}
           </h1>
-          <p className="font-display text-3xl font-bold text-brand-900">{formatNaira(priceKobo)}</p>
+          <div className="flex items-baseline gap-3">
+            <p className="font-display text-3xl font-bold text-brand-900">
+              {formatNaira(priceKobo)}
+            </p>
+            {discount !== null && (
+              <>
+                <p className="text-lg text-neutral-400 line-through">
+                  {formatNaira(product.compare_at_price_kobo!)}
+                </p>
+                <span className="rounded-full bg-red-500 px-2 py-1 text-xs font-bold text-white">
+                  -{discount}%
+                </span>
+              </>
+            )}
+          </div>
 
           {product.description && (
             <p className="whitespace-pre-line text-neutral-700">{product.description}</p>

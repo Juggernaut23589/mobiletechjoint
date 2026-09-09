@@ -3,7 +3,11 @@
 import { useTransition } from "react";
 import Image from "next/image";
 import { formatNaira } from "@/lib/money";
-import { toggleMerchandisingFlag, assignProductBrand } from "@/app/actions/admin-products";
+import {
+  toggleMerchandisingFlag,
+  assignProductBrand,
+  setCompareAtPrice,
+} from "@/app/actions/admin-products";
 import type { ProductWithImages, Brand } from "@/types/database";
 
 /** One row per published product: toggle buttons for the two merchandising
@@ -42,6 +46,15 @@ export function MerchandisingRow({
     });
   }
 
+  function handleCompareAtBlur(e: React.FocusEvent<HTMLInputElement>) {
+    const formData = new FormData();
+    formData.set("productId", product.id);
+    formData.set("compareAtPriceNaira", e.target.value);
+    startTransition(() => {
+      setCompareAtPrice(formData);
+    });
+  }
+
   return (
     <div className="flex flex-wrap items-center gap-3 border-b border-neutral-200 py-3">
       <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md bg-neutral-100">
@@ -54,6 +67,18 @@ export function MerchandisingRow({
         <p className="truncate text-sm font-medium">{product.name}</p>
         <p className="text-xs text-neutral-500">{formatNaira(product.price_kobo ?? 0)}</p>
       </div>
+
+      <input
+        type="number"
+        min={1}
+        step="1"
+        placeholder="Was price (₦)"
+        defaultValue={product.compare_at_price_kobo ? product.compare_at_price_kobo / 100 : ""}
+        onBlur={handleCompareAtBlur}
+        disabled={isPending}
+        title="Set a 'was' price for a discount badge — leave blank to clear it"
+        className="w-28 shrink-0 rounded-md border border-neutral-300 px-2 py-1 text-xs disabled:opacity-50"
+      />
 
       <select
         defaultValue={product.brand_id ?? ""}

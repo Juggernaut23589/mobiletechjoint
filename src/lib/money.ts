@@ -21,3 +21,10 @@ export function formatNaira(kobo: number): string {
     maximumFractionDigits: 0,
   }).format(koboToNaira(kobo));
 }
+
+/** Whole-percent discount, or null if there's no real "was" price to
+ *  compare against. Rounds down so the badge never overstates the saving. */
+export function discountPercent(priceKobo: number, compareAtKobo: number | null): number | null {
+  if (!compareAtKobo || compareAtKobo <= priceKobo) return null;
+  return Math.floor(((compareAtKobo - priceKobo) / compareAtKobo) * 100);
+}
