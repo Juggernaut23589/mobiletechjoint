@@ -132,6 +132,30 @@ export async function setCompareAtPrice(formData: FormData): Promise<{ error?: s
   return {};
 }
 
+/** Reassigns a product's category — the manual correction path for
+ *  scripts/categorize-uncategorized.ts, which is keyword-matching on free
+ *  text titles and won't always get it right. */
+export async function assignProductCategory(formData: FormData): Promise<{ error?: string }> {
+  await assertAdmin();
+  const productId = formData.get("productId") as string;
+  const categoryId = formData.get("categoryId") as string;
+
+  if (!productId) return { error: "Missing product." };
+  if (!categoryId) return { error: "Missing category." };
+
+  const supabase = createServiceClient();
+  const { error } = await supabase
+    .from("products")
+    .update({ category_id: categoryId })
+    .eq("id", productId);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin/products");
+  revalidatePath("/category", "layout");
+  return {};
+}
+
 /** Toggles the hero-carousel / trending flags. Both are admin-curated, not
  *  computed — there's no order history yet to derive real "hot selling"
  *  data from (see the merchandising migration's comment). */

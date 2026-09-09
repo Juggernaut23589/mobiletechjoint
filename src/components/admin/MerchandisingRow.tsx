@@ -6,9 +6,10 @@ import { formatNaira } from "@/lib/money";
 import {
   toggleMerchandisingFlag,
   assignProductBrand,
+  assignProductCategory,
   setCompareAtPrice,
 } from "@/app/actions/admin-products";
-import type { ProductWithImages, Brand } from "@/types/database";
+import type { ProductWithImages, Brand, Category } from "@/types/database";
 
 /** One row per published product: toggle buttons for the two merchandising
  *  flags (is_featured -> hero carousel, is_trending -> "Trending Now"), plus
@@ -19,9 +20,11 @@ import type { ProductWithImages, Brand } from "@/types/database";
 export function MerchandisingRow({
   product,
   brands,
+  categories,
 }: {
   product: ProductWithImages;
   brands: Brand[];
+  categories: Category[];
 }) {
   const [isPending, startTransition] = useTransition();
 
@@ -46,6 +49,15 @@ export function MerchandisingRow({
     });
   }
 
+  function handleCategoryChange(categoryId: string) {
+    const formData = new FormData();
+    formData.set("productId", product.id);
+    formData.set("categoryId", categoryId);
+    startTransition(() => {
+      assignProductCategory(formData);
+    });
+  }
+
   function handleCompareAtBlur(e: React.FocusEvent<HTMLInputElement>) {
     const formData = new FormData();
     formData.set("productId", product.id);
@@ -67,6 +79,19 @@ export function MerchandisingRow({
         <p className="truncate text-sm font-medium">{product.name}</p>
         <p className="text-xs text-neutral-500">{formatNaira(product.price_kobo ?? 0)}</p>
       </div>
+
+      <select
+        defaultValue={product.category_id ?? ""}
+        disabled={isPending}
+        onChange={(e) => handleCategoryChange(e.target.value)}
+        className="w-32 shrink-0 rounded-md border border-neutral-300 px-2 py-1 text-xs disabled:opacity-50"
+      >
+        {categories.map((category) => (
+          <option key={category.id} value={category.id}>
+            {category.name}
+          </option>
+        ))}
+      </select>
 
       <input
         type="number"

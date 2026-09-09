@@ -2,7 +2,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { DraftProductRow } from "@/components/admin/DraftProductRow";
 import { MerchandisingRow } from "@/components/admin/MerchandisingRow";
 import { AdminNav } from "@/components/admin/AdminNav";
-import type { ProductWithImages, Brand } from "@/types/database";
+import type { ProductWithImages, Brand, Category } from "@/types/database";
 
 // Always fresh — this is a working queue (new Instagram drafts land here
 // every 3 hours; whoever is completing them needs to see them immediately,
@@ -24,6 +24,7 @@ export default async function AdminProductsPage() {
     .order("name");
 
   const { data: brands } = await supabase.from("brands").select("*").order("name");
+  const { data: categories } = await supabase.from("categories").select("*").order("name");
 
   const draftItems = (drafts ?? []) as unknown as ProductWithImages[];
   const publishedItems = (published ?? []) as unknown as ProductWithImages[];
@@ -65,7 +66,12 @@ export default async function AdminProductsPage() {
         ) : (
           <div className="flex flex-col">
             {publishedItems.map((product) => (
-              <MerchandisingRow key={product.id} product={product} brands={(brands ?? []) as Brand[]} />
+              <MerchandisingRow
+                key={product.id}
+                product={product}
+                brands={(brands ?? []) as Brand[]}
+                categories={(categories ?? []) as Category[]}
+              />
             ))}
           </div>
         )}
