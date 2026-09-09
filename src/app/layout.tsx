@@ -1,6 +1,18 @@
 import type { Metadata } from "next";
+import { Space_Grotesk, Inter } from "next/font/google";
 import { SiteHeader } from "@/components/SiteHeader";
 import "./globals.css";
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-display",
+  weight: ["500", "600", "700"],
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -15,8 +27,8 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
-      <body className="antialiased min-h-screen bg-neutral-50 text-neutral-900">
+    <html lang="en" className={`${spaceGrotesk.variable} ${inter.variable}`}>
+      <body className="min-h-screen bg-surface font-sans text-ink antialiased">
         <SiteHeader />
         <main>{children}</main>
       </body>

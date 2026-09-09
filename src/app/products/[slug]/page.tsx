@@ -1,10 +1,11 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import Image from "next/image";
 import { getPublishedProductBySlug, getComplementaryProducts } from "@/lib/products";
 import { formatNaira } from "@/lib/money";
 import { AddToCartForm } from "@/components/AddToCartForm";
 import { ProductSection } from "@/components/ProductSection";
+import { ProductGallery } from "@/components/ProductGallery";
+import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 
 // See app/page.tsx — same reasoning: stock/price can change (admin edits,
 // the Instagram poller flipping a draft to published) between deploys.
@@ -46,90 +47,54 @@ export default async function ProductPage({
   const videos = product.product_images
     .filter((img) => img.is_video)
     .sort((a, b) => a.position - b.position);
-  const cover = images[0] ?? null;
+
+  const lowStock = product.stock_quantity > 0 && product.stock_quantity <= 5;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <div className="grid gap-8 md:grid-cols-2">
-        {/* Media: images + any Instagram video, all re-hosted in Supabase Storage */}
-        <div className="flex flex-col gap-3">
-          <div className="relative aspect-square overflow-hidden rounded-lg bg-neutral-100">
-            {cover ? (
-              <Image
-                src={cover.url}
-                alt={product.name}
-                fill
-                sizes="(min-width: 768px) 50vw, 100vw"
-                className="object-cover"
-                priority
-              />
-            ) : (
-              <div className="flex h-full items-center justify-center text-neutral-400">
-                No image
-              </div>
-            )}
-          </div>
+        <RevealOnScroll>
+          <ProductGallery images={images} videos={videos} productName={product.name} />
+        </RevealOnScroll>
 
-          {images.length > 1 && (
-            <div className="grid grid-cols-5 gap-2">
-              {images.slice(1).map((img) => (
-                <div
-                  key={img.id}
-                  className="relative aspect-square overflow-hidden rounded-md bg-neutral-100"
-                >
-                  <Image
-                    src={img.url}
-                    alt={product.name}
-                    fill
-                    sizes="100px"
-                    className="object-cover"
-                  />
-                </div>
-              ))}
-            </div>
+        <RevealOnScroll delay={0.1} className="flex flex-col gap-4">
+          {(product.brand || product.category) && (
+            <span className="text-sm font-medium text-brand-600">
+              {product.brand?.name ?? product.category?.name}
+            </span>
           )}
-
-          {videos.map((video) => (
-            <video
-              key={video.id}
-              src={video.url}
-              controls
-              playsInline
-              className="w-full rounded-lg bg-black"
-            />
-          ))}
-        </div>
-
-        {/* Details + purchase */}
-        <div className="flex flex-col gap-4">
-          {product.category && (
-            <span className="text-sm font-medium text-brand-600">{product.category.name}</span>
-          )}
-          <h1 className="text-2xl font-bold tracking-tight text-brand-900">{product.name}</h1>
-          <p className="text-2xl font-bold text-brand-900">{formatNaira(priceKobo)}</p>
+          <h1 className="font-display text-2xl font-bold tracking-tight text-brand-900">
+            {product.name}
+          </h1>
+          <p className="font-display text-3xl font-bold text-brand-900">{formatNaira(priceKobo)}</p>
 
           {product.description && (
-            <p className="whitespace-pre-line text-neutral-700">
-              {product.description}
-            </p>
+            <p className="whitespace-pre-line text-neutral-700">{product.description}</p>
           )}
 
-          <p className="text-sm text-neutral-500">
-            {product.stock_quantity > 0
-              ? `${product.stock_quantity} in stock`
-              : "Currently out of stock"}
-          </p>
+          {lowStock && (
+            <p className="w-fit rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600">
+              Only {product.stock_quantity} left in stock
+            </p>
+          )}
+          {!lowStock && (
+            <p className="text-sm text-neutral-500">
+              {product.stock_quantity > 0
+                ? `${product.stock_quantity} in stock`
+                : "Currently out of stock"}
+            </p>
+          )}
 
           <AddToCartForm
             productId={product.id}
             slug={product.slug}
             name={product.name}
             priceKobo={priceKobo}
-            imageUrl={cover?.url ?? null}
+            imageUrl={images[0]?.url ?? null}
             stockQuantity={product.stock_quantity}
             categoryId={product.category_id}
           />
-        </div>
+        </RevealOnScroll>
       </div>
 
       {related.length > 0 && (

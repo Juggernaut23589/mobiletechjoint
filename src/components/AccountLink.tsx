@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { User } from "lucide-react";
 
 /** Deliberately client-side, mirroring CartLink's pattern — calling
  *  cookies()/getCurrentUser() from a Server Component in the shared layout
@@ -22,8 +23,12 @@ export function AccountLink() {
   }, []);
 
   return (
-    <Link href={loggedIn ? "/account" : "/account/login"} className="text-sm font-medium text-white">
-      {loggedIn ? "Account" : "Log in"}
+    <Link
+      href={loggedIn ? "/account" : "/account/login"}
+      className="flex items-center gap-1.5 text-sm font-medium text-white transition-opacity hover:opacity-80"
+    >
+      <User className="h-5 w-5" strokeWidth={2} />
+      <span className="hidden sm:inline">{loggedIn ? "Account" : "Log in"}</span>
     </Link>
   );
 }

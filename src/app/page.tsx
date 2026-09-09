@@ -9,6 +9,8 @@ import { ProductCard } from "@/components/ProductCard";
 import { ProductSection } from "@/components/ProductSection";
 import { HeroCarousel } from "@/components/HeroCarousel";
 import { CategorySidebar } from "@/components/CategorySidebar";
+import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
+import { TrustStrip } from "@/components/TrustStrip";
 
 // Without this, the page is prerendered once at build time and never
 // reflects products added afterwards (manual entry, or the Instagram
@@ -28,6 +30,7 @@ export default async function HomePage() {
   return (
     <div>
       <HeroCarousel products={featured} />
+      <TrustStrip />
 
       <div className="mx-auto max-w-7xl px-4 py-8">
         <div className="flex gap-8">
@@ -47,9 +50,11 @@ export default async function HomePage() {
             />
 
             <section>
-              <h2 className="mb-4 text-lg font-bold tracking-tight text-brand-900">
-                All Products
-              </h2>
+              <RevealOnScroll className="mb-4">
+                <h2 className="font-display text-lg font-bold tracking-tight text-brand-900">
+                  All Products
+                </h2>
+              </RevealOnScroll>
               {allProducts.length === 0 ? (
                 <p className="text-neutral-500">
                   No products published yet. Check back soon.

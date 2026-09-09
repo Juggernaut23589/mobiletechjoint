@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useCartStore } from "@/store/cart";
 import { formatNaira } from "@/lib/money";
 import { initiateCheckout } from "@/app/actions/checkout";
+import { Button } from "@/components/ui/Button";
 import type { SavedPaymentMethod } from "@/types/database";
 
 export function CheckoutForm({
@@ -79,9 +80,11 @@ export function CheckoutForm({
 
   return (
     <div className="mx-auto max-w-md px-4 py-8">
-      <h1 className="mb-6 text-2xl font-bold tracking-tight text-brand-900">Checkout</h1>
+      <h1 className="font-display mb-6 text-2xl font-bold tracking-tight text-brand-900">
+        Checkout
+      </h1>
 
-      <div className="mb-6 rounded-md border border-neutral-200 p-4">
+      <div className="mb-6 rounded-2xl border border-neutral-200 bg-white p-4">
         {items.map((item) => (
           <div key={item.productId} className="flex justify-between py-1 text-sm">
             <span className="min-w-0 truncate pr-2">
@@ -109,7 +112,7 @@ export function CheckoutForm({
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
+            className="w-full rounded-xl border border-neutral-300 px-3 py-2.5 text-sm outline-none transition-colors focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
           />
         </div>
         <div>
@@ -122,7 +125,7 @@ export function CheckoutForm({
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
+            className="w-full rounded-xl border border-neutral-300 px-3 py-2.5 text-sm outline-none transition-colors focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
           />
         </div>
         <div>
@@ -134,7 +137,7 @@ export function CheckoutForm({
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
+            className="w-full rounded-xl border border-neutral-300 px-3 py-2.5 text-sm outline-none transition-colors focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
           />
         </div>
 
@@ -145,7 +148,7 @@ export function CheckoutForm({
               {savedMethods.map((method) => (
                 <label
                   key={method.id}
-                  className="flex items-center gap-2 rounded-md border border-neutral-300 px-3 py-2 text-sm"
+                  className="flex items-center gap-2 rounded-xl border border-neutral-300 px-3 py-2.5 text-sm has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50"
                 >
                   <input
                     type="radio"
@@ -161,7 +164,7 @@ export function CheckoutForm({
                   </span>
                 </label>
               ))}
-              <label className="flex items-center gap-2 rounded-md border border-neutral-300 px-3 py-2 text-sm">
+              <label className="flex items-center gap-2 rounded-xl border border-neutral-300 px-3 py-2.5 text-sm has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50">
                 <input
                   type="radio"
                   name="paymentMethod"
@@ -198,13 +201,9 @@ export function CheckoutForm({
           <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
         )}
 
-        <button
-          type="submit"
-          disabled={submitting}
-          className="rounded-md bg-accent-500 px-6 py-3 text-sm font-semibold text-brand-900 transition-colors hover:bg-accent-400 disabled:opacity-50"
-        >
+        <Button type="submit" variant="primary" disabled={submitting}>
           {submitting ? "Processing…" : `Pay ${formatNaira(subtotalKobo)}`}
-        </button>
+        </Button>
       </form>
     </div>
   );
