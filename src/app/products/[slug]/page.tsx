@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Image from "next/image";
-import { getPublishedProductBySlug, getRelatedProducts } from "@/lib/products";
+import { getPublishedProductBySlug, getComplementaryProducts } from "@/lib/products";
 import { formatNaira } from "@/lib/money";
 import { AddToCartForm } from "@/components/AddToCartForm";
 import { ProductSection } from "@/components/ProductSection";
@@ -34,7 +34,7 @@ export default async function ProductPage({
 
   if (!product) notFound();
 
-  const related = await getRelatedProducts(product.category_id, product.id, 4);
+  const related = await getComplementaryProducts(product.category_id, product.id, 4);
 
   // price_kobo is NOT NULL for any product with status='published' — enforced
   // by the price_required_when_published CHECK constraint in the migration.

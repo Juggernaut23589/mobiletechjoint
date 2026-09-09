@@ -1,8 +1,8 @@
 import { createServiceClient } from "@/lib/supabase/server";
 import { DraftProductRow } from "@/components/admin/DraftProductRow";
 import { MerchandisingRow } from "@/components/admin/MerchandisingRow";
-import { adminLogout } from "@/app/actions/admin-auth";
-import type { ProductWithImages } from "@/types/database";
+import { AdminNav } from "@/components/admin/AdminNav";
+import type { ProductWithImages, Brand } from "@/types/database";
 
 // Always fresh — this is a working queue (new Instagram drafts land here
 // every 3 hours; whoever is completing them needs to see them immediately,
@@ -13,33 +13,30 @@ export default async function AdminProductsPage() {
   const supabase = createServiceClient();
   const { data: drafts } = await supabase
     .from("products")
-    .select("*, product_images(*), category:categories(*)")
+    .select("*, product_images(*), category:categories(*), brand:brands(*)")
     .eq("status", "draft")
     .order("created_at", { ascending: false });
 
   const { data: published } = await supabase
     .from("products")
-    .select("*, product_images(*), category:categories(*)")
+    .select("*, product_images(*), category:categories(*), brand:brands(*)")
     .eq("status", "published")
     .order("name");
+
+  const { data: brands } = await supabase.from("brands").select("*").order("name");
 
   const draftItems = (drafts ?? []) as unknown as ProductWithImages[];
   const publishedItems = (published ?? []) as unknown as ProductWithImages[];
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Draft Products</h1>
-          <p className="text-sm text-neutral-500">
-            {draftItems.length} awaiting price/stock · {publishedItems.length} published
-          </p>
-        </div>
-        <form action={adminLogout}>
-          <button type="submit" className="text-sm text-neutral-400 hover:text-neutral-900">
-            Log out
-          </button>
-        </form>
+      <AdminNav active="products" />
+
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold tracking-tight">Draft Products</h1>
+        <p className="text-sm text-neutral-500">
+          {draftItems.length} awaiting price/stock · {publishedItems.length} published
+        </p>
       </div>
 
       {draftItems.length === 0 ? (
@@ -68,7 +65,7 @@ export default async function AdminProductsPage() {
         ) : (
           <div className="flex flex-col">
             {publishedItems.map((product) => (
-              <MerchandisingRow key={product.id} product={product} />
+              <MerchandisingRow key={product.id} product={product} brands={(brands ?? []) as Brand[]} />
             ))}
           </div>
         )}

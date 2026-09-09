@@ -43,6 +43,33 @@ in code today.
   category misspelling, and re-hosts every product image into this
   project's own Supabase Storage rather than depending on the WordPress
   site's uptime.
+- **Customer accounts** (`/account/*`, Supabase Auth, email+password):
+  signup, login, logout, order history, and saved payment methods. Gated
+  by `proxy.ts`, same pattern as `/admin`. Checkout pre-fills from the
+  logged-in customer's profile and links the order to their account;
+  guest checkout still works exactly as before (`orders.customer_id` is
+  nullable).
+- **Saved payment methods**: never raw card numbers — only the reusable
+  `authorization_code` Paystack returns after a successful charge, plus
+  display metadata (card type, last 4, expiry, bank). Captured when a
+  logged-in customer checks "Save this card" at checkout and the payment
+  settles (`settlePaidOrder` in `lib/paystack.ts`). "Pay with a saved
+  card" charges that token directly server-side
+  (`chargeAuthorization`) — no redirect to Paystack's hosted page. If
+  Paystack responds with anything but a clean success (e.g. a card that
+  needs OTP), the checkout falls back to asking for a new card rather
+  than trying to handle OTP itself — see Known gaps.
+- **Brand browsing**: category pages (`/category/[slug]`) show a brand
+  filter chip row (`?brand=slug`) for whichever manufacturers actually
+  have published products in that category. `products.brand_id` was
+  backfilled by matching known brand names against the *start* of each
+  product title (`scripts/backfill-brands.ts`) — 284 of 324 products
+  matched; the rest are correctable one at a time from the brand dropdown
+  on `/admin/products`.
+- **Curated cross-sells**: product pages and the cart pull suggestions
+  from `category_complements` — admin-defined pairs like "Cameras pairs
+  with Lenses, Batteries, Chargers" (`/admin/cross-sells`). Falls back to
+  same-category products if a category has no pairing set up yet.
 
 ## Environment variables
 
@@ -77,6 +104,26 @@ See `.env.example`. Two things worth knowing:
   need to be entered by whoever manages inventory.
 - No transactional emails yet (order confirmation, etc.) — out of scope
   for this pass.
+- The category taxonomy is currently too coarse for cross-sell curation to
+  be very useful: 194 of 324 products sit in "Uncategorized," with the
+  rest split across just "Adapters," "Digital & Electronic," and "Docking
+  Station" — there's no real "Cameras"/"Lenses"/"Lighting" split to map
+  complements onto yet. The `/admin/cross-sells` tool is ready for when
+  the catalogue gets re-categorized; seeding it now would mean fabricating
+  pairings that don't reflect the real catalogue.
+- "Pay with a saved card" only handles the clean-success case. Some
+  cards/banks require OTP or PIN verification even on a repeat charge —
+  Paystack signals this with a non-"success" status that this flow
+  doesn't attempt to complete; the customer is told to use a new card
+  instead of getting stuck.
+- Customer signup/login forms are untested via a real browser, same
+  tooling gap as the admin login (Server Actions use an internal wire
+  protocol that plain `curl` can't drive) — the underlying pieces (Supabase
+  Auth calls, the `/account` access-control redirect) were verified
+  directly instead.
+- Mobile responsiveness was reviewed and adjusted page-by-page (grids,
+  the cart row, the header, account nav) but not tested on real devices —
+  only reasoned about from Tailwind's breakpoint behavior.
 
 ## Local development
 

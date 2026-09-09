@@ -1,12 +1,17 @@
 import { createPublicClient } from "@/lib/supabase/server";
-import type { Category, CategoryWithCount, ProductWithImages } from "@/types/database";
+import type {
+  Category,
+  CategoryWithCount,
+  BrandWithCount,
+  ProductWithImages,
+} from "@/types/database";
 
 /** All published products, newest first, with images and category joined. */
 export async function getPublishedProducts(limit?: number): Promise<ProductWithImages[]> {
   const supabase = createPublicClient();
   let query = supabase
     .from("products")
-    .select("*, product_images(*), category:categories(*)")
+    .select("*, product_images(*), category:categories(*), brand:brands(*)")
     .eq("status", "published")
     .order("created_at", { ascending: false });
   if (limit) query = query.limit(limit);
@@ -26,7 +31,7 @@ export async function getPublishedProductBySlug(
   const supabase = createPublicClient();
   const { data, error } = await supabase
     .from("products")
-    .select("*, product_images(*), category:categories(*)")
+    .select("*, product_images(*), category:categories(*), brand:brands(*)")
     .eq("slug", slug)
     .eq("status", "published")
     .maybeSingle();
@@ -86,7 +91,7 @@ export async function getFeaturedProducts(limit = 8): Promise<ProductWithImages[
   const supabase = createPublicClient();
   const { data, error } = await supabase
     .from("products")
-    .select("*, product_images(*), category:categories(*)")
+    .select("*, product_images(*), category:categories(*), brand:brands(*)")
     .eq("status", "published")
     .eq("is_featured", true)
     .order("created_at", { ascending: false })
@@ -105,7 +110,7 @@ export async function getTrendingProducts(limit = 8): Promise<ProductWithImages[
   const supabase = createPublicClient();
   const { data, error } = await supabase
     .from("products")
-    .select("*, product_images(*), category:categories(*)")
+    .select("*, product_images(*), category:categories(*), brand:brands(*)")
     .eq("status", "published")
     .eq("is_trending", true)
     .order("created_at", { ascending: false })
@@ -135,7 +140,7 @@ export async function getRelatedProducts(
   const supabase = createPublicClient();
   const { data, error } = await supabase
     .from("products")
-    .select("*, product_images(*), category:categories(*)")
+    .select("*, product_images(*), category:categories(*), brand:brands(*)")
     .eq("status", "published")
     .eq("category_id", categoryId)
     .neq("id", excludeProductId)
@@ -150,7 +155,8 @@ export async function getRelatedProducts(
 }
 
 export async function getPublishedProductsByCategorySlug(
-  categorySlug: string
+  categorySlug: string,
+  brandSlug?: string
 ): Promise<{ category: Category | null; products: ProductWithImages[] }> {
   const supabase = createPublicClient();
   const { data: category } = await supabase
@@ -161,16 +167,97 @@ export async function getPublishedProductsByCategorySlug(
 
   if (!category) return { category: null, products: [] };
 
-  const { data, error } = await supabase
+  let query = supabase
     .from("products")
-    .select("*, product_images(*), category:categories(*)")
+    .select("*, product_images(*), category:categories(*), brand:brands(*)")
     .eq("status", "published")
     .eq("category_id", category.id)
     .order("created_at", { ascending: false });
+
+  if (brandSlug) {
+    const { data: brand } = await supabase
+      .from("brands")
+      .select("id")
+      .eq("slug", brandSlug)
+      .maybeSingle();
+    // An unrecognized brand slug should show an empty result, not silently
+    // ignore the filter and show everything.
+    query = query.eq("brand_id", brand?.id ?? "00000000-0000-0000-0000-000000000000");
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error("getPublishedProductsByCategorySlug failed:", error.message);
     return { category, products: [] };
   }
   return { category, products: (data ?? []) as unknown as ProductWithImages[] };
+}
+
+/** Brands actually present among a category's published products, with a
+ *  live count — so the filter only ever shows options that return results. */
+export async function getBrandsForCategory(categoryId: string): Promise<BrandWithCount[]> {
+  const supabase = createPublicClient();
+  const { data: products, error } = await supabase
+    .from("products")
+    .select("brand_id, brand:brands(*)")
+    .eq("status", "published")
+    .eq("category_id", categoryId)
+    .not("brand_id", "is", null);
+
+  if (error) {
+    console.error("getBrandsForCategory failed:", error.message);
+    return [];
+  }
+
+  const counts = new Map<string, BrandWithCount>();
+  for (const p of products ?? []) {
+    const brand = p.brand as unknown as { id: string; name: string; slug: string; created_at: string } | null;
+    if (!brand) continue;
+    const existing = counts.get(brand.id);
+    if (existing) existing.product_count += 1;
+    else counts.set(brand.id, { ...brand, product_count: 1 });
+  }
+
+  return Array.from(counts.values()).sort((a, b) => b.product_count - a.product_count);
+}
+
+/** Complementary cross-sells: real products pulled from whichever categories
+ *  an admin has mapped as pairing with this product's category (e.g.
+ *  Cameras -> Lenses, Batteries, Chargers). Falls back to same-category
+ *  related products if no mapping exists yet for this category, so a
+ *  product page is never left without any cross-sell section. */
+export async function getComplementaryProducts(
+  categoryId: string | null,
+  excludeProductId: string,
+  limit = 4
+): Promise<ProductWithImages[]> {
+  if (!categoryId) return [];
+  const supabase = createPublicClient();
+
+  const { data: complements } = await supabase
+    .from("category_complements")
+    .select("complement_category_id")
+    .eq("category_id", categoryId);
+
+  const complementIds = (complements ?? []).map((c) => c.complement_category_id);
+
+  if (complementIds.length === 0) {
+    return getRelatedProducts(categoryId, excludeProductId, limit);
+  }
+
+  const { data, error } = await supabase
+    .from("products")
+    .select("*, product_images(*), category:categories(*), brand:brands(*)")
+    .eq("status", "published")
+    .in("category_id", complementIds)
+    .neq("id", excludeProductId)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.error("getComplementaryProducts failed:", error.message);
+    return [];
+  }
+  return (data ?? []) as unknown as ProductWithImages[];
 }

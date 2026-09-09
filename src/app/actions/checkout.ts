@@ -1,14 +1,20 @@
 "use server";
 
 import crypto from "crypto";
-import { createServiceClient } from "@/lib/supabase/server";
-import { initializeTransaction } from "@/lib/paystack";
+import { createServiceClient, createServerAuthClient } from "@/lib/supabase/server";
+import { initializeTransaction, chargeAuthorization } from "@/lib/paystack";
 
 export interface CheckoutInput {
   customerName: string;
   customerEmail: string;
   customerPhone: string;
   items: { productId: string; quantity: number }[];
+  /** Only meaningful when logged in. Persists the Paystack authorization
+   *  returned on settlement — see settlePaidOrder in lib/paystack.ts. */
+  saveCard?: boolean;
+  /** If set, pays by directly charging this saved card (no redirect to
+   *  Paystack) instead of starting a new hosted-page transaction. */
+  savedPaymentMethodId?: string;
 }
 
 export type CheckoutResult =
@@ -30,6 +36,11 @@ export async function initiateCheckout(input: CheckoutInput): Promise<CheckoutRe
   }
 
   const supabase = createServiceClient();
+
+  const authClient = await createServerAuthClient();
+  const {
+    data: { user },
+  } = await authClient.auth.getUser();
 
   const productIds = input.items.map((i) => i.productId);
   const { data: products, error } = await supabase
@@ -86,6 +97,8 @@ export async function initiateCheckout(input: CheckoutInput): Promise<CheckoutRe
       customer_name: input.customerName,
       customer_email: input.customerEmail,
       customer_phone: input.customerPhone || null,
+      customer_id: user?.id ?? null,
+      save_card_requested: Boolean(user && input.saveCard),
       status: "pending",
       total_kobo: totalKobo,
       currency: "NGN",
@@ -115,12 +128,54 @@ export async function initiateCheckout(input: CheckoutInput): Promise<CheckoutRe
   }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const callbackUrl = `${appUrl}/checkout/callback?reference=${encodeURIComponent(reference)}`;
+
+  if (input.savedPaymentMethodId && user) {
+    // Scoped by customer_id — a savedPaymentMethodId can only ever resolve
+    // to a card that belongs to the logged-in customer, even though this
+    // uses the service client.
+    const { data: method } = await supabase
+      .from("saved_payment_methods")
+      .select("paystack_authorization_code")
+      .eq("id", input.savedPaymentMethodId)
+      .eq("customer_id", user.id)
+      .maybeSingle();
+
+    if (!method) {
+      return { ok: false, error: "Saved card not found." };
+    }
+
+    const charge = await chargeAuthorization({
+      authorizationCode: method.paystack_authorization_code,
+      email: input.customerEmail,
+      amountKobo: totalKobo,
+      reference,
+    });
+
+    if (!charge.ok) {
+      return { ok: false, error: charge.error };
+    }
+    if (!charge.success) {
+      // Doesn't always mean failure — some cards need OTP/PIN, which this
+      // direct-charge path doesn't handle. Send them to the normal hosted
+      // flow instead of leaving them stuck.
+      return {
+        ok: false,
+        error: "This card needs extra verification. Please pay with a new card instead.",
+      };
+    }
+
+    // Reuse the same verify-then-settle logic as the redirect flow, rather
+    // than duplicating it — the callback page never trusts query params for
+    // anything but which reference to ask Paystack about.
+    return { ok: true, authorizationUrl: callbackUrl };
+  }
 
   const result = await initializeTransaction({
     email: input.customerEmail,
     amountKobo: totalKobo,
     reference,
-    callbackUrl: `${appUrl}/checkout/callback`,
+    callbackUrl,
     metadata: { order_id: order.id },
   });
 

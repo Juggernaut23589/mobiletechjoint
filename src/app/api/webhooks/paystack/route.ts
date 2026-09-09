@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyWebhookSignature, settlePaidOrder, markOrderFailed } from "@/lib/paystack";
+import type { PaystackAuthorization } from "@/lib/paystack";
 
 export async function POST(request: NextRequest) {
   const rawBody = await request.text();
@@ -11,7 +12,13 @@ export async function POST(request: NextRequest) {
 
   const event = JSON.parse(rawBody) as {
     event: string;
-    data: { reference: string; amount: number; paid_at: string; status: string };
+    data: {
+      reference: string;
+      amount: number;
+      paid_at: string;
+      status: string;
+      authorization?: PaystackAuthorization;
+    };
   };
 
   if (event.event === "charge.success") {
@@ -21,6 +28,7 @@ export async function POST(request: NextRequest) {
       reference: event.data.reference,
       amountKobo: event.data.amount,
       paidAt: event.data.paid_at,
+      authorization: event.data.authorization ?? null,
     });
   } else if (event.event === "charge.failed") {
     await markOrderFailed(event.data.reference);

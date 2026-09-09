@@ -18,6 +18,44 @@ export interface CategoryWithCount extends Category {
   product_count: number;
 }
 
+export interface Brand {
+  id: string;
+  name: string;
+  slug: string;
+  created_at: string;
+}
+
+export interface BrandWithCount extends Brand {
+  product_count: number;
+}
+
+export interface CategoryComplement {
+  id: string;
+  category_id: string;
+  complement_category_id: string;
+  created_at: string;
+}
+
+export interface CustomerProfile {
+  id: string;
+  full_name: string | null;
+  phone: string | null;
+  created_at: string;
+}
+
+export interface SavedPaymentMethod {
+  id: string;
+  customer_id: string;
+  paystack_authorization_code: string;
+  card_type: string | null;
+  last4: string | null;
+  exp_month: string | null;
+  exp_year: string | null;
+  bank: string | null;
+  is_default: boolean;
+  created_at: string;
+}
+
 export interface ProductImage {
   id: string;
   product_id: string;
@@ -46,6 +84,10 @@ export interface Product {
   /** Admin-curated, same reasoning as is_featured. Shown in the "Trending
    *  Now" section. */
   is_trending: boolean;
+  /** Manufacturer facet within a category (Cameras -> Sony). Backfilled by
+   *  title keyword-matching for the WooCommerce import — imperfect, null
+   *  for anything that didn't match a known brand name. */
+  brand_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -56,6 +98,7 @@ export type PublishedProduct = Product & { status: "published"; price_kobo: numb
 export interface ProductWithImages extends Product {
   product_images: ProductImage[];
   category: Category | null;
+  brand: Brand | null;
 }
 
 export interface Order {
@@ -63,6 +106,8 @@ export interface Order {
   customer_name: string;
   customer_email: string;
   customer_phone: string | null;
+  customer_id: string | null;
+  save_card_requested: boolean;
   status: OrderStatus;
   total_kobo: number;
   currency: string;
@@ -70,6 +115,10 @@ export interface Order {
   paystack_verified_at: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface OrderWithItems extends Order {
+  order_items: OrderItem[];
 }
 
 export interface OrderItem {

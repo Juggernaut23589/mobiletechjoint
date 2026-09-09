@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "migrate:woocommerce": "dotenv -e .env.local -- tsx scripts/migrate-woocommerce.ts"
+    "migrate:woocommerce": "dotenv -e .env.local -- tsx scripts/migrate-woocommerce.ts",
+    "backfill:brands": "dotenv -e .env.local -- tsx scripts/backfill-brands.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.6",

@@ -42,7 +42,7 @@ export default function CartPage() {
 
       <div className="flex flex-col divide-y divide-neutral-200 border-y border-neutral-200">
         {items.map((item) => (
-          <div key={item.productId} className="flex items-center gap-4 py-4">
+          <div key={item.productId} className="flex flex-wrap items-center gap-4 py-4">
             <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-md bg-neutral-100">
               {item.imageUrl ? (
                 <Image
@@ -55,10 +55,10 @@ export default function CartPage() {
               ) : null}
             </div>
 
-            <div className="flex flex-1 flex-col gap-1">
+            <div className="flex min-w-0 flex-1 basis-40 flex-col gap-1">
               <Link
                 href={`/products/${item.slug}`}
-                className="text-sm font-medium hover:underline"
+                className="truncate text-sm font-medium hover:underline"
               >
                 {item.name}
               </Link>
@@ -67,27 +67,29 @@ export default function CartPage() {
               </p>
             </div>
 
-            <input
-              type="number"
-              min={1}
-              value={item.quantity}
-              onChange={(e) =>
-                setQuantity(item.productId, Math.max(1, Number(e.target.value) || 1))
-              }
-              className="w-16 rounded-md border border-neutral-300 px-2 py-1 text-center text-sm"
-            />
+            <div className="ml-auto flex items-center gap-3 sm:ml-0">
+              <input
+                type="number"
+                min={1}
+                value={item.quantity}
+                onChange={(e) =>
+                  setQuantity(item.productId, Math.max(1, Number(e.target.value) || 1))
+                }
+                className="w-16 rounded-md border border-neutral-300 px-2 py-1 text-center text-sm"
+              />
 
-            <p className="w-24 text-right text-sm font-semibold">
-              {formatNaira(item.priceKoboSnapshot * item.quantity)}
-            </p>
+              <p className="w-24 text-right text-sm font-semibold">
+                {formatNaira(item.priceKoboSnapshot * item.quantity)}
+              </p>
 
-            <button
-              onClick={() => removeItem(item.productId)}
-              className="text-sm text-neutral-400 hover:text-red-600"
-              aria-label={`Remove ${item.name}`}
-            >
-              ✕
-            </button>
+              <button
+                onClick={() => removeItem(item.productId)}
+                className="text-sm text-neutral-400 hover:text-red-600"
+                aria-label={`Remove ${item.name}`}
+              >
+                ✕
+              </button>
+            </div>
           </div>
         ))}
       </div>

@@ -63,6 +63,30 @@ export async function archiveProduct(formData: FormData): Promise<{ error?: stri
   return {};
 }
 
+/** Assigns (or clears) a product's manufacturer/brand — separate from the
+ *  merchandising flags, this feeds the category-page brand filter. Manual
+ *  correction path for the WooCommerce backfill's keyword-matching, which
+ *  is inherently imperfect (see scripts/backfill-brands.ts). */
+export async function assignProductBrand(formData: FormData): Promise<{ error?: string }> {
+  await assertAdmin();
+  const productId = formData.get("productId") as string;
+  const brandId = formData.get("brandId") as string;
+
+  if (!productId) return { error: "Missing product." };
+
+  const supabase = createServiceClient();
+  const { error } = await supabase
+    .from("products")
+    .update({ brand_id: brandId || null })
+    .eq("id", productId);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin/products");
+  revalidatePath("/category", "layout");
+  return {};
+}
+
 /** Toggles the hero-carousel / trending flags. Both are admin-curated, not
  *  computed — there's no order history yet to derive real "hot selling"
  *  data from (see the merchandising migration's comment). */

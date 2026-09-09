@@ -49,6 +49,16 @@ export async function initializeTransaction(params: {
   return { ok: true, authorizationUrl: data.data.authorization_url };
 }
 
+export interface PaystackAuthorization {
+  authorization_code: string;
+  card_type: string | null;
+  last4: string | null;
+  exp_month: string | null;
+  exp_year: string | null;
+  bank: string | null;
+  reusable: boolean;
+}
+
 /** Verifies a transaction directly with Paystack. Used by the callback page,
  *  which only receives a `reference` from the redirect — it must never
  *  trust query-string status/amount values, since those are fully
@@ -60,6 +70,7 @@ export async function verifyTransaction(reference: string): Promise<
       amountKobo: number;
       currency: string;
       paidAt: string;
+      authorization: PaystackAuthorization | null;
     }
   | { ok: false; error: string }
 > {
@@ -74,7 +85,13 @@ export async function verifyTransaction(reference: string): Promise<
   const data = (await res.json()) as {
     status: boolean;
     message?: string;
-    data?: { status: string; amount: number; currency: string; paid_at: string };
+    data?: {
+      status: string;
+      amount: number;
+      currency: string;
+      paid_at: string;
+      authorization?: PaystackAuthorization;
+    };
   };
 
   if (!data.status || !data.data) {
@@ -85,6 +102,56 @@ export async function verifyTransaction(reference: string): Promise<
     success: data.data.status === "success",
     amountKobo: data.data.amount,
     currency: data.data.currency,
+    paidAt: data.data.paid_at,
+    authorization: data.data.authorization ?? null,
+  };
+}
+
+/** Charges a previously saved authorization directly — no redirect to
+ *  Paystack's hosted page. Used for "pay with saved card." Paystack can
+ *  still respond with a non-success status (e.g. requiring OTP); this
+ *  function does not handle that flow — callers should fall back to the
+ *  normal initializeTransaction redirect on anything but a clean success. */
+export async function chargeAuthorization(params: {
+  authorizationCode: string;
+  email: string;
+  amountKobo: number;
+  reference: string;
+}): Promise<
+  | { ok: true; success: boolean; amountKobo: number; paidAt: string }
+  | { ok: false; error: string }
+> {
+  if (!/^sk_(test|live)_/.test(PAYSTACK_SECRET)) {
+    return { ok: false, error: "Payment gateway is not configured." };
+  }
+
+  const res = await fetch("https://api.paystack.co/transaction/charge_authorization", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${PAYSTACK_SECRET}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      authorization_code: params.authorizationCode,
+      email: params.email,
+      amount: params.amountKobo,
+      reference: params.reference,
+    }),
+  });
+
+  const data = (await res.json()) as {
+    status: boolean;
+    message?: string;
+    data?: { status: string; amount: number; paid_at: string };
+  };
+
+  if (!data.status || !data.data) {
+    return { ok: false, error: data.message ?? "Charge failed." };
+  }
+  return {
+    ok: true,
+    success: data.data.status === "success",
+    amountKobo: data.data.amount,
     paidAt: data.data.paid_at,
   };
 }
@@ -111,12 +178,13 @@ export async function settlePaidOrder(params: {
   reference: string;
   amountKobo: number;
   paidAt: string;
+  authorization?: PaystackAuthorization | null;
 }): Promise<{ settled: boolean; alreadySettled: boolean; reason?: string }> {
   const supabase = createServiceClient();
 
   const { data: order, error: fetchError } = await supabase
     .from("orders")
-    .select("id, total_kobo, status")
+    .select("id, total_kobo, status, customer_id, save_card_requested, customer_email")
     .eq("paystack_reference", params.reference)
     .maybeSingle();
 
@@ -166,6 +234,25 @@ export async function settlePaidOrder(params: {
       p_product_id: item.product_id,
       p_quantity: item.quantity,
     });
+  }
+
+  // Only persist the card if the customer was logged in, explicitly asked
+  // to save it, and Paystack actually marked the authorization reusable
+  // (some card types/banks return reusable: false).
+  if (order.customer_id && order.save_card_requested && params.authorization?.reusable) {
+    const auth = params.authorization;
+    await supabase.from("saved_payment_methods").upsert(
+      {
+        customer_id: order.customer_id,
+        paystack_authorization_code: auth.authorization_code,
+        card_type: auth.card_type,
+        last4: auth.last4,
+        exp_month: auth.exp_month,
+        exp_year: auth.exp_year,
+        bank: auth.bank,
+      },
+      { onConflict: "customer_id,paystack_authorization_code", ignoreDuplicates: true }
+    );
   }
 
   return { settled: true, alreadySettled: false };
