@@ -36,6 +36,19 @@ export interface CategoryComplement {
   created_at: string;
 }
 
+export interface StaffProfile {
+  id: string;
+  full_name: string;
+  email: string;
+  phone: string | null;
+  job_title: string | null;
+  role: "super_admin" | "staff";
+  is_active: boolean;
+  is_pending: boolean;
+  abilities: Record<string, boolean>;
+  created_at: string;
+}
+
 export interface CustomerProfile {
   id: string;
   full_name: string | null;

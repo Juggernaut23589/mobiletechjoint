@@ -66,6 +66,36 @@ in code today.
   product title (`scripts/backfill-brands.ts`) — 284 of 324 products
   matched; the rest are correctable one at a time from the brand dropdown
   on `/admin/products`.
+- **Staff portal** (`/staff/*`), same pattern proven at hub.makeoverarena.com:
+  self-registration → pending approval → a super_admin grants specific
+  `abilities` (manage_products, manage_inventory, manage_customers,
+  manage_orders, view_sales, manage_cross_sells) from
+  `/staff/dashboard/team`. Each staff member's dashboard only shows the
+  sections they've been granted — a super_admin always sees everything.
+  Session is a separate HMAC-signed cookie (`lib/staff-auth.ts`, Web
+  Crypto only so it works in the Edge runtime too), independent of both
+  the customer auth system and the legacy `/admin` shared password (kept
+  as a break-glass fallback — `assertAdmin()` in `admin-products.ts` /
+  `admin-crosssells.ts` now accepts either).
+  - `/staff/dashboard/products`: full edit (name, description, price,
+    stock, category, brand, images/video, deals, hero/trending) — the
+    original admin only had draft-publish + a few toggles, not real
+    editing of an existing product's content.
+  - `/staff/dashboard/inventory`: stock-only view, a separately grantable
+    ability from full product editing.
+  - `/staff/dashboard/customers`, `/orders`: full lists + detail views —
+    didn't exist in any form before (the old admin had no way to see all
+    orders or all customers, only per-customer via their own account).
+  - `/staff/dashboard/sales`: revenue, paid order count, average order
+    value, daily revenue, top-selling products — all computed from real
+    paid orders, no placeholder numbers.
+  - `/staff/dashboard/cross-sells`: the existing category-pairing tool,
+    re-homed with ability gating.
+  - First super_admin created via `scripts/create-super-admin.ts`
+    (`npm run create:super-admin`, reads `SUPER_ADMIN_NAME` /
+    `SUPER_ADMIN_EMAIL` / `SUPER_ADMIN_PASSWORD` from the environment so
+    the password never touches shell history) — every subsequent account
+    goes through the normal register → approve flow.
 - **Curated cross-sells**: product pages and the cart pull suggestions
   from `category_complements` — admin-defined pairs like "Cameras pairs
   with Lenses, Batteries, Chargers" (`/admin/cross-sells`). Falls back to
@@ -85,6 +115,16 @@ See `.env.example`. Two things worth knowing:
 
 ## Known gaps (not yet done)
 
+- Staff register/login form submissions (Server Action wire protocol)
+  are untested via a real browser — same tooling gap as the admin and
+  customer auth forms below. Verified instead by: the bootstrap script
+  creating a real super_admin row in the live database, and curl-based
+  checks that `/staff/dashboard/*` correctly redirects unauthenticated
+  visitors to `/staff/login`.
+- No email notifications yet when a staff member registers (a super_admin
+  has to check `/staff/dashboard/team` to see pending approvals) or when
+  they're approved — this project has no email-sending infrastructure set
+  up (unlike hub.makeoverarena.com, which has `lib/emails/send-email.ts`).
 - No live Paystack account — `initializeTransaction`/`verifyTransaction`
   are correct per Paystack's docs but unverified against a real account.
 - Instagram Graph API code is unverified against a real Business account —

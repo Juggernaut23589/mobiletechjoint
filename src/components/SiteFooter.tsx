@@ -71,13 +71,11 @@ export function SiteFooter() {
           )}
         </div>
 
-        <div className="mt-8 border-t border-white/10 pt-6 text-xs text-white/50">
-          <p>
-            © {new Date().getFullYear()} MobileTechJoint. All rights reserved.{" "}
-            <Link href="/" className="hover:text-white">
-              mobiletechjoint.com
-            </Link>
-          </p>
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-2 border-t border-white/10 pt-6 text-xs text-white/50">
+          <p>© {new Date().getFullYear()} MobileTechJoint. All rights reserved.</p>
+          <Link href="/staff/login" className="hover:text-white">
+            Staff Login
+          </Link>
         </div>
       </div>
     </footer>

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { STAFF_COOKIE_NAME, SUPER_ADMIN_ONLY_ROUTES, decodeStaffSession } from "@/lib/staff-auth";
 
 /**
  * Two independent things happen here:
@@ -71,9 +72,34 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  // Staff portal — separate from the customer account system above and
+  // from the legacy shared-password /admin above. A valid session here
+  // just means "a real staff account exists and is logged in"; whether
+  // they're approved (isPending) or have the right ability for a given
+  // page is checked in the page itself, since that needs the full
+  // session object, not just a redirect decision.
+  const isStaffAuthPage = pathname === "/staff/login" || pathname === "/staff/register";
+  if (pathname.startsWith("/staff/dashboard") || (pathname.startsWith("/staff") && !isStaffAuthPage)) {
+    const staffCookie = request.cookies.get(STAFF_COOKIE_NAME);
+    const staffSession = staffCookie ? await decodeStaffSession(staffCookie.value) : null;
+
+    if (!staffSession) {
+      const loginUrl = new URL("/staff/login", request.url);
+      loginUrl.searchParams.set("next", pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+
+    if (
+      SUPER_ADMIN_ONLY_ROUTES.some((r) => pathname.startsWith(r)) &&
+      staffSession.role !== "super_admin"
+    ) {
+      return NextResponse.redirect(new URL("/staff/dashboard?error=forbidden", request.url));
+    }
+  }
+
   return response;
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/account/:path*"],
+  matcher: ["/admin/:path*", "/account/:path*", "/staff/:path*"],
 };

@@ -3,11 +3,16 @@
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { createServiceClient } from "@/lib/supabase/server";
+import { STAFF_COOKIE_NAME, decodeStaffSession, hasAbility } from "@/lib/staff-auth";
 
 async function assertAdmin() {
   const cookieStore = await cookies();
-  const value = cookieStore.get("mtj_admin_session")?.value;
-  if (!value || value !== process.env.ADMIN_SESSION_SECRET) {
+  const legacyCookie = cookieStore.get("mtj_admin_session")?.value;
+  if (legacyCookie && legacyCookie === process.env.ADMIN_SESSION_SECRET) return;
+
+  const staffCookie = cookieStore.get(STAFF_COOKIE_NAME)?.value;
+  const session = staffCookie ? await decodeStaffSession(staffCookie) : null;
+  if (!hasAbility(session, "manage_cross_sells")) {
     throw new Error("Unauthorized");
   }
 }
@@ -30,6 +35,7 @@ export async function addCategoryComplement(formData: FormData): Promise<{ error
   }
 
   revalidatePath("/admin/cross-sells");
+  revalidatePath("/staff/dashboard/cross-sells");
   return {};
 }
 
@@ -47,4 +53,5 @@ export async function removeCategoryComplement(formData: FormData): Promise<void
   await supabase.from("category_complements").delete().eq("id", id);
 
   revalidatePath("/admin/cross-sells");
+  revalidatePath("/staff/dashboard/cross-sells");
 }
