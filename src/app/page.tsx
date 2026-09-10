@@ -56,7 +56,7 @@ export default async function HomePage() {
       <CategoryTiles categories={categories} />
 
       <div className="mx-auto max-w-7xl px-4 py-12 sm:py-16">
-        <div className="flex gap-8">
+        <div className="flex items-start gap-8">
           <CategorySidebar categories={categories} />
 
           <div className="min-w-0 flex-1">
