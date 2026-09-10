@@ -51,14 +51,14 @@ export default async function StaffSalesPage() {
           <div className="flex flex-col gap-2 rounded-lg border border-neutral-200 bg-white p-4">
             {stats.dailyRevenue.map((day) => (
               <div key={day.date} className="flex items-center gap-3">
-                <span className="w-24 shrink-0 text-xs text-neutral-500">{day.date}</span>
+                <span className="w-20 shrink-0 whitespace-nowrap sm:w-24 text-xs text-neutral-500">{day.date}</span>
                 <div className="h-2 flex-1 overflow-hidden rounded-full bg-neutral-100">
                   <div
                     className="h-full bg-brand-gradient"
                     style={{ width: `${Math.max((day.revenueKobo / maxDaily) * 100, 3)}%` }}
                   />
                 </div>
-                <span className="w-24 shrink-0 text-right text-xs font-medium">
+                <span className="w-20 shrink-0 sm:w-24 text-right text-xs font-medium">
                   {formatNaira(day.revenueKobo)}
                 </span>
               </div>

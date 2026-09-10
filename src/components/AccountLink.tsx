@@ -25,7 +25,7 @@ export function AccountLink() {
   return (
     <Link
       href={loggedIn ? "/account" : "/account/login"}
-      className="flex items-center gap-1.5 text-sm font-medium text-white transition-opacity hover:opacity-80"
+      className="-m-2 flex items-center gap-1.5 p-2 text-sm font-medium text-white transition-opacity hover:opacity-80"
     >
       <User className="h-5 w-5" strokeWidth={2} />
       <span className="hidden sm:inline">{loggedIn ? "Account" : "Log in"}</span>

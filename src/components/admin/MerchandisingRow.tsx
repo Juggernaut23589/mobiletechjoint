@@ -84,7 +84,7 @@ export function MerchandisingRow({
         defaultValue={product.category_id ?? ""}
         disabled={isPending}
         onChange={(e) => handleCategoryChange(e.target.value)}
-        className="w-32 shrink-0 rounded-md border border-neutral-300 px-2 py-1 text-xs disabled:opacity-50"
+        className="w-full shrink-0 rounded-md border border-neutral-300 px-2 py-1 text-xs disabled:opacity-50 sm:w-32"
       >
         {categories.map((category) => (
           <option key={category.id} value={category.id}>

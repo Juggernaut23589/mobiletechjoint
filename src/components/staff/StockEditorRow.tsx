@@ -21,13 +21,13 @@ export function StockEditorRow({ product }: { product: ProductWithImages }) {
   }
 
   return (
-    <div className="flex items-center gap-3 border-b border-neutral-200 py-3">
+    <div className="flex flex-wrap items-center gap-3 border-b border-neutral-200 py-3">
       <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md bg-neutral-100">
         {cover ? (
           <Image src={cover.url} alt={product.name} fill sizes="48px" className="object-cover" />
         ) : null}
       </div>
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 basis-32">
         <p className="truncate text-sm font-medium">{product.name}</p>
         {product.stock_quantity <= 0 ? (
           <p className="text-xs font-medium text-red-600">Out of stock</p>
