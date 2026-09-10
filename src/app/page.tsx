@@ -11,6 +11,7 @@ import { ProductSection } from "@/components/ProductSection";
 import { DealsSection } from "@/components/DealsSection";
 import { HeroCarousel } from "@/components/HeroCarousel";
 import { CategorySidebar } from "@/components/CategorySidebar";
+import { CategoryChips } from "@/components/CategoryChips";
 import { CategoryTiles } from "@/components/CategoryTiles";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { TrustStrip } from "@/components/TrustStrip";
@@ -56,6 +57,8 @@ export default async function HomePage() {
       <CategoryTiles categories={categories} />
 
       <div className="mx-auto max-w-7xl px-4 py-12 sm:py-16">
+        <CategoryChips categories={categories} />
+
         <div className="flex items-start gap-8">
           <CategorySidebar categories={categories} />
 
