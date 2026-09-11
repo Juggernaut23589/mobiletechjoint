@@ -1,10 +1,8 @@
 import Link from "next/link";
 import type { CategoryWithCount } from "@/types/database";
 
-/** Desktop-only sticky sidebar. Deliberately does NOT also render the
- *  mobile chip row anymore — see CategoryChips.tsx for why they were
- *  split apart (the mobile row needs to be a full-width block above the
- *  sidebar+content flex row, not a flex item inside it). */
+/** Desktop-only sticky sidebar. Mobile browsing uses the hamburger menu
+ *  in the header instead (MobileCategoryMenu.tsx) — not rendered here. */
 export function CategorySidebar({ categories }: { categories: CategoryWithCount[] }) {
   if (categories.length === 0) return null;
 

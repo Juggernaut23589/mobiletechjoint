@@ -8,7 +8,6 @@ import {
 } from "@/lib/products";
 import { ProductCard } from "@/components/ProductCard";
 import { CategorySidebar } from "@/components/CategorySidebar";
-import { CategoryChips } from "@/components/CategoryChips";
 
 export const revalidate = 60;
 
@@ -44,8 +43,6 @@ export default async function CategoryPage({
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:py-16">
-      <CategoryChips categories={categories} />
-
       <div className="flex items-start gap-8">
         <CategorySidebar categories={categories} />
 
