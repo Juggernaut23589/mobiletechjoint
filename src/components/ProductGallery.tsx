@@ -20,7 +20,10 @@ export function ProductGallery({
   return (
     <div className="flex flex-col gap-3">
       <div className="relative aspect-square overflow-hidden rounded-2xl bg-neutral-100">
-        <AnimatePresence mode="wait">
+        {/* initial={false}: only animate on thumbnail switches, not the
+            first paint — the product photo must never depend on a mount
+            animation completing just to be visible. */}
+        <AnimatePresence mode="wait" initial={false}>
           {active ? (
             <motion.div
               key={active.id}

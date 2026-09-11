@@ -5,7 +5,6 @@ import { formatNaira, discountPercent } from "@/lib/money";
 import { AddToCartForm } from "@/components/AddToCartForm";
 import { ProductSection } from "@/components/ProductSection";
 import { ProductGallery } from "@/components/ProductGallery";
-import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 
 // See app/page.tsx — same reasoning: stock/price can change (admin edits,
 // the Instagram poller flipping a draft to published) between deploys.
@@ -53,12 +52,13 @@ export default async function ProductPage({
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12 sm:py-16">
+      {/* Not RevealOnScroll-wrapped: this is the gallery and buy button —
+          the single most important content on this page. It must never
+          depend on client JS succeeding just to become visible. */}
       <div className="grid gap-8 md:grid-cols-2">
-        <RevealOnScroll>
-          <ProductGallery images={images} videos={videos} productName={product.name} />
-        </RevealOnScroll>
+        <ProductGallery images={images} videos={videos} productName={product.name} />
 
-        <RevealOnScroll delay={0.1} className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4">
           {(product.brand || product.category) && (
             <span className="text-sm font-medium text-brand-600">
               {product.brand?.name ?? product.category?.name}
@@ -109,7 +109,7 @@ export default async function ProductPage({
             stockQuantity={product.stock_quantity}
             categoryId={product.category_id}
           />
-        </RevealOnScroll>
+        </div>
       </div>
 
       {related.length > 0 && (
