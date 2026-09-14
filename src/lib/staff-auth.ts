@@ -19,14 +19,20 @@ export type StaffAbility =
   | "manage_customers"
   | "manage_orders"
   | "view_sales"
-  | "manage_cross_sells";
+  | "manage_cross_sells"
+  | "manage_deliveries"
+  | "manage_expenses"
+  | "manage_disputes";
 
 export const STAFF_ABILITIES: { key: StaffAbility; label: string; description: string }[] = [
   { key: "manage_products", label: "Products", description: "Edit product postings — images, videos, descriptions, price, publish/archive, brand, category, deals." },
   { key: "manage_inventory", label: "Inventory", description: "View and adjust stock levels on published products." },
-  { key: "manage_customers", label: "Customers", description: "View customer accounts and their order history." },
+  { key: "manage_customers", label: "Customers", description: "View customer accounts, order history, and saved payment methods." },
   { key: "manage_orders", label: "Orders", description: "View and manage all orders across every customer." },
-  { key: "view_sales", label: "Sales & Income", description: "View revenue, order volume, and sales reporting." },
+  { key: "manage_deliveries", label: "Deliveries", description: "Set delivery pricing by state and track delivery status on orders." },
+  { key: "view_sales", label: "Sales & Income", description: "View revenue, order volume, expenses, and net income reporting." },
+  { key: "manage_expenses", label: "Expenses", description: "Record and edit business expenses." },
+  { key: "manage_disputes", label: "Disputes", description: "Email customers directly about order issues and disputes." },
   { key: "manage_cross_sells", label: "Cross-sells", description: "Curate which categories cross-sell with each other." },
 ];
 

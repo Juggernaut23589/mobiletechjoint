@@ -20,7 +20,10 @@ export default async function StaffSalesPage() {
       <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-brand-900">
         Sales &amp; Income
       </h1>
-      <p className="mb-6 text-sm text-neutral-500">Based on paid orders only.</p>
+      <p className="mb-6 text-sm text-neutral-500">
+        Revenue is based on paid orders only; expenses come from whatever staff with the
+        Expenses ability have recorded.
+      </p>
 
       <div className="mb-8 grid gap-4 sm:grid-cols-3">
         <div className="rounded-lg border border-neutral-200 bg-white p-4">
@@ -38,6 +41,20 @@ export default async function StaffSalesPage() {
             {formatNaira(stats.averageOrderKobo)}
           </p>
           <p className="text-sm text-neutral-500">Average order value</p>
+        </div>
+        <div className="rounded-lg border border-neutral-200 bg-white p-4">
+          <p className="font-display text-2xl font-bold text-red-600">
+            −{formatNaira(stats.totalExpensesKobo)}
+          </p>
+          <p className="text-sm text-neutral-500">Total expenses</p>
+        </div>
+        <div className="rounded-lg border border-neutral-200 bg-white p-4 sm:col-span-2">
+          <p
+            className={`font-display text-2xl font-bold ${stats.netIncomeKobo >= 0 ? "text-green-700" : "text-red-600"}`}
+          >
+            {formatNaira(stats.netIncomeKobo)}
+          </p>
+          <p className="text-sm text-neutral-500">Net income (revenue − expenses)</p>
         </div>
       </div>
 

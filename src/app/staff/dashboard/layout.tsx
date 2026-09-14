@@ -9,7 +9,9 @@ const NAV = [
   { href: "/staff/dashboard/inventory", label: "Inventory", ability: "manage_inventory" as const },
   { href: "/staff/dashboard/customers", label: "Customers", ability: "manage_customers" as const },
   { href: "/staff/dashboard/orders", label: "Orders", ability: "manage_orders" as const },
+  { href: "/staff/dashboard/deliveries", label: "Deliveries", ability: "manage_deliveries" as const },
   { href: "/staff/dashboard/sales", label: "Sales & Income", ability: "view_sales" as const },
+  { href: "/staff/dashboard/expenses", label: "Expenses", ability: "manage_expenses" as const },
   { href: "/staff/dashboard/cross-sells", label: "Cross-sells", ability: "manage_cross_sells" as const },
 ];
 

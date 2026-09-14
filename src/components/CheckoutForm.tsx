@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/store/cart";
 import { formatNaira } from "@/lib/money";
 import { initiateCheckout } from "@/app/actions/checkout";
 import { Button } from "@/components/ui/Button";
+import { NIGERIA_STATES, lgasForState } from "@/lib/nigeria-locations";
 import type { SavedPaymentMethod } from "@/types/database";
 
 export function CheckoutForm({
@@ -14,13 +15,11 @@ export function CheckoutForm({
   defaultEmail,
   defaultPhone,
   savedMethods,
-  isLoggedIn,
 }: {
   defaultName: string;
   defaultEmail: string;
   defaultPhone: string;
   savedMethods: SavedPaymentMethod[];
-  isLoggedIn: boolean;
 }) {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
@@ -32,6 +31,9 @@ export function CheckoutForm({
   const [name, setName] = useState(defaultName);
   const [email, setEmail] = useState(defaultEmail);
   const [phone, setPhone] = useState(defaultPhone);
+  const [state, setState] = useState("");
+  const [lga, setLga] = useState("");
+  const [address, setAddress] = useState("");
   const [selectedMethodId, setSelectedMethodId] = useState<string>(
     savedMethods.find((m) => m.is_default)?.id ?? savedMethods[0]?.id ?? ""
   );
@@ -39,6 +41,21 @@ export function CheckoutForm({
   const [saveCard, setSaveCard] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [rates, setRates] = useState<{ state: string; price_kobo: number }[]>([]);
+  useEffect(() => {
+    fetch("/api/delivery-rates")
+      .then((res) => res.json())
+      .then((data) => setRates(data.rates ?? []))
+      .catch(() => {});
+  }, []);
+
+  const deliveryFeeKobo = useMemo(
+    () => rates.find((r) => r.state === state)?.price_kobo ?? null,
+    [rates, state]
+  );
+  const lgaOptions = useMemo(() => lgasForState(state), [state]);
+  const totalWithDeliveryKobo = subtotalKobo + (deliveryFeeKobo ?? 0);
 
   if (!mounted) return null;
 
@@ -58,14 +75,19 @@ export function CheckoutForm({
     setError(null);
     setSubmitting(true);
 
-    // Only productId + quantity leave the browser. Price is never sent —
-    // the server re-fetches and re-validates every item from the database.
+    // Only productId + quantity + the chosen state/LGA leave the browser.
+    // Price and the delivery fee are never sent — the server re-fetches
+    // and re-validates every item, and looks up the delivery fee from the
+    // state name alone, from the database.
     const result = await initiateCheckout({
       customerName: name,
       customerEmail: email,
       customerPhone: phone,
       items: items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
-      saveCard: isLoggedIn && useNewCard ? saveCard : false,
+      deliveryState: state,
+      deliveryLga: lga,
+      deliveryAddress: address,
+      saveCard: useNewCard ? saveCard : false,
       savedPaymentMethodId: !useNewCard ? selectedMethodId : undefined,
     });
 
@@ -93,12 +115,21 @@ export function CheckoutForm({
             <span className="shrink-0">{formatNaira(item.priceKoboSnapshot * item.quantity)}</span>
           </div>
         ))}
-        <div className="mt-2 flex justify-between border-t border-neutral-200 pt-2 text-sm font-semibold">
-          <span>Total</span>
+        <div className="mt-2 flex justify-between border-t border-neutral-200 pt-2 text-sm">
+          <span>Subtotal</span>
           <span>{formatNaira(subtotalKobo)}</span>
         </div>
+        <div className="flex justify-between text-sm">
+          <span>Delivery{state ? ` (${state})` : ""}</span>
+          <span>{state ? (deliveryFeeKobo !== null ? formatNaira(deliveryFeeKobo) : "—") : "Select a state"}</span>
+        </div>
+        <div className="mt-1 flex justify-between border-t border-neutral-200 pt-2 text-sm font-semibold">
+          <span>Total</span>
+          <span>{formatNaira(totalWithDeliveryKobo)}</span>
+        </div>
         <p className="mt-2 text-xs text-neutral-400">
-          Final amount is confirmed against current prices when payment is initiated.
+          Final amount is confirmed against current prices and delivery rates when payment is
+          initiated.
         </p>
       </div>
 
@@ -141,7 +172,66 @@ export function CheckoutForm({
           />
         </div>
 
-        {isLoggedIn && savedMethods.length > 0 && (
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label htmlFor="state" className="mb-1 block text-sm font-medium">
+              State
+            </label>
+            <select
+              id="state"
+              required
+              value={state}
+              onChange={(e) => {
+                setState(e.target.value);
+                setLga("");
+              }}
+              className="w-full rounded-xl border border-neutral-300 px-3 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+            >
+              <option value="">Select…</option>
+              {NIGERIA_STATES.map((s) => (
+                <option key={s.name} value={s.name}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="lga" className="mb-1 block text-sm font-medium">
+              Local Government
+            </label>
+            <select
+              id="lga"
+              required
+              disabled={!state}
+              value={lga}
+              onChange={(e) => setLga(e.target.value)}
+              className="w-full rounded-xl border border-neutral-300 px-3 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 disabled:bg-neutral-100"
+            >
+              <option value="">Select…</option>
+              {lgaOptions.map((l) => (
+                <option key={l} value={l}>
+                  {l}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label htmlFor="address" className="mb-1 block text-sm font-medium">
+            Street address
+          </label>
+          <input
+            id="address"
+            required
+            placeholder="House number, street name, landmark"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            className="w-full rounded-xl border border-neutral-300 px-3 py-2.5 text-sm outline-none transition-colors focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+          />
+        </div>
+
+        {savedMethods.length > 0 && (
           <div>
             <p className="mb-2 text-sm font-medium">Payment method</p>
             <div className="flex flex-col gap-2">
@@ -177,7 +267,7 @@ export function CheckoutForm({
           </div>
         )}
 
-        {isLoggedIn && useNewCard && (
+        {useNewCard && (
           <label className="flex items-center gap-2 text-sm text-neutral-600">
             <input
               type="checkbox"
@@ -188,21 +278,12 @@ export function CheckoutForm({
           </label>
         )}
 
-        {!isLoggedIn && (
-          <p className="text-xs text-neutral-500">
-            <Link href="/account/login" className="font-medium text-brand-600 hover:underline">
-              Log in
-            </Link>{" "}
-            to save a card and view this order in your account later, or continue as a guest.
-          </p>
-        )}
-
         {error && (
           <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
         )}
 
         <Button type="submit" variant="primary" disabled={submitting}>
-          {submitting ? "Processing…" : `Pay ${formatNaira(subtotalKobo)}`}
+          {submitting ? "Processing…" : `Pay ${formatNaira(totalWithDeliveryKobo)}`}
         </Button>
       </form>
     </div>

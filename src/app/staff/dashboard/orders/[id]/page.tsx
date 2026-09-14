@@ -5,6 +5,7 @@ import { getOrderById } from "@/lib/staff";
 import { formatNaira } from "@/lib/money";
 import { OrderStatusBadge } from "@/components/OrderStatusBadge";
 import { OrderStatusForm } from "@/components/staff/OrderStatusForm";
+import { EmailCustomerForm } from "@/components/staff/EmailCustomerForm";
 
 export const dynamic = "force-dynamic";
 
@@ -45,6 +46,19 @@ export default async function StaffOrderDetailPage({
           <p className="mt-1 text-xs text-neutral-400">
             {order.customer_id ? "Registered account" : "Guest checkout"}
           </p>
+          {order.delivery_address && (
+            <p className="mt-2">
+              {order.delivery_address}, {order.delivery_lga}, {order.delivery_state}
+              {order.delivery_fee_kobo > 0 && (
+                <span className="text-neutral-400"> · delivery {formatNaira(order.delivery_fee_kobo)}</span>
+              )}
+            </p>
+          )}
+          {(session.role === "super_admin" || hasAbility(session, "manage_disputes")) && (
+            <div className="mt-3">
+              <EmailCustomerForm customerEmail={order.customer_email} orderReference={order.paystack_reference} />
+            </div>
+          )}
         </div>
         <div className="rounded-lg border border-neutral-200 bg-white p-4 text-sm">
           <p className="mb-1 font-medium text-neutral-900">Update status</p>

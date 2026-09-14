@@ -41,3 +41,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 supabase/.temp/
+
+# Never commit — contains live credentials pasted for local CLI use
+.tokens.md

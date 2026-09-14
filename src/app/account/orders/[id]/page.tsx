@@ -59,6 +59,16 @@ export default async function OrderDetailPage({
         <p>{order.customer_name}</p>
         <p>{order.customer_email}</p>
         {order.customer_phone && <p>{order.customer_phone}</p>}
+        {order.delivery_address && (
+          <p className="mt-2">
+            {order.delivery_address}, {order.delivery_lga}, {order.delivery_state}
+          </p>
+        )}
+        {order.delivery_fee_kobo > 0 && (
+          <p className="mt-1 text-xs text-neutral-400">
+            Delivery fee: {formatNaira(order.delivery_fee_kobo)}
+          </p>
+        )}
       </div>
     </div>
   );

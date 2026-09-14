@@ -3,12 +3,17 @@
 import crypto from "crypto";
 import { createServiceClient, createServerAuthClient } from "@/lib/supabase/server";
 import { initializeTransaction, chargeAuthorization } from "@/lib/paystack";
+import { getDeliveryFeeKobo } from "@/lib/delivery";
+import { NIGERIA_STATES } from "@/lib/nigeria-locations";
 
 export interface CheckoutInput {
   customerName: string;
   customerEmail: string;
   customerPhone: string;
   items: { productId: string; quantity: number }[];
+  deliveryState: string;
+  deliveryLga: string;
+  deliveryAddress: string;
   /** Only meaningful when logged in. Persists the Paystack authorization
    *  returned on settlement — see settlePaidOrder in lib/paystack.ts. */
   saveCard?: boolean;
@@ -41,6 +46,29 @@ export async function initiateCheckout(input: CheckoutInput): Promise<CheckoutRe
   const {
     data: { user },
   } = await authClient.auth.getUser();
+
+  // Checkout requires an account — proxy.ts already redirects an
+  // unauthenticated visitor away from /checkout, but a Server Action can
+  // be invoked directly, so it must not rely on that page-level gate alone.
+  if (!user) {
+    return { ok: false, error: "Please log in to check out." };
+  }
+
+  const stateEntry = NIGERIA_STATES.find((s) => s.name === input.deliveryState);
+  if (!stateEntry) {
+    return { ok: false, error: "Select a valid state." };
+  }
+  if (!stateEntry.lgas.includes(input.deliveryLga)) {
+    return { ok: false, error: "Select a valid local government area." };
+  }
+  if (!input.deliveryAddress?.trim()) {
+    return { ok: false, error: "Enter a delivery address." };
+  }
+
+  const deliveryFeeKobo = await getDeliveryFeeKobo(input.deliveryState);
+  if (deliveryFeeKobo === null) {
+    return { ok: false, error: "Delivery isn't available for that state yet." };
+  }
 
   const productIds = input.items.map((i) => i.productId);
   const { data: products, error } = await supabase
@@ -89,6 +117,11 @@ export async function initiateCheckout(input: CheckoutInput): Promise<CheckoutRe
     });
   }
 
+  // Delivery fee is looked up server-side from the state name only — never
+  // trust a client-supplied amount, same principle as re-pricing every
+  // cart item from the database above.
+  totalKobo += deliveryFeeKobo;
+
   const reference = `mtj_${crypto.randomBytes(12).toString("hex")}`;
 
   const { data: order, error: orderError } = await supabase
@@ -97,12 +130,16 @@ export async function initiateCheckout(input: CheckoutInput): Promise<CheckoutRe
       customer_name: input.customerName,
       customer_email: input.customerEmail,
       customer_phone: input.customerPhone || null,
-      customer_id: user?.id ?? null,
-      save_card_requested: Boolean(user && input.saveCard),
+      customer_id: user.id,
+      save_card_requested: Boolean(input.saveCard),
       status: "pending",
       total_kobo: totalKobo,
       currency: "NGN",
       paystack_reference: reference,
+      delivery_state: input.deliveryState,
+      delivery_lga: input.deliveryLga,
+      delivery_address: input.deliveryAddress.trim(),
+      delivery_fee_kobo: deliveryFeeKobo,
     })
     .select("id")
     .single();

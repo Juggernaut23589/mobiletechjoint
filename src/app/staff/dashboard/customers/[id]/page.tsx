@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getStaffSession } from "@/app/actions/staff-auth";
 import { hasAbility } from "@/lib/staff-auth";
 import { getCustomerOrdersForStaff } from "@/lib/staff";
+import { getSavedPaymentMethods } from "@/lib/account";
 import { createServiceClient } from "@/lib/supabase/server";
 import { formatNaira } from "@/lib/money";
 import { OrderStatusBadge } from "@/components/OrderStatusBadge";
@@ -29,7 +30,10 @@ export default async function StaffCustomerDetailPage({
 
   if (!profile) notFound();
 
-  const orders = await getCustomerOrdersForStaff(id);
+  const [orders, paymentMethods] = await Promise.all([
+    getCustomerOrdersForStaff(id),
+    getSavedPaymentMethods(id),
+  ]);
   const totalSpentKobo = orders
     .filter((o) => o.status === "paid")
     .reduce((sum, o) => sum + o.total_kobo, 0);
@@ -53,6 +57,31 @@ export default async function StaffCustomerDetailPage({
           <p className="text-sm text-neutral-500">Total orders</p>
         </div>
       </div>
+
+      {paymentMethods.length > 0 && (
+        <div className="mb-6">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-neutral-500">
+            Saved payment methods
+          </h2>
+          <div className="flex flex-col divide-y divide-neutral-200 rounded-lg border border-neutral-200 bg-white">
+            {paymentMethods.map((method) => (
+              <div key={method.id} className="flex items-center justify-between p-3 text-sm">
+                <span className="capitalize">
+                  {method.card_type ?? "Card"} •••• {method.last4}
+                  {method.is_default && (
+                    <span className="ml-2 rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-700">
+                      Default
+                    </span>
+                  )}
+                </span>
+                <span className="text-xs text-neutral-400">
+                  {method.bank ? `${method.bank} · ` : ""}Exp {method.exp_month}/{method.exp_year}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-neutral-500">
         Order history

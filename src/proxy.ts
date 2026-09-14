@@ -72,6 +72,17 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  // Checkout requires an account (explicit decision — was guest-checkout
+  // by default before). /checkout/callback is deliberately NOT gated here:
+  // Paystack redirects there with only a `reference` query param, which
+  // the page never trusts for anything beyond "which reference to ask
+  // Paystack about" — it doesn't need a session to do that safely.
+  if (pathname === "/checkout" && !user) {
+    const loginUrl = new URL("/account/login", request.url);
+    loginUrl.searchParams.set("next", "/checkout");
+    return NextResponse.redirect(loginUrl);
+  }
+
   // Staff portal — separate from the customer account system above and
   // from the legacy shared-password /admin above. A valid session here
   // just means "a real staff account exists and is logged in"; whether
@@ -101,5 +112,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/account/:path*", "/staff/:path*"],
+  matcher: ["/admin/:path*", "/account/:path*", "/staff/:path*", "/checkout"],
 };

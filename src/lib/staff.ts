@@ -116,22 +116,49 @@ export async function getCustomerOrdersForStaff(customerId: string): Promise<Ord
   return (data ?? []) as unknown as OrderWithItems[];
 }
 
+export interface Expense {
+  id: string;
+  description: string;
+  amount_kobo: number;
+  category: string | null;
+  incurred_on: string;
+  created_at: string;
+}
+
+export async function getExpenses(limit = 200): Promise<Expense[]> {
+  const supabase = createServiceClient();
+  const { data, error } = await supabase
+    .from("expenses")
+    .select("id, description, amount_kobo, category, incurred_on, created_at")
+    .order("incurred_on", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.error("getExpenses failed:", error.message);
+    return [];
+  }
+  return data ?? [];
+}
+
 export interface SalesStats {
   revenueKobo: number;
   paidOrderCount: number;
   averageOrderKobo: number;
+  totalExpensesKobo: number;
+  netIncomeKobo: number;
   dailyRevenue: { date: string; revenueKobo: number }[];
   topProducts: { name: string; quantitySold: number; revenueKobo: number }[];
 }
 
 export async function getSalesStats(): Promise<SalesStats> {
   const supabase = createServiceClient();
-  const { data: paidOrders } = await supabase
-    .from("orders")
-    .select("id, total_kobo, paystack_verified_at, created_at")
-    .eq("status", "paid");
+  const [{ data: paidOrders }, { data: expenseRows }] = await Promise.all([
+    supabase.from("orders").select("id, total_kobo, paystack_verified_at, created_at").eq("status", "paid"),
+    supabase.from("expenses").select("amount_kobo"),
+  ]);
 
   const orders = paidOrders ?? [];
+  const totalExpensesKobo = (expenseRows ?? []).reduce((sum, e) => sum + e.amount_kobo, 0);
   const revenueKobo = orders.reduce((sum, o) => sum + o.total_kobo, 0);
   const paidOrderCount = orders.length;
   const averageOrderKobo = paidOrderCount > 0 ? Math.round(revenueKobo / paidOrderCount) : 0;
@@ -169,5 +196,13 @@ export async function getSalesStats(): Promise<SalesStats> {
     );
   }
 
-  return { revenueKobo, paidOrderCount, averageOrderKobo, dailyRevenue, topProducts };
+  return {
+    revenueKobo,
+    paidOrderCount,
+    averageOrderKobo,
+    totalExpensesKobo,
+    netIncomeKobo: revenueKobo - totalExpensesKobo,
+    dailyRevenue,
+    topProducts,
+  };
 }

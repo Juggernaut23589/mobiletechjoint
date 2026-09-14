@@ -129,6 +129,10 @@ export interface Order {
   currency: string;
   paystack_reference: string;
   paystack_verified_at: string | null;
+  delivery_state: string | null;
+  delivery_lga: string | null;
+  delivery_address: string | null;
+  delivery_fee_kobo: number;
   created_at: string;
   updated_at: string;
 }
