@@ -1,17 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { HeroBrandSlide } from "@/lib/products";
 
 const SLIDE_MS = 3500;
+/** Each slide's product photos stagger in left-to-right across this
+ *  window, rather than all appearing at once. */
+const IMAGE_STAGGER_WINDOW_S = 2;
 
 /** Homepage hero carousel: a fixed-height intro slide followed by one
  *  slide per brand with live stock (see getHeroBrandShowcase) — every
  *  slide fills the exact same box so nothing ever looks cropped or
- *  mismatched as it auto-advances every SLIDE_MS. */
+ *  mismatched. Auto-advances every SLIDE_MS; the arrow buttons and dots
+ *  below jump directly and reset that timer so manual navigation doesn't
+ *  fight the next auto-advance. */
 export function HeroCarousel({ brandSlides }: { brandSlides: HeroBrandSlide[] }) {
   const totalSlides = 1 + brandSlides.length;
   const [index, setIndex] = useState(0);
@@ -22,7 +28,13 @@ export function HeroCarousel({ brandSlides }: { brandSlides: HeroBrandSlide[] })
       setIndex((i) => (i + 1) % totalSlides);
     }, SLIDE_MS);
     return () => clearInterval(timer);
-  }, [totalSlides]);
+    // Re-armed on every index change (including manual jumps below) so a
+    // manual click always gets the full SLIDE_MS before auto-advancing again.
+  }, [totalSlides, index]);
+
+  const goTo = useCallback((i: number) => setIndex(((i % totalSlides) + totalSlides) % totalSlides), [totalSlides]);
+  const goPrev = useCallback(() => goTo(index - 1), [goTo, index]);
+  const goNext = useCallback(() => goTo(index + 1), [goTo, index]);
 
   return (
     <section className="relative h-[560px] overflow-hidden bg-brand-900 sm:h-[600px]">
@@ -51,7 +63,7 @@ export function HeroCarousel({ brandSlides }: { brandSlides: HeroBrandSlide[] })
                   New drops weekly
                 </span>
                 <h1 className="font-display mb-4.5 text-4xl font-bold leading-[1.08] tracking-tight text-white sm:text-5xl">
-                  Gear built for
+                  Gears built for
                   <br />
                   every frame you shoot.
                 </h1>
@@ -80,6 +92,8 @@ export function HeroCarousel({ brandSlides }: { brandSlides: HeroBrandSlide[] })
           (() => {
             const slide = brandSlides[index - 1];
             if (!slide) return null;
+            const stagger =
+              slide.products.length > 1 ? IMAGE_STAGGER_WINDOW_S / (slide.products.length - 1) : 0;
             return (
               <motion.div
                 key={slide.brandSlug}
@@ -107,20 +121,23 @@ export function HeroCarousel({ brandSlides }: { brandSlides: HeroBrandSlide[] })
                     </Link>
                   </div>
 
-                  <div className="flex shrink-0 gap-4 sm:gap-5">
-                    {slide.products.map((p) => (
-                      <div
+                  <div className="flex shrink-0 gap-3 sm:gap-4">
+                    {slide.products.map((p, i) => (
+                      <motion.div
                         key={p.imageUrl}
-                        className="relative h-[220px] w-[170px] shrink-0 overflow-hidden rounded-2xl bg-white p-5 shadow-2xl sm:h-[300px] sm:w-[230px]"
+                        initial={{ opacity: 0, x: -24 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.5, delay: i * stagger }}
+                        className="relative h-[190px] w-[120px] shrink-0 overflow-hidden rounded-2xl bg-white p-4 shadow-2xl sm:h-[280px] sm:w-[190px]"
                       >
                         <Image
                           src={p.imageUrl}
                           alt={p.name}
                           fill
-                          sizes="230px"
-                          className="object-contain p-4"
+                          sizes="190px"
+                          className="object-contain p-3"
                         />
-                      </div>
+                      </motion.div>
                     ))}
                   </div>
                 </div>
@@ -129,6 +146,42 @@ export function HeroCarousel({ brandSlides }: { brandSlides: HeroBrandSlide[] })
           })()
         )}
       </AnimatePresence>
+
+      {totalSlides > 1 && (
+        <>
+          <button
+            type="button"
+            onClick={goPrev}
+            aria-label="Previous slide"
+            className="absolute left-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20 sm:left-6"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <button
+            type="button"
+            onClick={goNext}
+            aria-label="Next slide"
+            className="absolute right-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20 sm:right-6"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+
+          <div className="absolute bottom-5 left-1/2 z-10 flex -translate-x-1/2 gap-2">
+            {Array.from({ length: totalSlides }, (_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => goTo(i)}
+                aria-label={`Go to slide ${i + 1}`}
+                aria-current={i === index}
+                className={`h-2 rounded-full transition-all ${
+                  i === index ? "w-6 bg-white" : "w-2 bg-white/40 hover:bg-white/60"
+                }`}
+              />
+            ))}
+          </div>
+        </>
+      )}
     </section>
   );
 }

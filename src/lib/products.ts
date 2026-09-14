@@ -402,7 +402,7 @@ export async function getHeroBrandShowcase(): Promise<HeroBrandSlide[]> {
         .eq("status", "published")
         .eq("brand_id", brand.id)
         .order("created_at", { ascending: false })
-        .limit(6);
+        .limit(8);
 
       if (error || !products) return null;
 
@@ -414,7 +414,7 @@ export async function getHeroBrandShowcase(): Promise<HeroBrandSlide[]> {
           return photo ? { name: p.name, imageUrl: photo.url } : null;
         })
         .filter((p): p is { name: string; imageUrl: string } => p !== null)
-        .slice(0, 2);
+        .slice(0, 3);
 
       if (withPhotos.length === 0) return null;
 
