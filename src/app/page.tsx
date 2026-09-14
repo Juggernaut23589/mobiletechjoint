@@ -4,11 +4,12 @@ import {
   getNewArrivals,
   getDealsProducts,
   getCategoriesWithCounts,
+  getHeroBrandShowcase,
 } from "@/lib/products";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductSection } from "@/components/ProductSection";
 import { DealsSection } from "@/components/DealsSection";
-import { HeroSection } from "@/components/HeroSection";
+import { HeroCarousel } from "@/components/HeroCarousel";
 import { CategoryQuickGrid } from "@/components/CategoryQuickGrid";
 import { PromoBanner } from "@/components/PromoBanner";
 import { ProductCarousel } from "@/components/ProductCarousel";
@@ -22,17 +23,19 @@ import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const [allProducts, featured, newArrivals, deals, categories] = await Promise.all([
-    getPublishedProducts(),
-    getFeaturedProducts(8),
-    getNewArrivals(8),
-    getDealsProducts(8),
-    getCategoriesWithCounts(),
-  ]);
+  const [allProducts, featured, newArrivals, deals, categories, heroBrandSlides] =
+    await Promise.all([
+      getPublishedProducts(),
+      getFeaturedProducts(8),
+      getNewArrivals(8),
+      getDealsProducts(8),
+      getCategoriesWithCounts(),
+      getHeroBrandShowcase(),
+    ]);
 
   return (
     <div>
-      <HeroSection />
+      <HeroCarousel brandSlides={heroBrandSlides} />
       <CategoryQuickGrid categories={categories} />
       <PromoBanner />
       <ProductCarousel title="New Arrivals" products={newArrivals} />

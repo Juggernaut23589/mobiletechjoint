@@ -347,3 +347,86 @@ export async function getComplementaryProducts(
   }
   return (data ?? []) as unknown as ProductWithImages[];
 }
+
+export interface HeroBrandSlide {
+  brandName: string;
+  brandSlug: string;
+  tagline: string;
+  gradient: string;
+  products: { name: string; imageUrl: string }[];
+}
+
+/** Curated look/tagline per brand for the homepage hero carousel — editorial
+ *  copy, not data that lives in the DB. A brand only becomes an actual
+ *  slide once we've confirmed (below) it currently has published products
+ *  with a real photo, so this list can safely be longer than 9: brands
+ *  with no live stock right now are silently skipped rather than showing
+ *  an empty/broken slide. */
+const HERO_BRAND_LOOKS: { slug: string; tagline: string; gradient: string }[] = [
+  { slug: "sony", tagline: "Full-frame power for hybrid creators.", gradient: "linear-gradient(135deg,#0B0E14 0%,#1a1e28 60%,#2F6FFF 140%)" },
+  { slug: "godox", tagline: "Studio lighting, dramatic and precise.", gradient: "linear-gradient(135deg,#0B0E14 0%,#4a2a12 55%,#FF6A3D 140%)" },
+  { slug: "dji", tagline: "Gimbals and action cams built to move.", gradient: "linear-gradient(135deg,#0B0E14 0%,#232838 60%,#3a4258 140%)" },
+  { slug: "canon", tagline: "Iconic glass. Unmistakable color.", gradient: "linear-gradient(135deg,#0B0E14 0%,#4a1420 55%,#FF3B5C 140%)" },
+  { slug: "ulanzi", tagline: "Everyday creator gear, endless variety.", gradient: "linear-gradient(135deg,#0B0E14 0%,#3a2360 55%,#A855F7 140%)" },
+  { slug: "lexar", tagline: "Fast storage for footage that matters.", gradient: "linear-gradient(135deg,#0B0E14 0%,#152040 55%,#2F6FFF 140%)" },
+  { slug: "kandf-concept", tagline: "Filters, bags, and rigs that hold up.", gradient: "linear-gradient(135deg,#0B0E14 0%,#123626 55%,#16C784 140%)" },
+  { slug: "fujifilm", tagline: "Instant film, made for the moment.", gradient: "linear-gradient(135deg,#0B0E14 0%,#123626 55%,#2FD98A 140%)" },
+  { slug: "hollyland", tagline: "Wireless audio that never drops out.", gradient: "linear-gradient(135deg,#0B0E14 0%,#152040 55%,#2F6FFF 140%)" },
+];
+
+/** Live product photos for each curated brand look, for the homepage hero
+ *  carousel. Only brands with at least one published, photographed
+ *  product become a slide. */
+export async function getHeroBrandShowcase(): Promise<HeroBrandSlide[]> {
+  const supabase = createPublicClient();
+  const slugs = HERO_BRAND_LOOKS.map((b) => b.slug);
+
+  const { data: brands, error: brandError } = await supabase
+    .from("brands")
+    .select("id, name, slug")
+    .in("slug", slugs);
+
+  if (brandError || !brands) {
+    console.error("getHeroBrandShowcase failed (brands):", brandError?.message);
+    return [];
+  }
+
+  const slides = await Promise.all(
+    HERO_BRAND_LOOKS.map(async (look) => {
+      const brand = brands.find((b) => b.slug === look.slug);
+      if (!brand) return null;
+
+      const { data: products, error } = await supabase
+        .from("products")
+        .select("name, product_images(url, is_video, position)")
+        .eq("status", "published")
+        .eq("brand_id", brand.id)
+        .order("created_at", { ascending: false })
+        .limit(6);
+
+      if (error || !products) return null;
+
+      const withPhotos = products
+        .map((p) => {
+          const photo = (p.product_images as { url: string; is_video: boolean; position: number }[])
+            .filter((img) => !img.is_video)
+            .sort((a, b) => a.position - b.position)[0];
+          return photo ? { name: p.name, imageUrl: photo.url } : null;
+        })
+        .filter((p): p is { name: string; imageUrl: string } => p !== null)
+        .slice(0, 2);
+
+      if (withPhotos.length === 0) return null;
+
+      return {
+        brandName: brand.name,
+        brandSlug: brand.slug,
+        tagline: look.tagline,
+        gradient: look.gradient,
+        products: withPhotos,
+      };
+    })
+  );
+
+  return slides.filter((s): s is HeroBrandSlide => s !== null).slice(0, 9);
+}
