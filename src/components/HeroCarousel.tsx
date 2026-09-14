@@ -6,7 +6,7 @@ import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import type { HeroBrandSlide } from "@/lib/products";
 
-const SLIDE_MS = 2300;
+const SLIDE_MS = 3500;
 
 /** Homepage hero carousel: a fixed-height intro slide followed by one
  *  slide per brand with live stock (see getHeroBrandShowcase) — every
