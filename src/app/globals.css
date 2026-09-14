@@ -1,35 +1,42 @@
 @import "tailwindcss";
 
 :root {
-  --color-surface: #f7f6fb;
+  --color-surface: #f5f6fa;
   --color-surface-raised: #ffffff;
-  --color-ink: #150f24;
+  --color-ink: #12141a;
 
-  /* Vivid violet + electric cyan — a proper "tech ecommerce" palette
-     (gaming/gadget-brand energy) instead of the flatter blue/black shell
-     from the previous pass, which read as too plain. */
-  --color-brand-50: #f2edff;
-  --color-brand-100: #e4d9ff;
-  --color-brand-200: #c9b6ff;
-  --color-brand-500: #8b5cf6;
-  --color-brand-600: #7c3aed;
-  --color-brand-700: #6423c7;
-  --color-brand-900: #170f2e;
+  /* Design-system palette from the approved mockups (Main/Category/
+     ProductDetail/Checkout/Account/StaffLogin/AdminDashboard): deep navy
+     shell, blue as the primary link/accent, orange as the primary CTA.
+     brand-900 drives every dark surface (navbar, hero, footer); brand-600
+     is the blue accent; accent-* is the orange CTA ramp. */
+  --color-brand-50: #eaf0ff;
+  --color-brand-100: #d6e2ff;
+  --color-brand-200: #adc5ff;
+  --color-brand-500: #2f6fff;
+  --color-brand-600: #2f6fff;
+  --color-brand-700: #1e4fd6;
+  --color-brand-900: #0b0e14;
 
-  --color-cyan-400: #22d3ee;
-  --color-cyan-500: #06b6d4;
+  --color-cyan-400: #2f6fff;
+  --color-cyan-500: #1e4fd6;
 
-  --color-accent-400: #fbbf24;
-  --color-accent-500: #f59e0b;
-  --color-accent-600: #d97706;
+  --color-accent-400: #ff8a63;
+  --color-accent-500: #ff6a3d;
+  --color-accent-600: #e85a2f;
 
-  /* The hero carousel / category tiles keep this original indigo,
-     deliberately decoupled from the shell so they read as a distinct
-     "merchandising" moment regardless of how the shell palette shifts. */
-  --color-merch-600: #4338ca;
-  --color-merch-900: #15123a;
+  /* Category tiles / merchandising moments: purple, decoupled from the
+     blue/orange shell so category art reads as distinct from nav/CTAs. */
+  --color-merch-600: #a855f7;
+  --color-merch-900: #0b0e14;
 
-  --shadow-color: 262 55% 22%;
+  --color-purple: #a855f7;
+  --color-green: #16c784;
+  --color-red: #ff3b5c;
+  --color-muted: #6b7280;
+  --color-border: #e5e7eb;
+
+  --shadow-color: 220 45% 6%;
 }
 
 @theme inline {
@@ -52,10 +59,15 @@
   --color-accent-500: var(--color-accent-500);
   --color-accent-600: var(--color-accent-600);
 
-  --font-sans: -apple-system, BlinkMacSystemFont, var(--font-inter), "Segoe UI", Roboto,
+  --color-purple: var(--color-purple);
+  --color-green: var(--color-green);
+  --color-red: var(--color-red);
+  --color-muted: var(--color-muted);
+  --color-border: var(--color-border);
+
+  --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     Helvetica, Arial, sans-serif;
-  --font-display: -apple-system, BlinkMacSystemFont, var(--font-inter), "Segoe UI", Roboto,
-    Helvetica, Arial, sans-serif;
+  --font-display: var(--font-space-grotesk), var(--font-sans);
 }
 
 body {
@@ -76,26 +88,30 @@ h1, h2, h3, h4, .font-display {
 }
 
 .bg-brand-gradient {
-  background: linear-gradient(135deg, var(--color-brand-600), var(--color-cyan-500) 130%);
+  background: linear-gradient(135deg, var(--color-brand-600), var(--color-brand-700) 130%);
 }
 
 .bg-merch-gradient {
-  background: linear-gradient(135deg, var(--color-merch-600), var(--color-merch-900) 70%);
+  background: linear-gradient(135deg, var(--color-merch-600), #7c3aed 70%);
 }
 
 .bg-accent-gradient {
-  background: linear-gradient(135deg, var(--color-accent-400), var(--color-accent-600));
+  background: linear-gradient(135deg, var(--color-accent-500), var(--color-purple) 100%);
+}
+
+.bg-promo-gradient {
+  background: linear-gradient(120deg, var(--color-accent-500) 0%, var(--color-purple) 100%);
 }
 
 .text-accent-gradient {
-  background: linear-gradient(90deg, var(--color-accent-400), var(--color-accent-500));
+  background: linear-gradient(90deg, var(--color-accent-500), var(--color-purple));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
 .text-brand-gradient {
-  background: linear-gradient(90deg, var(--color-brand-500), var(--color-cyan-400));
+  background: linear-gradient(90deg, var(--color-brand-500), var(--color-purple));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -106,7 +122,7 @@ h1, h2, h3, h4, .font-display {
 }
 
 .shadow-glow-accent {
-  box-shadow: 0 10px 28px -6px rgba(245, 158, 11, 0.45);
+  box-shadow: 0 10px 28px -6px rgba(255, 106, 61, 0.35);
 }
 
 /* Seamless auto-scrolling hero marquee: the track renders the product list
@@ -145,10 +161,34 @@ h1, h2, h3, h4, .font-display {
   }
 }
 
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
 .skeleton {
   background: linear-gradient(90deg, #eceef5 25%, #f6f7fb 37%, #eceef5 63%);
   background-size: 400% 100%;
   animation: shimmer 1.4s ease infinite;
+}
+
+@keyframes floaty {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-14px);
+  }
+}
+
+.animate-floaty {
+  animation-name: floaty;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
 }
 
 @keyframes pulse-glow {
@@ -169,6 +209,9 @@ h1, h2, h3, h4, .font-display {
     animation: none;
   }
   .animate-pulse-glow {
+    animation: none;
+  }
+  .animate-floaty {
     animation: none;
   }
 }

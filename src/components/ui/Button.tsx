@@ -5,6 +5,10 @@ import { forwardRef } from "react";
 
 const VARIANTS = {
   primary: "bg-brand-gradient text-white shadow-glow hover:brightness-110",
+  // Solid orange CTA from the approved design-system mockups — the primary
+  // "Add to Cart" / "Shop Now" action color, distinct from the blue-based
+  // `primary` gradient used elsewhere.
+  accent: "bg-accent-500 text-white shadow-glow-accent hover:bg-accent-600",
   secondary:
     "border border-brand-200 text-brand-700 bg-white hover:bg-brand-50",
   dark: "bg-brand-900 text-white shadow-glow hover:brightness-125",

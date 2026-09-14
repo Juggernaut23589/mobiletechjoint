@@ -132,7 +132,7 @@ export default function CartPage() {
       </div>
 
       <Button
-        variant="primary"
+        variant="accent"
         className="mt-6 w-full"
         onClick={() => router.push("/checkout")}
       >

@@ -12,7 +12,7 @@ export default async function PaymentMethodsPage() {
 
   return (
     <div>
-      <h1 className="mb-1 text-2xl font-bold tracking-tight text-brand-900">Payment Methods</h1>
+      <h1 className="mb-1 font-display text-2xl text-brand-900">Payment Methods</h1>
       <p className="mb-6 text-sm text-neutral-500">
         We never store your card number — only a secure reusable token from Paystack.
         Cards are saved automatically when you check &quot;Save this card&quot; during checkout.

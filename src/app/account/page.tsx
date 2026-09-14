@@ -19,7 +19,7 @@ export default async function AccountOverviewPage() {
 
   return (
     <div>
-      <h1 className="mb-1 text-2xl font-bold tracking-tight text-brand-900">
+      <h1 className="mb-1 font-display text-2xl text-brand-900">
         Hi{profile?.full_name ? `, ${profile.full_name.split(" ")[0]}` : ""}
       </h1>
       <p className="mb-6 text-sm text-neutral-500">{user.email}</p>

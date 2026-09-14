@@ -83,7 +83,7 @@ export function AddToCartForm({
         </div>
       </div>
       <div className="flex gap-3">
-        <Button onClick={handleAdd} variant="secondary" className="flex-1 rounded-full">
+        <Button onClick={handleAdd} variant="accent" className="flex-1 rounded-full">
           {added ? (
             <>
               <Check className="h-4 w-4" /> Added
@@ -92,7 +92,7 @@ export function AddToCartForm({
             "Add to Cart"
           )}
         </Button>
-        <Button onClick={handleBuyNow} variant="primary" className="flex-1">
+        <Button onClick={handleBuyNow} variant="dark" className="flex-1 rounded-full">
           Buy Now
         </Button>
       </div>

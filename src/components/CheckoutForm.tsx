@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/store/cart";
 import { formatNaira } from "@/lib/money";
@@ -100,145 +101,143 @@ export function CheckoutForm({
     router.push(result.authorizationUrl);
   }
 
-  return (
-    <div className="mx-auto max-w-md px-4 py-12 sm:py-16">
-      <h1 className="font-display mb-6 text-2xl font-bold tracking-tight text-brand-900">
-        Checkout
-      </h1>
+  const inputClass =
+    "w-full rounded-[10px] border border-neutral-200 bg-white px-3.5 py-2.5 text-[13.5px] outline-none transition-colors focus:border-brand-600 focus:ring-2 focus:ring-brand-100";
+  const labelClass = "mb-1.5 block text-[13px] font-semibold text-neutral-900";
 
-      <div className="mb-6 rounded-2xl border border-neutral-200 bg-white p-4">
-        {items.map((item) => (
-          <div key={item.productId} className="flex justify-between py-1 text-sm">
-            <span className="min-w-0 truncate pr-2">
-              {item.name} × {item.quantity}
-            </span>
-            <span className="shrink-0">{formatNaira(item.priceKoboSnapshot * item.quantity)}</span>
+  return (
+    <div className="mx-auto max-w-[1000px] px-4 py-10 sm:px-8">
+      <div className="flex items-center gap-2.5 pb-10 text-[13px] text-neutral-500">
+        {["Cart", "Shipping", "Payment"].map((label, i, arr) => (
+          <div key={label} className="flex flex-1 items-center gap-2.5 last:flex-none">
+            <div className="flex items-center gap-2">
+              <span
+                className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold ${
+                  i < 1
+                    ? "bg-[#16C784] text-white"
+                    : i === 1
+                      ? "bg-brand-600 text-white"
+                      : "bg-neutral-200 text-neutral-500"
+                }`}
+              >
+                {i < 1 ? "✓" : i + 1}
+              </span>
+              <span className={i === 1 ? "font-semibold text-neutral-900" : ""}>{label}</span>
+            </div>
+            {i < arr.length - 1 && <div className="h-0.5 flex-1 bg-neutral-200" />}
           </div>
         ))}
-        <div className="mt-2 flex justify-between border-t border-neutral-200 pt-2 text-sm">
-          <span>Subtotal</span>
-          <span>{formatNaira(subtotalKobo)}</span>
-        </div>
-        <div className="flex justify-between text-sm">
-          <span>Delivery{state ? ` (${state})` : ""}</span>
-          <span>{state ? (deliveryFeeKobo !== null ? formatNaira(deliveryFeeKobo) : "—") : "Select a state"}</span>
-        </div>
-        <div className="mt-1 flex justify-between border-t border-neutral-200 pt-2 text-sm font-semibold">
-          <span>Total</span>
-          <span>{formatNaira(totalWithDeliveryKobo)}</span>
-        </div>
-        <p className="mt-2 text-xs text-neutral-400">
-          Final amount is confirmed against current prices and delivery rates when payment is
-          initiated.
-        </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="grid gap-10 lg:grid-cols-[1fr_380px]">
         <div>
-          <label htmlFor="name" className="mb-1 block text-sm font-medium">
-            Full name
-          </label>
-          <input
-            id="name"
-            required
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full rounded-xl border border-neutral-300 px-3 py-2.5 text-sm outline-none transition-colors focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
-          />
-        </div>
-        <div>
-          <label htmlFor="email" className="mb-1 block text-sm font-medium">
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-xl border border-neutral-300 px-3 py-2.5 text-sm outline-none transition-colors focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
-          />
-        </div>
-        <div>
-          <label htmlFor="phone" className="mb-1 block text-sm font-medium">
-            Phone number
-          </label>
-          <input
-            id="phone"
-            type="tel"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            className="w-full rounded-xl border border-neutral-300 px-3 py-2.5 text-sm outline-none transition-colors focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label htmlFor="state" className="mb-1 block text-sm font-medium">
-              State
-            </label>
-            <select
-              id="state"
-              required
-              value={state}
-              onChange={(e) => {
-                setState(e.target.value);
-                setLga("");
-              }}
-              className="w-full rounded-xl border border-neutral-300 px-3 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
-            >
-              <option value="">Select…</option>
-              {NIGERIA_STATES.map((s) => (
-                <option key={s.name} value={s.name}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
+          <h2 className="font-display mb-4.5 text-lg text-brand-900">Shipping Information</h2>
+          <div className="grid grid-cols-2 gap-3.5">
+            <div>
+              <label htmlFor="name" className={labelClass}>
+                Full name
+              </label>
+              <input
+                id="name"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className={`${inputClass} col-span-2`}
+              />
+            </div>
+            <div className="col-span-2">
+              <label htmlFor="email" className={labelClass}>
+                Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={inputClass}
+              />
+            </div>
+            <div className="col-span-2">
+              <label htmlFor="phone" className={labelClass}>
+                Phone number
+              </label>
+              <input
+                id="phone"
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className={inputClass}
+              />
+            </div>
+            <div className="col-span-2">
+              <label htmlFor="address" className={labelClass}>
+                Street address
+              </label>
+              <input
+                id="address"
+                required
+                placeholder="House number, street name, landmark"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label htmlFor="state" className={labelClass}>
+                State
+              </label>
+              <select
+                id="state"
+                required
+                value={state}
+                onChange={(e) => {
+                  setState(e.target.value);
+                  setLga("");
+                }}
+                className={inputClass}
+              >
+                <option value="">Select…</option>
+                {NIGERIA_STATES.map((s) => (
+                  <option key={s.name} value={s.name}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="lga" className={labelClass}>
+                Local Government
+              </label>
+              <select
+                id="lga"
+                required
+                disabled={!state}
+                value={lga}
+                onChange={(e) => setLga(e.target.value)}
+                className={`${inputClass} disabled:bg-neutral-100`}
+              >
+                <option value="">Select…</option>
+                {lgaOptions.map((l) => (
+                  <option key={l} value={l}>
+                    {l}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
-          <div>
-            <label htmlFor="lga" className="mb-1 block text-sm font-medium">
-              Local Government
-            </label>
-            <select
-              id="lga"
-              required
-              disabled={!state}
-              value={lga}
-              onChange={(e) => setLga(e.target.value)}
-              className="w-full rounded-xl border border-neutral-300 px-3 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 disabled:bg-neutral-100"
-            >
-              <option value="">Select…</option>
-              {lgaOptions.map((l) => (
-                <option key={l} value={l}>
-                  {l}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
 
-        <div>
-          <label htmlFor="address" className="mb-1 block text-sm font-medium">
-            Street address
-          </label>
-          <input
-            id="address"
-            required
-            placeholder="House number, street name, landmark"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            className="w-full rounded-xl border border-neutral-300 px-3 py-2.5 text-sm outline-none transition-colors focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
-          />
-        </div>
-
-        {savedMethods.length > 0 && (
-          <div>
-            <p className="mb-2 text-sm font-medium">Payment method</p>
-            <div className="flex flex-col gap-2">
+          <h2 className="font-display mb-4 mt-7 text-lg text-brand-900">Payment Method</h2>
+          {savedMethods.length > 0 && (
+            <div className="mb-4 flex flex-col gap-2.5">
               {savedMethods.map((method) => (
                 <label
                   key={method.id}
-                  className="flex items-center gap-2 rounded-xl border border-neutral-300 px-3 py-2.5 text-sm has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50"
+                  className={`flex items-center gap-2.5 rounded-[14px] border-[1.5px] px-4 py-3.5 text-sm transition-colors ${
+                    !useNewCard && selectedMethodId === method.id
+                      ? "border-brand-600 bg-brand-50"
+                      : "border-neutral-200"
+                  }`}
                 >
                   <input
                     type="radio"
@@ -254,7 +253,11 @@ export function CheckoutForm({
                   </span>
                 </label>
               ))}
-              <label className="flex items-center gap-2 rounded-xl border border-neutral-300 px-3 py-2.5 text-sm has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50">
+              <label
+                className={`flex items-center gap-2.5 rounded-[14px] border-[1.5px] px-4 py-3.5 text-sm transition-colors ${
+                  useNewCard ? "border-brand-600 bg-brand-50" : "border-neutral-200"
+                }`}
+              >
                 <input
                   type="radio"
                   name="paymentMethod"
@@ -264,27 +267,83 @@ export function CheckoutForm({
                 <span>Use a new card</span>
               </label>
             </div>
+          )}
+          <div className="rounded-[14px] border border-neutral-200 bg-white p-4.5 text-[13.5px] leading-relaxed text-neutral-500">
+            You&apos;ll be taken to Paystack&apos;s secure checkout to enter your card, bank
+            transfer, or USSD details — this site never sees or stores your card number.
           </div>
-        )}
+          {useNewCard && (
+            <label className="mt-3.5 flex items-center gap-2 text-sm text-neutral-600">
+              <input
+                type="checkbox"
+                checked={saveCard}
+                onChange={(e) => setSaveCard(e.target.checked)}
+              />
+              Save this card for future purchases
+            </label>
+          )}
 
-        {useNewCard && (
-          <label className="flex items-center gap-2 text-sm text-neutral-600">
-            <input
-              type="checkbox"
-              checked={saveCard}
-              onChange={(e) => setSaveCard(e.target.checked)}
-            />
-            Save this card for future purchases
-          </label>
-        )}
+          {error && (
+            <p className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
+          )}
+        </div>
 
-        {error && (
-          <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
-        )}
+        <div>
+          <div className="rounded-2xl border border-neutral-200 bg-white p-6">
+            <h3 className="font-display mb-4 text-[15px] text-brand-900">Order Summary</h3>
+            {items.map((item) => (
+              <div key={item.productId} className="mb-3.5 flex gap-2.5">
+                {item.imageUrl ? (
+                  <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-neutral-100">
+                    <Image src={item.imageUrl} alt={item.name} fill className="object-cover" />
+                  </div>
+                ) : (
+                  <div className="h-12 w-12 shrink-0 rounded-lg bg-neutral-100" />
+                )}
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[12.5px] font-semibold">{item.name}</p>
+                  <p className="text-xs text-neutral-500">Qty {item.quantity}</p>
+                </div>
+                <div className="shrink-0 text-[13px] font-semibold">
+                  {formatNaira(item.priceKoboSnapshot * item.quantity)}
+                </div>
+              </div>
+            ))}
+            <div className="border-t border-neutral-200 pt-3">
+              <div className="flex justify-between py-1.5 text-[13.5px] text-neutral-500">
+                <span>Subtotal</span>
+                <span className="text-neutral-900">{formatNaira(subtotalKobo)}</span>
+              </div>
+              <div className="flex justify-between py-1.5 text-[13.5px] text-neutral-500">
+                <span>Delivery{state ? ` (${state})` : ""}</span>
+                <span className="text-neutral-900">
+                  {state ? (deliveryFeeKobo !== null ? formatNaira(deliveryFeeKobo) : "—") : "Select a state"}
+                </span>
+              </div>
+              <div className="mt-1.5 flex justify-between border-t border-neutral-200 pt-2.5 text-base font-bold text-brand-900">
+                <span>Total</span>
+                <span>{formatNaira(totalWithDeliveryKobo)}</span>
+              </div>
+            </div>
+            <p className="mt-2.5 text-xs text-neutral-400">
+              Final amount is confirmed against current prices and delivery rates when payment
+              is initiated.
+            </p>
 
-        <Button type="submit" variant="primary" disabled={submitting}>
-          {submitting ? "Processing…" : `Pay ${formatNaira(totalWithDeliveryKobo)}`}
-        </Button>
+            <Button type="submit" variant="accent" disabled={submitting} className="mt-4.5 w-full">
+              {submitting ? "Processing…" : `Pay with Paystack`}
+            </Button>
+
+            <div className="mt-4 flex flex-col gap-2 text-xs text-neutral-500">
+              <div className="flex items-center gap-2">
+                <span className="text-[#16C784]">🔒</span> SSL Secured Checkout
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[#16C784]">✓</span> Secure checkout via Paystack
+              </div>
+            </div>
+          </div>
+        </div>
       </form>
     </div>
   );
