@@ -11,27 +11,21 @@ const SLIDE_MS = 3500;
 /** Homepage hero carousel: a fixed-height intro slide followed by one
  *  slide per brand with live stock (see getHeroBrandShowcase) — every
  *  slide fills the exact same box so nothing ever looks cropped or
- *  mismatched as it auto-advances. Paused on hover so the CTAs are
- *  actually clickable, not a moving target. */
+ *  mismatched as it auto-advances every SLIDE_MS. */
 export function HeroCarousel({ brandSlides }: { brandSlides: HeroBrandSlide[] }) {
   const totalSlides = 1 + brandSlides.length;
   const [index, setIndex] = useState(0);
-  const [paused, setPaused] = useState(false);
 
   useEffect(() => {
-    if (paused || totalSlides <= 1) return;
+    if (totalSlides <= 1) return;
     const timer = setInterval(() => {
       setIndex((i) => (i + 1) % totalSlides);
     }, SLIDE_MS);
     return () => clearInterval(timer);
-  }, [paused, totalSlides]);
+  }, [totalSlides]);
 
   return (
-    <section
-      className="relative h-[560px] overflow-hidden bg-brand-900 sm:h-[600px]"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-    >
+    <section className="relative h-[560px] overflow-hidden bg-brand-900 sm:h-[600px]">
       <AnimatePresence mode="sync">
         {index === 0 ? (
           <motion.div
