@@ -1,0 +1,114 @@
+name: Deploy to VM
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch: {}
+
+concurrency:
+  group: deploy-mobiletechjoint
+  cancel-in-progress: false
+
+env:
+  APP_DIR: /home/deploy/mobiletechjoint-store
+  PM2_NAME: mobiletechjoint-store
+  HEALTH_URL: https://mobiletechjoint.com/
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          PAYSTACK_SECRET_KEY: ${{ secrets.PAYSTACK_SECRET_KEY }}
+          NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY: ${{ secrets.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY }}
+          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+          INSTAGRAM_BUSINESS_ACCOUNT_ID: ${{ secrets.INSTAGRAM_BUSINESS_ACCOUNT_ID }}
+          NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+          ADMIN_SESSION_SECRET: ${{ secrets.ADMIN_SESSION_SECRET }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          STAFF_SESSION_SECRET: ${{ secrets.STAFF_SESSION_SECRET }}
+        run: npm run build
+
+      - name: Package build output
+        run: tar -czf build.tar.gz .next public package.json package-lock.json
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: build.tar.gz
+          retention-days: 3
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: build-output
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.VM_SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "${{ secrets.VM_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Sync source on VM
+        run: |
+          ssh -i ~/.ssh/deploy_key deploy@${{ secrets.VM_HOST }} \
+            "cd $APP_DIR && git fetch --prune origin master && git reset --hard origin/master"
+
+      - name: Copy build artifact to VM
+        run: |
+          scp -i ~/.ssh/deploy_key build.tar.gz deploy@${{ secrets.VM_HOST }}:/tmp/build-mtj.tar.gz
+
+      - name: Unpack, install, restart
+        run: |
+          ssh -i ~/.ssh/deploy_key deploy@${{ secrets.VM_HOST }} bash -s <<'REMOTE'
+            set -euo pipefail
+            cd /home/deploy/mobiletechjoint-store
+            rm -rf .next
+            tar -xzf /tmp/build-mtj.tar.gz
+            rm -f /tmp/build-mtj.tar.gz
+            npm ci --omit=dev --prefer-offline
+            pm2 restart mobiletechjoint-store --update-env
+            pm2 save
+          REMOTE
+
+      - name: Health check
+        run: |
+          sleep 10
+          for i in 1 2 3; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "$HEALTH_URL")
+            if [ "$code" = "200" ]; then
+              echo "Health check passed ($code)"
+              exit 0
+            fi
+            echo "Attempt $i: got $code, retrying..."
+            sleep 5
+          done
+          echo "Health check failed"
+          ssh -i ~/.ssh/deploy_key deploy@${{ secrets.VM_HOST }} "pm2 logs $PM2_NAME --lines 50 --nostream"
+          exit 1
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "### Deploy to $HEALTH_URL" >> "$GITHUB_STEP_SUMMARY"
+          echo "Job status: ${{ job.status }}" >> "$GITHUB_STEP_SUMMARY"
