@@ -10,7 +10,8 @@
     "migrate:woocommerce": "dotenv -e .env.local -- tsx scripts/migrate-woocommerce.ts",
     "backfill:brands": "dotenv -e .env.local -- tsx scripts/backfill-brands.ts",
     "categorize:products": "dotenv -e .env.local -- tsx scripts/categorize-uncategorized.ts",
-    "create:super-admin": "dotenv -e .env.local -- tsx scripts/create-super-admin.ts"
+    "create:super-admin": "dotenv -e .env.local -- tsx scripts/create-super-admin.ts",
+    "feature:products": "dotenv -e .env.local -- tsx scripts/feature-products.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.6",
