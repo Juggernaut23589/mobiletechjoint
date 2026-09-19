@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import Image from "next/image";
+import { Plus } from "lucide-react";
 import { getStaffSession } from "@/app/actions/staff-auth";
 import { hasAbility } from "@/lib/staff-auth";
 import { createServiceClient } from "@/lib/supabase/server";
@@ -41,10 +42,21 @@ export default async function StaffProductsPage({
 
   return (
     <div>
-      <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-brand-900">Products</h1>
-      <p className="mb-6 text-sm text-neutral-500">
-        {items.length} shown{q ? ` for "${q}"` : ""} — most recent first.
-      </p>
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-brand-900">Products</h1>
+          <p className="text-sm text-neutral-500">
+            {items.length} shown{q ? ` for "${q}"` : ""} — most recent first.
+          </p>
+        </div>
+        <Link
+          href="/staff/dashboard/products/new"
+          className="inline-flex items-center gap-1.5 rounded-full bg-brand-gradient px-4 py-2 text-sm font-semibold text-white shadow-glow"
+        >
+          <Plus className="h-4 w-4" strokeWidth={2.5} />
+          Add product
+        </Link>
+      </div>
 
       <form className="mb-4">
         <input
@@ -57,6 +69,11 @@ export default async function StaffProductsPage({
       </form>
 
       <div className="flex flex-col divide-y divide-neutral-200 rounded-lg border border-neutral-200 bg-white">
+        {items.length === 0 && (
+          <p className="p-6 text-sm text-neutral-500">
+            {q ? "Nothing matches that search." : "No products yet — add the first one."}
+          </p>
+        )}
         {items.map((product) => {
           const cover = product.product_images.find((img) => !img.is_video) ?? null;
           return (

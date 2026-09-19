@@ -36,12 +36,9 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           PAYSTACK_SECRET_KEY: ${{ secrets.PAYSTACK_SECRET_KEY }}
           NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY: ${{ secrets.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY }}
-          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
-          INSTAGRAM_BUSINESS_ACCOUNT_ID: ${{ secrets.INSTAGRAM_BUSINESS_ACCOUNT_ID }}
           NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
           ADMIN_SESSION_SECRET: ${{ secrets.ADMIN_SESSION_SECRET }}
-          CRON_SECRET: ${{ secrets.CRON_SECRET }}
           STAFF_SESSION_SECRET: ${{ secrets.STAFF_SESSION_SECRET }}
         run: npm run build
 

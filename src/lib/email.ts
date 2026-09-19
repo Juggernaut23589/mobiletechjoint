@@ -2,7 +2,7 @@
  * Transactional email via Resend (installed through the Vercel Marketplace
  * — RESEND_API_KEY is provisioned automatically once the integration is
  * connected, not something to type in by hand). Same fail-gracefully
- * pattern as lib/paystack.ts and lib/instagram.ts: a missing key returns a
+ * pattern as lib/paystack.ts: a missing key returns a
  * typed error instead of throwing, since this app must never crash just
  * because an integration isn't connected yet.
  */

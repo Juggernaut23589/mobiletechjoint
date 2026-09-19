@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
+import slugify from "slugify";
 import { createServiceClient } from "@/lib/supabase/server";
 import { nairaToKobo } from "@/lib/money";
 import { STAFF_COOKIE_NAME, decodeStaffSession, hasAbility } from "@/lib/staff-auth";
@@ -24,6 +25,138 @@ async function assertAdmin() {
   if (!hasAbility(session, "manage_products")) {
     throw new Error("Unauthorized");
   }
+}
+
+const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
+
+/** Creates a brand-new product from the staff dashboard — the manual
+ *  upload path that replaced the Instagram sync. Everything the edit page
+ *  can set is accepted up front so a staff member can go from empty form
+ *  to a live listing in one submit, but publishing still requires a price
+ *  (the DB's price_required_when_published constraint would reject it
+ *  anyway; checking here gives a readable error instead). Any images
+ *  attached are uploaded to the same product-media bucket the edit page
+ *  uses, in the order they were chosen. Returns the new id so the caller
+ *  can land on the edit page for further tweaks. */
+export async function createProduct(
+  formData: FormData
+): Promise<{ error?: string; productId?: string }> {
+  try {
+    await assertAdmin();
+  } catch {
+    return { error: "Forbidden." };
+  }
+
+  const name = (formData.get("name") as string)?.trim();
+  const description = (formData.get("description") as string)?.trim();
+  const status = (formData.get("status") as string) || "draft";
+  const categoryId = (formData.get("categoryId") as string) || null;
+  const brandId = (formData.get("brandId") as string) || null;
+  const priceRaw = formData.get("priceNaira") as string;
+  const compareAtRaw = formData.get("compareAtPriceNaira") as string;
+  const stockRaw = formData.get("stockQuantity") as string;
+  const files = formData.getAll("files").filter((f): f is File => f instanceof File && f.size > 0);
+
+  if (!name) return { error: "Name is required." };
+  if (status !== "draft" && status !== "published") return { error: "Invalid status." };
+
+  const priceNaira = priceRaw ? Number(priceRaw) : null;
+  if (priceNaira !== null && (!Number.isFinite(priceNaira) || priceNaira <= 0)) {
+    return { error: "Enter a valid price." };
+  }
+  if (status === "published" && priceNaira === null) {
+    return { error: "A price is required to publish. Save as a draft if it isn't set yet." };
+  }
+
+  const compareAtNaira = compareAtRaw ? Number(compareAtRaw) : null;
+  if (compareAtNaira !== null) {
+    if (!Number.isFinite(compareAtNaira) || compareAtNaira <= 0) {
+      return { error: "Enter a valid \"was\" price." };
+    }
+    if (priceNaira === null || compareAtNaira <= priceNaira) {
+      return { error: "The \"was\" price must be higher than the actual price." };
+    }
+  }
+
+  const stockQuantity = stockRaw ? Number(stockRaw) : 0;
+  if (!Number.isInteger(stockQuantity) || stockQuantity < 0) {
+    return { error: "Enter a valid stock quantity." };
+  }
+
+  for (const file of files) {
+    if (file.size > MAX_UPLOAD_BYTES) {
+      return { error: `"${file.name}" is over 25MB. Compress it and try again.` };
+    }
+    if (!file.type.startsWith("image/") && !file.type.startsWith("video/")) {
+      return { error: `"${file.name}" isn't an image or video.` };
+    }
+  }
+
+  const supabase = createServiceClient();
+
+  // Same convention as the WooCommerce import (slug + numeric suffix):
+  // a short random tail keeps two "Godox AD300Pro" listings from colliding
+  // without the staff member having to think about URLs.
+  const base = slugify(name, { lower: true, strict: true }) || "product";
+  const slug = `${base}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+  const { data: product, error: insertError } = await supabase
+    .from("products")
+    .insert({
+      name,
+      slug,
+      description: description || null,
+      price_kobo: priceNaira !== null ? nairaToKobo(priceNaira) : null,
+      compare_at_price_kobo: compareAtNaira !== null ? nairaToKobo(compareAtNaira) : null,
+      stock_quantity: stockQuantity,
+      status,
+      source: "manual",
+      category_id: categoryId,
+      brand_id: brandId,
+    })
+    .select("id")
+    .single();
+
+  if (insertError || !product) return { error: insertError?.message ?? "Could not create product." };
+
+  const uploadErrors: string[] = [];
+  for (const [position, file] of files.entries()) {
+    const isVideo = file.type.startsWith("video/");
+    const ext = file.name.split(".").pop() ?? (isVideo ? "mp4" : "jpg");
+    const path = `products/${product.id}/${Date.now()}-${position}.${ext}`;
+    const buffer = Buffer.from(await file.arrayBuffer());
+
+    const { error: uploadError } = await supabase.storage
+      .from("product-media")
+      .upload(path, buffer, { contentType: file.type || undefined });
+    if (uploadError) {
+      uploadErrors.push(`${file.name}: ${uploadError.message}`);
+      continue;
+    }
+
+    const { data: publicUrlData } = supabase.storage.from("product-media").getPublicUrl(path);
+    const { error: imageError } = await supabase.from("product_images").insert({
+      product_id: product.id,
+      url: publicUrlData.publicUrl,
+      is_video: isVideo,
+      position,
+    });
+    if (imageError) uploadErrors.push(`${file.name}: ${imageError.message}`);
+  }
+
+  revalidatePath("/staff/dashboard/products");
+  revalidatePath("/admin/products");
+  revalidatePath("/");
+  revalidatePath("/category", "layout");
+  revalidatePath("/brand", "layout");
+
+  if (uploadErrors.length > 0) {
+    return {
+      productId: product.id,
+      error: `Product created, but some media failed: ${uploadErrors.join("; ")}`,
+    };
+  }
+  return { productId: product.id };
 }
 
 export async function publishDraftProduct(formData: FormData): Promise<{ error?: string }> {

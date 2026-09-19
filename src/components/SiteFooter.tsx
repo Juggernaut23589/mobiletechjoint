@@ -5,8 +5,7 @@ import { FooterCategoryLinks } from "@/components/FooterCategoryLinks";
 /** Dark footer matching the approved design-system mockup (Main.dc.html):
  *  brand blurb, real category links, payment trust badges, and contact —
  *  contact rows only render when the corresponding env var is set, never
- *  fabricated placeholder details (same pattern as lib/paystack.ts and
- *  lib/instagram.ts). "Returns"/"FAQ" links from the mockup are omitted —
+ *  fabricated placeholder details (same pattern as lib/paystack.ts). "Returns"/"FAQ" links from the mockup are omitted —
  *  no such pages existed at the time; "Meet the team" / "FAQ" were added
  *  once /team and the homepage FAQ section shipped. */
 export function SiteFooter() {

@@ -26,14 +26,14 @@ in code today.
   simulated signed webhook (see git log for `feat: Paystack checkout` —
   idempotency and amount-tamper rejection were both proven against the real
   database, not just written and assumed).
-- **Instagram sync**: `/api/cron/instagram-sync`, run once daily (06:00) by
-  Vercel Cron — the Hobby plan caps cron jobs at one run per day; the
-  original proposal's 3-hourly cadence needs a Pro plan upgrade if that's
-  ever wanted. Creates `status='draft'` products with re-hosted media —
-  never priced automatically, per the proposal's human-confirms-price
-  requirement. Enforced at the database level by the
-  `price_required_when_published` CHECK constraint on `products`, not just
-  in application code.
+- **Product uploads**: staff with the `manage_products` ability add new
+  products from `/staff/dashboard/products/new` — details, category, brand,
+  price, "was" price, stock, draft/published, and any number of images or
+  videos in one submit (`createProduct` in `actions/admin-products.ts`).
+  This replaced the earlier Instagram sync (removed Sept 2026): products
+  are entered by people, never scraped, and the DB's
+  `price_required_when_published` CHECK constraint still guarantees
+  nothing goes live without a price.
 - **Admin** (`/admin/products`, gated by `proxy.ts` + a shared-secret
   cookie): lists drafts (from Instagram or a WooCommerce import with no
   price), lets someone set price + stock and publish, or archive.
