@@ -1,5 +1,12 @@
 import { createPublicClient } from "@/lib/supabase/server";
+import {
+  BRAND_SHELF_PRIORITY,
+  HERO_BRAND_ORDER,
+  brandEditorial,
+  type BrandEditorial,
+} from "@/lib/brand-editorial";
 import type {
+  Brand,
   Category,
   CategoryWithCount,
   BrandWithCount,
@@ -356,35 +363,17 @@ export interface HeroBrandSlide {
   products: { name: string; imageUrl: string }[];
 }
 
-/** Curated look/tagline per brand for the homepage hero carousel — editorial
- *  copy, not data that lives in the DB. A brand only becomes an actual
- *  slide once we've confirmed (below) it currently has published products
- *  with a real photo, so this list can safely be longer than 9: brands
- *  with no live stock right now are silently skipped rather than showing
- *  an empty/broken slide. */
-const HERO_BRAND_LOOKS: { slug: string; tagline: string; gradient: string }[] = [
-  { slug: "sony", tagline: "Full-frame power for hybrid creators.", gradient: "linear-gradient(135deg,#0B0E14 0%,#1a1e28 60%,#2F6FFF 140%)" },
-  { slug: "godox", tagline: "Studio lighting, dramatic and precise.", gradient: "linear-gradient(135deg,#0B0E14 0%,#4a2a12 55%,#FF6A3D 140%)" },
-  { slug: "dji", tagline: "Gimbals and action cams built to move.", gradient: "linear-gradient(135deg,#0B0E14 0%,#232838 60%,#3a4258 140%)" },
-  { slug: "canon", tagline: "Iconic glass. Unmistakable color.", gradient: "linear-gradient(135deg,#0B0E14 0%,#4a1420 55%,#FF3B5C 140%)" },
-  { slug: "ulanzi", tagline: "Everyday creator gear, endless variety.", gradient: "linear-gradient(135deg,#0B0E14 0%,#3a2360 55%,#A855F7 140%)" },
-  { slug: "lexar", tagline: "Fast storage for footage that matters.", gradient: "linear-gradient(135deg,#0B0E14 0%,#152040 55%,#2F6FFF 140%)" },
-  { slug: "kandf-concept", tagline: "Filters, bags, and rigs that hold up.", gradient: "linear-gradient(135deg,#0B0E14 0%,#123626 55%,#16C784 140%)" },
-  { slug: "fujifilm", tagline: "Instant film, made for the moment.", gradient: "linear-gradient(135deg,#0B0E14 0%,#123626 55%,#2FD98A 140%)" },
-  { slug: "hollyland", tagline: "Wireless audio that never drops out.", gradient: "linear-gradient(135deg,#0B0E14 0%,#152040 55%,#2F6FFF 140%)" },
-];
-
 /** Live product photos for each curated brand look, for the homepage hero
  *  carousel. Only brands with at least one published, photographed
- *  product become a slide. */
+ *  product become a slide — brands with no live stock are skipped rather
+ *  than showing an empty slide. */
 export async function getHeroBrandShowcase(): Promise<HeroBrandSlide[]> {
   const supabase = createPublicClient();
-  const slugs = HERO_BRAND_LOOKS.map((b) => b.slug);
 
   const { data: brands, error: brandError } = await supabase
     .from("brands")
     .select("id, name, slug")
-    .in("slug", slugs);
+    .in("slug", HERO_BRAND_ORDER);
 
   if (brandError || !brands) {
     console.error("getHeroBrandShowcase failed (brands):", brandError?.message);
@@ -392,9 +381,10 @@ export async function getHeroBrandShowcase(): Promise<HeroBrandSlide[]> {
   }
 
   const slides = await Promise.all(
-    HERO_BRAND_LOOKS.map(async (look) => {
-      const brand = brands.find((b) => b.slug === look.slug);
+    HERO_BRAND_ORDER.map(async (slug) => {
+      const brand = brands.find((b) => b.slug === slug);
       if (!brand) return null;
+      const look = brandEditorial(brand.slug, brand.name);
 
       const { data: products, error } = await supabase
         .from("products")
@@ -429,4 +419,124 @@ export async function getHeroBrandShowcase(): Promise<HeroBrandSlide[]> {
   );
 
   return slides.filter((s): s is HeroBrandSlide => s !== null).slice(0, 9);
+}
+
+/** Every brand with at least one published product, most-stocked first.
+ *  Ties break by BRAND_SHELF_PRIORITY so the shelf order is stable between
+ *  revalidations instead of flickering when two brands share a count. */
+export async function getBrandsWithCounts(): Promise<BrandWithCount[]> {
+  const supabase = createPublicClient();
+  const { data, error } = await supabase
+    .from("products")
+    .select("brand:brands(*)")
+    .eq("status", "published")
+    .not("brand_id", "is", null);
+
+  if (error) {
+    console.error("getBrandsWithCounts failed:", error.message);
+    return [];
+  }
+
+  const counts = new Map<string, BrandWithCount>();
+  for (const row of data ?? []) {
+    const brand = row.brand as unknown as Brand | null;
+    if (!brand) continue;
+    const existing = counts.get(brand.id);
+    if (existing) existing.product_count += 1;
+    else counts.set(brand.id, { ...brand, product_count: 1 });
+  }
+
+  const rank = (slug: string) => {
+    const i = BRAND_SHELF_PRIORITY.indexOf(slug);
+    return i === -1 ? BRAND_SHELF_PRIORITY.length : i;
+  };
+
+  return Array.from(counts.values()).sort(
+    (a, b) => b.product_count - a.product_count || rank(a.slug) - rank(b.slug)
+  );
+}
+
+export interface BrandShelf {
+  brand: BrandWithCount;
+  editorial: BrandEditorial;
+  products: ProductWithImages[];
+}
+
+/** The homepage "shop by brand" shelves: the top `maxBrands` brands by
+ *  published stock, each with `perBrand` of its newest products. Replaces
+ *  the old all-products grid, which made the homepage scroll forever.
+ *  `excludeIds` are products already on screen higher up (new arrivals,
+ *  hot selling, deals) — shelves skip those when the brand has enough
+ *  other stock, so the page doesn't show the same three items four times. */
+export async function getBrandShelves(
+  maxBrands = 8,
+  perBrand = 3,
+  excludeIds: Iterable<string> = []
+): Promise<BrandShelf[]> {
+  const brands = (await getBrandsWithCounts()).slice(0, maxBrands);
+  if (brands.length === 0) return [];
+
+  const excluded = new Set(excludeIds);
+  const supabase = createPublicClient();
+  const shelves = await Promise.all(
+    brands.map(async (brand) => {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*, product_images(*), category:categories(*), brand:brands(*)")
+        .eq("status", "published")
+        .eq("brand_id", brand.id)
+        .order("created_at", { ascending: false })
+        .limit(perBrand + excluded.size);
+
+      if (error) {
+        console.error(`getBrandShelves failed (${brand.slug}):`, error.message);
+        return null;
+      }
+      const candidates = (data ?? []) as unknown as ProductWithImages[];
+      const fresh = candidates.filter((p) => !excluded.has(p.id));
+      const products = [...fresh, ...candidates.filter((p) => excluded.has(p.id))].slice(
+        0,
+        perBrand
+      );
+      if (products.length === 0) return null;
+      return { brand, editorial: brandEditorial(brand.slug, brand.name), products };
+    })
+  );
+
+  return shelves.filter((s): s is BrandShelf => s !== null);
+}
+
+/** A brand's published products, newest first, one page at a time — backs
+ *  /brand/[slug]. `brand` is null when the slug doesn't exist. */
+export async function getPublishedProductsByBrandSlug(
+  brandSlug: string,
+  { page = 1, perPage = 10 }: { page?: number; perPage?: number } = {}
+): Promise<{ brand: Brand | null; products: ProductWithImages[]; total: number }> {
+  const supabase = createPublicClient();
+  const { data: brand } = await supabase
+    .from("brands")
+    .select("*")
+    .eq("slug", brandSlug)
+    .maybeSingle();
+
+  if (!brand) return { brand: null, products: [], total: 0 };
+
+  const from = (page - 1) * perPage;
+  const { data, error, count } = await supabase
+    .from("products")
+    .select("*, product_images(*), category:categories(*), brand:brands(*)", { count: "exact" })
+    .eq("status", "published")
+    .eq("brand_id", brand.id)
+    .order("created_at", { ascending: false })
+    .range(from, from + perPage - 1);
+
+  if (error) {
+    console.error("getPublishedProductsByBrandSlug failed:", error.message);
+    return { brand, products: [], total: 0 };
+  }
+  return {
+    brand,
+    products: (data ?? []) as unknown as ProductWithImages[],
+    total: count ?? 0,
+  };
 }

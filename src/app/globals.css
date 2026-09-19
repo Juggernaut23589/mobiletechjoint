@@ -204,6 +204,17 @@ h1, h2, h3, h4, .font-display {
   animation: pulse-glow 2s ease-in-out infinite;
 }
 
+/* Team portraits come from mixed colour/B&W sources; one grayscale
+   treatment makes the grid read as a set, and colour returns on hover. */
+.team-portrait {
+  filter: grayscale(1) contrast(1.05);
+  transition: filter 0.6s ease, transform 0.7s ease;
+}
+
+.group:hover .team-portrait {
+  filter: grayscale(0) contrast(1);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .marquee-track {
     animation: none;

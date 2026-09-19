@@ -45,7 +45,11 @@ export function QuickAddButton({
       onClick={handleAdd}
       whileTap={{ scale: 0.9 }}
       aria-label={`Add ${name} to cart`}
-      className="absolute bottom-2 right-2 flex h-9 w-9 items-center justify-center rounded-full bg-white text-brand-700 opacity-100 shadow-glow transition-opacity sm:opacity-0 sm:group-hover:opacity-100"
+      // top = image height (the image is a square as wide as the card, and
+      // 100cqw is the card's inline size) minus the button + a margin, so the
+      // button sits in the image's bottom-right corner without being nested
+      // inside the card's <Link>.
+      className="absolute right-2.5 top-[calc(100cqw-2.875rem)] flex h-9 w-9 items-center justify-center rounded-full bg-white text-brand-700 opacity-100 shadow-glow transition-opacity sm:opacity-0 sm:group-hover:opacity-100"
     >
       {added ? <Check className="h-4 w-4" strokeWidth={2.5} /> : <Plus className="h-4 w-4" strokeWidth={2.5} />}
     </motion.button>

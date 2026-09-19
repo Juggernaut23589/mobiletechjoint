@@ -7,7 +7,8 @@ import { FooterCategoryLinks } from "@/components/FooterCategoryLinks";
  *  contact rows only render when the corresponding env var is set, never
  *  fabricated placeholder details (same pattern as lib/paystack.ts and
  *  lib/instagram.ts). "Returns"/"FAQ" links from the mockup are omitted —
- *  no such pages exist yet, and this project doesn't ship dead links. */
+ *  no such pages existed at the time; "Meet the team" / "FAQ" were added
+ *  once /team and the homepage FAQ section shipped. */
 export function SiteFooter() {
   const supportEmail = process.env.SUPPORT_EMAIL;
   const supportPhone = process.env.SUPPORT_PHONE;
@@ -43,6 +44,24 @@ export function SiteFooter() {
         </div>
 
         <div>
+          <h4 className="mb-3.5 text-[13.5px] font-semibold text-white">Company</h4>
+          <ul className="mb-6 flex flex-col gap-2.5 text-sm">
+            <li>
+              <Link href="/team" className="hover:text-white">
+                Meet the team
+              </Link>
+            </li>
+            <li>
+              <Link href="/#faq" className="hover:text-white">
+                FAQ
+              </Link>
+            </li>
+            <li>
+              <Link href="/deals" className="hover:text-white">
+                Deals
+              </Link>
+            </li>
+          </ul>
           <h4 className="mb-3.5 text-[13.5px] font-semibold text-white">Payment</h4>
           <div className="flex items-start gap-2 text-sm">
             <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-accent-500" />

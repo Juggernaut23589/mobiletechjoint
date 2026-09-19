@@ -114,7 +114,7 @@ export function HeroCarousel({ brandSlides }: { brandSlides: HeroBrandSlide[] })
                     </h2>
                     <p className="mb-7 text-base leading-relaxed text-white/70">{slide.tagline}</p>
                     <Link
-                      href={`/search?q=${encodeURIComponent(slide.brandName)}`}
+                      href={`/brand/${slide.brandSlug}`}
                       className="inline-block rounded-full bg-white px-6.5 py-3 text-sm font-semibold text-brand-900 transition-all hover:-translate-y-0.5 hover:bg-white/90"
                     >
                       Shop {slide.brandName} →
