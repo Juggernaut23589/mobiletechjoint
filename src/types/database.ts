@@ -3,7 +3,7 @@
 // `supabase gen types typescript` to generate this from the live database.
 
 export type ProductStatus = "draft" | "published" | "archived";
-export type ProductSource = "manual" | "woocommerce_import" | "instagram";
+export type ProductSource = "manual" | "woocommerce_import" | "instagram" | "catalogue_import";
 export type OrderStatus = "pending" | "paid" | "failed" | "refunded";
 export type ImportStatus = "pending_review" | "imported" | "skipped" | "failed";
 
@@ -94,6 +94,9 @@ export interface Product {
   source: ProductSource;
   instagram_media_id: string | null;
   woocommerce_id: number | null;
+  /** Origin identifier for imported rows, e.g. "camerajoint:37800" (see
+   *  scripts/import-catalogue.mjs). Null for products created here. */
+  source_ref: string | null;
   /** Admin-curated, not computed — there's no order history yet to derive
    *  real "hot selling" data from. Shown in the homepage hero carousel. */
   is_featured: boolean;
