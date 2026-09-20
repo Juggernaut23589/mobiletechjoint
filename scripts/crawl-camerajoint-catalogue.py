@@ -34,7 +34,7 @@ import unicodedata
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from urllib.error import HTTPError, URLError
-from urllib.parse import urlparse
+from urllib.parse import quote, urlparse
 from urllib.request import Request, urlopen
 
 BASE = "https://www.camerajoint.ng"
@@ -53,6 +53,9 @@ def slugify(text: str) -> str:
 
 
 def fetch(url: str, retries: int = 4, binary: bool = False):
+    # Some image filenames contain characters like "°"; urllib needs them
+    # percent-encoded (everything after the scheme/host, keeping URL syntax).
+    url = quote(url, safe=":/?=&%#+@,;")
     delay = 1.0
     for attempt in range(retries):
         try:
@@ -263,8 +266,11 @@ def main():
             if n % 250 == 0 or n == len(jobs):
                 print(f"  {n}/{len(jobs)}  {counts}", flush=True)
 
+    failed_file = out / "failed-images.json"
     if failures:
-        (out / "failed-images.json").write_text(json.dumps(failures, indent=2))
+        failed_file.write_text(json.dumps(failures, indent=2))
+    elif failed_file.exists():
+        failed_file.unlink()  # a clean re-run shouldn't leave a stale report behind
     print(f"\nDone. {counts}. Output: {out.resolve()}")
     if failures:
         print(f"{len(failures)} image(s) failed — listed in failed-images.json; re-run to retry them.")
