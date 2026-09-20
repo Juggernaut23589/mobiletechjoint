@@ -11,7 +11,8 @@
     "backfill:brands": "dotenv -e .env.local -- tsx scripts/backfill-brands.ts",
     "categorize:products": "dotenv -e .env.local -- tsx scripts/categorize-uncategorized.ts",
     "create:super-admin": "dotenv -e .env.local -- tsx scripts/create-super-admin.ts",
-    "feature:products": "dotenv -e .env.local -- tsx scripts/feature-products.ts"
+    "feature:products": "dotenv -e .env.local -- tsx scripts/feature-products.ts",
+    "archive:legacy": "dotenv -e .env.local -- tsx scripts/archive-legacy-products.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.6",

@@ -6,6 +6,9 @@
  * at the time of writing — and anyone can change them afterwards from the
  * merchandising toggles on /admin/products or /staff/dashboard/products.
  *
+ * Re-pointed at the camerajoint catalogue after the legacy products were
+ * archived (the original eight picks were all legacy rows).
+ *
  * Run with: npm run feature:products
  */
 import { createClient } from "@supabase/supabase-js";
@@ -16,32 +19,38 @@ const supabase = createClient(
 );
 
 const FEATURED_SLUG_PREFIXES = [
-  "sony-alpha-a7-iv",
-  "dji-rs-4-pro",
-  "canon-eos-r50",
-  "godox-ad300pro",
-  "hollyland-lark-m2-wireless",
-  "lexar-4tb-sl500",
-  "fujifilm-instax-mini-evo-hybrid-instant-camera-black",
-  "ulanzi-video-fast-carbon-fibre",
+  "sony-fx6-full-frame-cinema-camera",
+  "nikon-z8-mirrorless-camera",
+  "dji-air-3s-drone-with-rc-2-fly-more-combo",
+  "godox-ad600pro-ii-all-in-one-outdoor-flash",
+  "rode-rodecaster-pro-ii-integrated-audio",
+  "fujifilm-x-h2s-mirrorless-camera",
+  "insta360-x6-8k-360-camera-essentials-bundle",
+  "ulanzi-jj06-glidego-video-tripod",
 ];
 
 async function main() {
-  const { data: products, error } = await supabase
-    .from("products")
-    .select("id, name, slug, is_featured, stock_quantity")
-    .eq("status", "published");
-  if (error) throw error;
-
-  const picks = FEATURED_SLUG_PREFIXES.map((prefix) => {
-    const match = (products ?? []).find((p) => p.slug.startsWith(prefix));
-    if (!match) console.warn(`no published product matches "${prefix}"`);
-    return match;
-  }).filter((p): p is NonNullable<typeof p> => Boolean(p));
-
-  for (const p of picks) {
+  // One query per pick: a blanket select of all published products caps
+  // at Supabase's default 1000-row page, which silently dropped matches
+  // once the catalogue passed that size.
+  let applied = 0;
+  for (const prefix of FEATURED_SLUG_PREFIXES) {
+    const { data: matches, error } = await supabase
+      .from("products")
+      .select("id, name, slug, is_featured")
+      .eq("status", "published")
+      .like("slug", `${prefix}%`)
+      .order("slug")
+      .limit(1);
+    if (error) throw error;
+    const p = matches?.[0];
+    if (!p) {
+      console.warn(`no published product matches "${prefix}"`);
+      continue;
+    }
     if (p.is_featured) {
       console.log(`already featured: ${p.name}`);
+      applied++;
       continue;
     }
     const { error: updateError } = await supabase
@@ -50,8 +59,9 @@ async function main() {
       .eq("id", p.id);
     if (updateError) throw updateError;
     console.log(`featured: ${p.name}`);
+    applied++;
   }
-  console.log(`done — ${picks.length} of ${FEATURED_SLUG_PREFIXES.length} picks applied`);
+  console.log(`done — ${applied} of ${FEATURED_SLUG_PREFIXES.length} picks applied`);
 }
 
 main().catch((e) => {

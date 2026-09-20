@@ -13,6 +13,25 @@ import type {
   ProductWithImages,
 } from "@/types/database";
 
+/** PostgREST caps any single select at the project's max-rows setting
+ *  (1000 by default). The catalogue is past that, so anything that needs
+ *  EVERY published product — the brand and category tallies — must page.
+ *  Silent truncation here showed up as wrong "N products in stock" counts
+ *  and missing brands on the homepage. */
+const PAGE_SIZE = 1000;
+
+async function selectAllRows<T>(
+  page: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: { message: string } | null }>
+): Promise<{ rows: T[]; error: string | null }> {
+  const rows: T[] = [];
+  for (let from = 0; ; from += PAGE_SIZE) {
+    const { data, error } = await page(from, from + PAGE_SIZE - 1);
+    if (error) return { rows, error: error.message };
+    rows.push(...(data ?? []));
+    if (!data || data.length < PAGE_SIZE) return { rows, error: null };
+  }
+}
+
 /** All published products, newest first, with images and category joined. */
 export async function getPublishedProducts(limit?: number): Promise<ProductWithImages[]> {
   const supabase = createPublicClient();
@@ -69,19 +88,21 @@ export async function getCategories(): Promise<Category[]> {
  *  it's just empty right now, not broken), but sorts to the bottom. */
 export async function getCategoriesWithCounts(): Promise<CategoryWithCount[]> {
   const supabase = createPublicClient();
-  const [{ data: categories, error: catError }, { data: products, error: prodError }] =
+  const [{ data: categories, error: catError }, { rows: products, error: prodError }] =
     await Promise.all([
       supabase.from("categories").select("*").order("name"),
-      supabase.from("products").select("category_id").eq("status", "published"),
+      selectAllRows<{ category_id: string | null }>((from, to) =>
+        supabase.from("products").select("category_id").eq("status", "published").range(from, to)
+      ),
     ]);
 
   if (catError || prodError) {
-    console.error("getCategoriesWithCounts failed:", catError?.message ?? prodError?.message);
+    console.error("getCategoriesWithCounts failed:", catError?.message ?? prodError);
     return [];
   }
 
   const counts = new Map<string, number>();
-  for (const p of products ?? []) {
+  for (const p of products) {
     if (!p.category_id) continue;
     counts.set(p.category_id, (counts.get(p.category_id) ?? 0) + 1);
   }
@@ -426,20 +447,28 @@ export async function getHeroBrandShowcase(): Promise<HeroBrandSlide[]> {
  *  revalidations instead of flickering when two brands share a count. */
 export async function getBrandsWithCounts(): Promise<BrandWithCount[]> {
   const supabase = createPublicClient();
-  const { data, error } = await supabase
-    .from("products")
-    .select("brand:brands(*)")
-    .eq("status", "published")
-    .not("brand_id", "is", null);
+  const [{ data: brands, error: brandError }, { rows: products, error: prodError }] =
+    await Promise.all([
+      supabase.from("brands").select("*"),
+      selectAllRows<{ brand_id: string | null }>((from, to) =>
+        supabase
+          .from("products")
+          .select("brand_id")
+          .eq("status", "published")
+          .not("brand_id", "is", null)
+          .range(from, to)
+      ),
+    ]);
 
-  if (error) {
-    console.error("getBrandsWithCounts failed:", error.message);
+  if (brandError || prodError) {
+    console.error("getBrandsWithCounts failed:", brandError?.message ?? prodError);
     return [];
   }
 
+  const byId = new Map<string, Brand>((brands ?? []).map((b) => [b.id, b as Brand]));
   const counts = new Map<string, BrandWithCount>();
-  for (const row of data ?? []) {
-    const brand = row.brand as unknown as Brand | null;
+  for (const row of products) {
+    const brand = row.brand_id ? byId.get(row.brand_id) : undefined;
     if (!brand) continue;
     const existing = counts.get(brand.id);
     if (existing) existing.product_count += 1;
