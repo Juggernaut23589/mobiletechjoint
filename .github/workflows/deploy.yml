@@ -80,9 +80,20 @@ jobs:
           ssh -i ~/.ssh/deploy_key deploy@${{ secrets.VM_HOST }} bash -s <<'REMOTE'
             set -euo pipefail
             cd /home/deploy/mobiletechjoint-store
+            # Keep the image optimizer's disk cache across deploys. Wiping it
+            # meant every product photo had to be re-fetched from Supabase and
+            # re-encoded on the first request after each deploy — a cold-start
+            # storm that showed up as slow/broken images.
+            rm -rf /tmp/mtj-image-cache
+            if [ -d .next/cache/images ]; then mv .next/cache/images /tmp/mtj-image-cache; fi
             rm -rf .next
             tar -xzf /tmp/build-mtj.tar.gz
             rm -f /tmp/build-mtj.tar.gz
+            if [ -d /tmp/mtj-image-cache ]; then
+              mkdir -p .next/cache
+              rm -rf .next/cache/images
+              mv /tmp/mtj-image-cache .next/cache/images
+            fi
             npm ci --omit=dev --prefer-offline
             pm2 restart mobiletechjoint-store --update-env
             pm2 save
