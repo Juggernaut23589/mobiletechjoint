@@ -67,15 +67,57 @@ export function ProductGallery({
         </div>
       )}
 
-      {videos.map((video) => (
-        <video
-          key={video.id}
-          src={video.url}
-          controls
-          playsInline
-          className="w-full rounded-2xl bg-black"
-        />
-      ))}
+      {videos.map((video) => {
+        const embedUrl = toYouTubeEmbedUrl(video.url);
+        return embedUrl ? (
+          <div key={video.id} className="aspect-video w-full overflow-hidden rounded-2xl bg-black">
+            <iframe
+              src={embedUrl}
+              title={`${productName} video`}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="h-full w-full"
+            />
+          </div>
+        ) : (
+          <video
+            key={video.id}
+            src={video.url}
+            controls
+            playsInline
+            className="w-full rounded-2xl bg-black"
+          />
+        );
+      })}
     </div>
   );
+}
+
+/** Convert a youtube.com/watch, youtu.be, or youtube.com/shorts URL into an
+ *  embeddable player URL. Returns null for non-YouTube URLs (e.g. a direct
+ *  .mp4 file), which fall back to the native <video> element above. */
+function toYouTubeEmbedUrl(url: string): string | null {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return null;
+  }
+
+  const host = parsed.hostname.replace(/^www\.|^m\./, "");
+  let videoId: string | null = null;
+
+  if (host === "youtu.be") {
+    videoId = parsed.pathname.slice(1);
+  } else if (host === "youtube.com") {
+    if (parsed.pathname === "/watch") {
+      videoId = parsed.searchParams.get("v");
+    } else if (parsed.pathname.startsWith("/shorts/")) {
+      videoId = parsed.pathname.split("/")[2];
+    } else if (parsed.pathname.startsWith("/embed/")) {
+      videoId = parsed.pathname.split("/")[2];
+    }
+  }
+
+  return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
 }
