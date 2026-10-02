@@ -44,3 +44,6 @@ supabase/.temp/
 
 # Never commit — contains live credentials pasted for local CLI use
 .tokens.md
+
+# Never commit — contains a live Cloudflare API token
+.cloudflare.md

@@ -33,7 +33,7 @@ export function ProductCard({
               alt={product.name}
               fill
               sizes={sizes}
-              className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]"
+              className="object-contain p-4 transition-transform duration-700 ease-out group-hover:scale-[1.06]"
             />
           ) : (
             <div className="flex h-full items-center justify-center text-sm text-neutral-400">
