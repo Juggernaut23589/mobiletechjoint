@@ -4,6 +4,7 @@ import { CartDrawer } from "@/components/CartDrawer";
 import { AccountLink } from "@/components/AccountLink";
 import { MobileCategoryMenu } from "@/components/MobileCategoryMenu";
 import { DesktopNav } from "@/components/DesktopNav";
+import { Logo } from "@/components/Logo";
 
 /** Dark navbar matching the approved design-system mockup (Main.dc.html):
  *  logo, search box, top-category nav links (DesktopNav, fetched
@@ -19,13 +20,7 @@ export function SiteHeader() {
         <div className="flex shrink-0 items-center gap-2">
           <MobileCategoryMenu />
           <Link href="/" className="flex items-center gap-2">
-            <svg width="28" height="28" viewBox="0 0 32 32" fill="none" className="shrink-0">
-              <g stroke="#2F6FFF" strokeWidth="1.6">
-                <circle cx="16" cy="16" r="13" />
-                <path d="M16 3 L16 12 M27.2 9.5 L19.4 14 M27.2 22.5 L19.4 18 M16 29 L16 20 M4.8 22.5 L12.6 18 M4.8 9.5 L12.6 14" />
-                <circle cx="16" cy="16" r="3.4" fill="#2F6FFF" />
-              </g>
-            </svg>
+            <Logo size={32} />
             <span className="font-display text-[17px] tracking-tight text-white">
               mobile<span className="font-bold">techjoint</span>
             </span>

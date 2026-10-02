@@ -33,9 +33,6 @@ export function BrandIndexStrip({ brands }: { brands: BrandWithCount[] }) {
                   className="group inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-surface px-3.5 py-2 text-[13px] font-semibold text-neutral-800 transition-all hover:-translate-y-0.5 hover:border-brand-600 hover:bg-brand-50 hover:text-brand-700"
                 >
                   {b.name}
-                  <span className="text-[11px] font-medium text-neutral-400 group-hover:text-brand-600">
-                    {b.product_count}
-                  </span>
                   <ArrowUpRight className="h-3.5 w-3.5 opacity-0 transition-opacity group-hover:opacity-100" />
                 </Link>
               </li>

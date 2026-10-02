@@ -20,16 +20,9 @@ function iconFor(name: string): LucideIcon {
   return Package;
 }
 
-const TINTS = [
-  { bg: "#EAF0FF", color: "#2F6FFF" },
-  { bg: "#FFEEE7", color: "#FF6A3D" },
-  { bg: "#F5E9FF", color: "#A855F7" },
-  { bg: "#E3FBF0", color: "#16C784" },
-  { bg: "#FFE8EC", color: "#FF3B5C" },
-];
-
-/** "Shop by category" grid matching the approved design-system mockup
- *  (Main.dc.html) — real categories, up to 8, sorted by product count. */
+/** "Shop by category" row — flat, uniform outlined icon tiles with a
+ *  centered label underneath (matching camerajoint.ng's reference layout),
+ *  real categories, up to 8, sorted by product count. */
 export function CategoryQuickGrid({ categories }: { categories: CategoryWithCount[] }) {
   const top = categories
     .filter((c) => c.product_count > 0)
@@ -41,23 +34,21 @@ export function CategoryQuickGrid({ categories }: { categories: CategoryWithCoun
   return (
     <section className="mx-auto max-w-[1360px] px-4 pb-2 pt-14 sm:px-8">
       <h2 className="font-display mb-5.5 text-2xl text-brand-900">Shop by category</h2>
-      <div className="grid grid-cols-3 gap-3.5 sm:grid-cols-4 lg:grid-cols-8">
-        {top.map((c, i) => {
+      <div className="flex flex-wrap justify-center gap-x-7 gap-y-6 sm:justify-start">
+        {top.map((c) => {
           const Icon = iconFor(c.name);
-          const tint = TINTS[i % TINTS.length];
           return (
             <Link
               key={c.id}
               href={`/category/${c.slug}`}
-              className="flex flex-col items-center gap-2.5 rounded-2xl border border-neutral-200 bg-white p-5 text-center transition-all hover:-translate-y-1 hover:border-transparent hover:shadow-glow"
+              className="group flex w-[92px] flex-col items-center gap-2 text-center"
             >
-              <div
-                className="flex h-11 w-11 items-center justify-center rounded-xl"
-                style={{ background: tint.bg }}
-              >
-                <Icon className="h-5 w-5" style={{ color: tint.color }} strokeWidth={1.8} />
+              <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-neutral-200 bg-white transition-colors group-hover:border-brand-600">
+                <Icon className="h-5.5 w-5.5 text-brand-900" strokeWidth={1.6} />
               </div>
-              <span className="text-xs font-semibold text-neutral-900">{c.name}</span>
+              <span className="text-[11px] font-bold uppercase leading-tight tracking-wide text-brand-900">
+                {c.name}
+              </span>
             </Link>
           );
         })}

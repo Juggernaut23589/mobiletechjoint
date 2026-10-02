@@ -4,6 +4,7 @@ import { useActionState, Suspense } from "react";
 import Link from "next/link";
 import { loginStaff } from "@/app/actions/staff-auth";
 import { STAFF_ABILITIES } from "@/lib/staff-auth";
+import { Logo } from "@/components/Logo";
 
 function LoginForm() {
   const [state, formAction, pending] = useActionState(loginStaff, {});
@@ -11,13 +12,7 @@ function LoginForm() {
   return (
     <div className="mx-auto flex min-h-[80vh] max-w-[380px] flex-col items-center justify-center px-4 py-10">
       <div className="mb-8 flex items-center gap-2">
-        <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
-          <g stroke="#2F6FFF" strokeWidth="1.6">
-            <circle cx="16" cy="16" r="13" />
-            <path d="M16 3 L16 12 M27.2 9.5 L19.4 14 M27.2 22.5 L19.4 18 M16 29 L16 20 M4.8 22.5 L12.6 18 M4.8 9.5 L12.6 14" />
-            <circle cx="16" cy="16" r="3.2" fill="#2F6FFF" />
-          </g>
-        </svg>
+        <Logo size={30} />
         <span className="font-display text-[18px] text-brand-900">
           mobile<span className="font-bold">techjoint</span>
         </span>

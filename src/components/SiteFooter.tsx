@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Mail, Phone, AtSign, ShieldCheck } from "lucide-react";
 import { FooterCategoryLinks } from "@/components/FooterCategoryLinks";
+import { Logo } from "@/components/Logo";
 
 /** Dark footer matching the approved design-system mockup (Main.dc.html):
  *  brand blurb, real category links, payment trust badges, and contact —
@@ -20,13 +21,7 @@ export function SiteFooter() {
       <div className="mx-auto grid max-w-[1360px] gap-8 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <div className="mb-3.5 flex items-center gap-2">
-            <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
-              <g stroke="#2F6FFF" strokeWidth="1.6">
-                <circle cx="16" cy="16" r="13" />
-                <path d="M16 3 L16 12 M27.2 9.5 L19.4 14 M27.2 22.5 L19.4 18 M16 29 L16 20 M4.8 22.5 L12.6 18 M4.8 9.5 L12.6 14" />
-                <circle cx="16" cy="16" r="3.2" fill="#2F6FFF" />
-              </g>
-            </svg>
+            <Logo size={28} />
             <span className="text-base text-white">
               mobile<span className="font-bold">techjoint</span>
             </span>
