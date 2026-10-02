@@ -20,7 +20,7 @@ export function SiteHeader() {
         <div className="flex shrink-0 items-center gap-2">
           <MobileCategoryMenu />
           <Link href="/" className="flex items-center gap-2">
-            <Logo size={32} />
+            <Logo size={44} />
             <span className="font-display text-[17px] tracking-tight text-white">
               mobile<span className="font-bold">techjoint</span>
             </span>

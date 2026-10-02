@@ -102,9 +102,31 @@ export function HeroCarousel({ brandSlides }: { brandSlides: HeroBrandSlide[] })
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.5 }}
                 className="absolute inset-0"
-                style={{ background: slide.gradient }}
               >
-                <div className="mx-auto flex h-full max-w-[1360px] flex-col-reverse items-center justify-center gap-8 px-4 sm:flex-row sm:justify-between sm:px-8">
+                {/* Product collage: tiled photos from this brand, sitting
+                    behind a translucent film of the brand's own gradient
+                    (below) rather than a flat color card. */}
+                {slide.products.length > 0 && (
+                  <div className="absolute inset-0 grid grid-cols-4 grid-rows-3">
+                    {Array.from(
+                      { length: 12 },
+                      (_, i) => slide.products[i % slide.products.length]
+                    ).map((p, i) => (
+                      <div key={i} className="relative overflow-hidden">
+                        <Image
+                          src={p.imageUrl}
+                          alt=""
+                          fill
+                          sizes="25vw"
+                          className="object-cover"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div className="absolute inset-0" style={{ background: slide.gradient, opacity: 0.82 }} />
+
+                <div className="relative z-10 mx-auto flex h-full max-w-[1360px] flex-col-reverse items-center justify-center gap-8 px-4 sm:flex-row sm:justify-between sm:px-8">
                   <div className="max-w-md text-center sm:text-left">
                     <span className="mb-4 inline-block text-[12.5px] font-bold uppercase tracking-[0.1em] text-white/60">
                       Featured Brand

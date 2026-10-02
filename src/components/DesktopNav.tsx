@@ -4,6 +4,13 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { CategoryWithCount } from "@/types/database";
 
+/** Shortened labels for the navbar only — category pages, the footer, and
+ *  the homepage category grid keep the full descriptive name. */
+const NAV_LABEL_OVERRIDES: Record<string, string> = {
+  "Rigs & Accessories": "Rigs",
+  "Lenses & Filters": "Lenses",
+};
+
 /** Top-category nav links in the desktop navbar. Fetched client-side via
  *  /api/categories rather than server-rendered in SiteHeader — SiteHeader
  *  lives in the root layout on every page, so a data fetch there would
@@ -37,7 +44,7 @@ export function DesktopNav() {
           href={`/category/${c.slug}`}
           className="text-sm font-medium text-[#C7CCDA] transition-colors hover:text-white"
         >
-          {c.name}
+          {NAV_LABEL_OVERRIDES[c.name] ?? c.name}
         </Link>
       ))}
       <Link href="/deals" className="text-sm font-medium text-accent-500 hover:text-accent-400">
