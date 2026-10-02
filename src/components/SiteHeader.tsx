@@ -16,11 +16,11 @@ import { Logo } from "@/components/Logo";
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-30 bg-brand-900">
-      <div className="mx-auto flex max-w-[1360px] items-center gap-4 px-4 py-3.5 sm:gap-7 sm:px-8">
+      <div className="mx-auto flex max-w-[1360px] items-center gap-4 px-4 py-2.5 sm:gap-7 sm:px-8">
         <div className="flex shrink-0 items-center gap-2">
           <MobileCategoryMenu />
           <Link href="/" className="flex items-center gap-2">
-            <Logo size={44} />
+            <Logo size={56} />
             <span className="font-display text-[17px] tracking-tight text-white">
               mobile<span className="font-bold">techjoint</span>
             </span>
