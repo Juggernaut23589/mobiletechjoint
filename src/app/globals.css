@@ -2,8 +2,10 @@
 
 :root {
   /* Light brand-blue tint instead of plain white/gray — same family as
-     brand-50 below, just the page-wide resting surface. */
-  --color-surface: #eef3fc;
+     brand-50 below, just the page-wide resting surface. Deliberately a
+     clearly-visible step away from white/gray (not a 2-3 RGB-unit nudge,
+     which reads as unchanged at normal screen brightness). */
+  --color-surface: #dde7fb;
   --color-surface-raised: #ffffff;
   --color-ink: #12141a;
 
