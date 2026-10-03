@@ -22,7 +22,8 @@ export type StaffAbility =
   | "manage_cross_sells"
   | "manage_deliveries"
   | "manage_expenses"
-  | "manage_disputes";
+  | "manage_disputes"
+  | "manage_purchasing";
 
 export const STAFF_ABILITIES: { key: StaffAbility; label: string; description: string }[] = [
   { key: "manage_products", label: "Products", description: "Edit product postings — images, videos, descriptions, price, publish/archive, brand, category, deals." },
@@ -30,10 +31,11 @@ export const STAFF_ABILITIES: { key: StaffAbility; label: string; description: s
   { key: "manage_customers", label: "Customers", description: "View customer accounts, order history, and saved payment methods." },
   { key: "manage_orders", label: "Orders", description: "View and manage all orders across every customer." },
   { key: "manage_deliveries", label: "Deliveries", description: "Set delivery pricing by state and track delivery status on orders." },
-  { key: "view_sales", label: "Sales & Income", description: "View revenue, order volume, expenses, and net income reporting." },
+  { key: "view_sales", label: "Finance", description: "View profit & loss, margins, cost of goods, and export financial reports." },
   { key: "manage_expenses", label: "Expenses", description: "Record and edit business expenses." },
   { key: "manage_disputes", label: "Disputes", description: "Email customers directly about order issues and disputes." },
   { key: "manage_cross_sells", label: "Cross-sells", description: "Curate which categories cross-sell with each other." },
+  { key: "manage_purchasing", label: "Purchasing", description: "Manage suppliers and purchase orders, receive stock, record supplier payments, and set product cost prices." },
 ];
 
 export interface StaffSession {

@@ -28,3 +28,17 @@ export function discountPercent(priceKobo: number, compareAtKobo: number | null)
   if (!compareAtKobo || compareAtKobo <= priceKobo) return null;
   return Math.floor(((compareAtKobo - priceKobo) / compareAtKobo) * 100);
 }
+
+export type Currency = "NGN" | "USD";
+
+/** Purchase orders can be priced in naira or dollars. Both are stored in
+ *  their minor unit (kobo / cents), so the same ×100 convention applies. */
+export function formatMoney(minor: number, currency: Currency): string {
+  if (currency === "NGN") return formatNaira(minor);
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(minor / 100);
+}
+
+/** Cents → kobo at a naira-per-dollar rate (1 cent × rate = rate kobo). */
+export function toKobo(minor: number, currency: Currency, exchangeRate: number): number {
+  return currency === "USD" ? Math.round(minor * exchangeRate) : minor;
+}

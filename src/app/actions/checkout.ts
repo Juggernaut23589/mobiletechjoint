@@ -73,7 +73,7 @@ export async function initiateCheckout(input: CheckoutInput): Promise<CheckoutRe
   const productIds = input.items.map((i) => i.productId);
   const { data: products, error } = await supabase
     .from("products")
-    .select("id, name, price_kobo, stock_quantity, status")
+    .select("id, name, price_kobo, cost_kobo, stock_quantity, status")
     .in("id", productIds);
 
   if (error) {
@@ -87,6 +87,7 @@ export async function initiateCheckout(input: CheckoutInput): Promise<CheckoutRe
     productId: string;
     name: string;
     priceKobo: number;
+    costKobo: number | null;
     quantity: number;
   }[] = [];
 
@@ -113,6 +114,7 @@ export async function initiateCheckout(input: CheckoutInput): Promise<CheckoutRe
       productId: product.id,
       name: product.name,
       priceKobo: product.price_kobo,
+      costKobo: product.cost_kobo,
       quantity: item.quantity,
     });
   }
@@ -155,6 +157,7 @@ export async function initiateCheckout(input: CheckoutInput): Promise<CheckoutRe
       product_id: item.productId,
       product_name_snapshot: item.name,
       unit_price_kobo_snapshot: item.priceKobo,
+      unit_cost_kobo_snapshot: item.costKobo,
       quantity: item.quantity,
     }))
   );

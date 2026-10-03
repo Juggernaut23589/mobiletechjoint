@@ -24,7 +24,8 @@ export type StockReason =
   | "loss"
   | "return"
   | "refund_restock"
-  | "cancellation";
+  | "cancellation"
+  | "purchase";
 export type ImportStatus = "pending_review" | "imported" | "skipped" | "failed";
 
 export interface Category {
@@ -127,6 +128,8 @@ export interface Product {
    *  title keyword-matching for the WooCommerce import — imperfect, null
    *  for anything that didn't match a known brand name. */
   brand_id: string | null;
+  /** Weighted-average cost in kobo; null until known. */
+  cost_kobo: number | null;
   /** Stock at or below this counts as low (per product). */
   reorder_level: number;
   /** Generated column: stock_quantity <= reorder_level. */
@@ -172,6 +175,7 @@ export interface Order {
   cancelled_at: string | null;
   returned_at: string | null;
   refunded_kobo: number;
+  paystack_fee_kobo: number;
   created_at: string;
   updated_at: string;
 }
@@ -205,6 +209,63 @@ export interface StockMovement {
   order_id: string | null;
   staff_id: string | null;
   staff_name: string | null;
+  purchase_order_id: string | null;
+  created_at: string;
+}
+
+export interface Supplier {
+  id: string;
+  name: string;
+  kind: "local" | "import";
+  currency: "NGN" | "USD";
+  contact_name: string | null;
+  phone: string | null;
+  email: string | null;
+  address: string | null;
+  notes: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export type PurchaseOrderStatus = "draft" | "ordered" | "partially_received" | "received" | "cancelled";
+
+export interface PurchaseOrder {
+  id: string;
+  po_number: string;
+  supplier_id: string;
+  status: PurchaseOrderStatus;
+  currency: "NGN" | "USD";
+  exchange_rate: number;
+  expected_date: string | null;
+  notes: string | null;
+  created_by: string | null;
+  created_by_name: string;
+  ordered_at: string | null;
+  received_at: string | null;
+  cancelled_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PurchaseOrderItem {
+  id: string;
+  purchase_order_id: string;
+  product_id: string;
+  quantity_ordered: number;
+  quantity_received: number;
+  unit_cost_minor: number;
+  created_at: string;
+}
+
+export interface PurchaseOrderPayment {
+  id: string;
+  purchase_order_id: string;
+  amount_minor: number;
+  paid_on: string;
+  method: string | null;
+  note: string | null;
+  recorded_by_name: string;
   created_at: string;
 }
 
@@ -218,6 +279,7 @@ export interface OrderItem {
   product_id: string | null;
   product_name_snapshot: string;
   unit_price_kobo_snapshot: number;
+  unit_cost_kobo_snapshot: number | null;
   quantity: number;
   created_at: string;
 }

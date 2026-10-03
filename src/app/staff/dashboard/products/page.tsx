@@ -22,6 +22,7 @@ const STATUSES = ["published", "draft", "archived"];
 const ISSUES = [
   { value: "no_brand", label: "Missing brand" },
   { value: "no_price", label: "Missing price" },
+  { value: "no_cost", label: "Missing cost price" },
 ];
 
 export default async function StaffProductsPage({
@@ -66,6 +67,7 @@ export default async function StaffProductsPage({
   if (category) query = query.eq("category_id", category);
   if (issue === "no_brand") query = query.is("brand_id", null);
   if (issue === "no_price") query = query.is("price_kobo", null);
+  if (issue === "no_cost") query = query.is("cost_kobo", null);
 
   const { data: products, count } = await query;
   const items = (products ?? []) as unknown as ProductWithImages[];

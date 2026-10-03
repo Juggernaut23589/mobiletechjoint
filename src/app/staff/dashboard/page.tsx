@@ -21,6 +21,8 @@ export default async function StaffOverviewPage() {
     { label: "Low stock", count: attention.lowStock, href: "/staff/dashboard/inventory?stock=low", show: hasAbility(session, "manage_inventory") },
     { label: "Out of stock (still listed)", count: attention.outOfStock, href: "/staff/dashboard/inventory?stock=out", show: hasAbility(session, "manage_inventory") },
     { label: "Staff awaiting approval", count: attention.pendingStaff, href: "/staff/dashboard/team", show: isSuper },
+    { label: "Expenses awaiting approval", count: attention.expensesAwaitingApproval, href: "/staff/dashboard/expenses?period=all", show: isSuper },
+    { label: "Purchase orders awaiting delivery", count: attention.purchaseOrdersAwaitingDelivery, href: "/staff/dashboard/purchase-orders?status=ordered", show: hasAbility(session, "manage_purchasing") },
   ].filter((t) => t.show);
 
   const cards = [
@@ -43,7 +45,7 @@ export default async function StaffOverviewPage() {
       show: isSuper || hasAbility(session, "manage_orders"),
     },
     {
-      label: "Revenue (paid orders)",
+      label: "Net revenue (all time)",
       value: formatNaira(stats.revenueKobo),
       href: "/staff/dashboard/sales",
       show: isSuper || hasAbility(session, "view_sales"),

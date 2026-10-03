@@ -107,6 +107,7 @@ export async function verifyTransaction(reference: string): Promise<
       amountKobo: number;
       currency: string;
       paidAt: string;
+      feesKobo: number;
       authorization: PaystackAuthorization | null;
     }
   | { ok: false; error: string }
@@ -127,6 +128,7 @@ export async function verifyTransaction(reference: string): Promise<
       amount: number;
       currency: string;
       paid_at: string;
+      fees?: number | null;
       authorization?: PaystackAuthorization;
     };
   };
@@ -140,6 +142,7 @@ export async function verifyTransaction(reference: string): Promise<
     amountKobo: data.data.amount,
     currency: data.data.currency,
     paidAt: data.data.paid_at,
+    feesKobo: data.data.fees ?? 0,
     authorization: data.data.authorization ?? null,
   };
 }
@@ -215,6 +218,8 @@ export async function settlePaidOrder(params: {
   reference: string;
   amountKobo: number;
   paidAt: string;
+  /** Paystack's processing fee in kobo, for the P&L. */
+  feesKobo?: number;
   authorization?: PaystackAuthorization | null;
 }): Promise<{ settled: boolean; alreadySettled: boolean; reason?: string }> {
   const supabase = createServiceClient();
@@ -241,7 +246,11 @@ export async function settlePaidOrder(params: {
 
   const { data: claimed, error: updateError } = await supabase
     .from("orders")
-    .update({ status: "paid", paystack_verified_at: params.paidAt })
+    .update({
+      status: "paid",
+      paystack_verified_at: params.paidAt,
+      paystack_fee_kobo: params.feesKobo ?? 0,
+    })
     .eq("paystack_reference", params.reference)
     .neq("status", "paid")
     .select("id");

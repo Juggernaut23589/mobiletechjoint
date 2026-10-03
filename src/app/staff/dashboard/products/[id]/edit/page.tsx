@@ -6,6 +6,7 @@ import { ProductEditForm } from "@/components/staff/ProductEditForm";
 import { ProductImageManager } from "@/components/staff/ProductImageManager";
 import { ActivityList, type ActivityRow } from "@/components/staff/ActivityList";
 import { StockHistory } from "@/components/staff/StockHistory";
+import { ProductCostForm } from "@/components/staff/ProductCostForm";
 import type { ProductWithImages, Category, Brand, StockMovement } from "@/types/database";
 
 export const dynamic = "force-dynamic";
@@ -81,6 +82,12 @@ export default async function StaffProductEditPage({
           images={(product.product_images ?? []) as ProductWithImages["product_images"]}
         />
       </div>
+
+      {hasAbility(session, "manage_purchasing") && (
+        <div className="mt-8 max-w-xl">
+          <ProductCostForm productId={product.id} costKobo={product.cost_kobo} priceKobo={product.price_kobo} />
+        </div>
+      )}
 
       <div id="stock-history" className="mt-10 scroll-mt-24">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-neutral-500">

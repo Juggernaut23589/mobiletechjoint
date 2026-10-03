@@ -11,6 +11,7 @@ export const STOCK_REASON_LABELS: Record<StockReason, string> = {
   return: "Customer return",
   refund_restock: "Restocked on refund",
   cancellation: "Order cancelled",
+  purchase: "Purchase received",
 };
 
 /** Reasons a staff member can pick when adjusting stock by hand. */

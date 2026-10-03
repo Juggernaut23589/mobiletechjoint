@@ -11,7 +11,9 @@ const NAV: { href: string; label: string; abilities: StaffAbility[] | null }[] =
   { href: "/staff/dashboard/customers", label: "Customers", abilities: ["manage_customers"] },
   { href: "/staff/dashboard/orders", label: "Orders", abilities: ["manage_orders", "manage_deliveries"] },
   { href: "/staff/dashboard/deliveries", label: "Delivery pricing", abilities: ["manage_deliveries"] },
-  { href: "/staff/dashboard/sales", label: "Sales & Income", abilities: ["view_sales"] },
+  { href: "/staff/dashboard/purchase-orders", label: "Purchase orders", abilities: ["manage_purchasing"] },
+  { href: "/staff/dashboard/suppliers", label: "Suppliers", abilities: ["manage_purchasing"] },
+  { href: "/staff/dashboard/sales", label: "Finance", abilities: ["view_sales"] },
   { href: "/staff/dashboard/expenses", label: "Expenses", abilities: ["manage_expenses"] },
   { href: "/staff/dashboard/cross-sells", label: "Cross-sells", abilities: ["manage_cross_sells"] },
 ];

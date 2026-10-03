@@ -57,6 +57,7 @@ export default async function CheckoutCallbackPage({
     reference: ref,
     amountKobo: verification.amountKobo,
     paidAt: verification.paidAt,
+    feesKobo: verification.feesKobo,
     authorization: verification.authorization,
   });
 

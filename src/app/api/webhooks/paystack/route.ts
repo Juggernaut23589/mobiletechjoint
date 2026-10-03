@@ -18,6 +18,7 @@ export async function POST(request: NextRequest) {
       amount: number;
       paid_at: string;
       status: string;
+      fees?: number | null;
       authorization?: PaystackAuthorization;
       id?: number | string;
       transaction_reference?: string;
@@ -31,6 +32,7 @@ export async function POST(request: NextRequest) {
       reference: event.data.reference,
       amountKobo: event.data.amount,
       paidAt: event.data.paid_at,
+      feesKobo: event.data.fees ?? 0,
       authorization: event.data.authorization ?? null,
     });
   } else if (event.event === "charge.failed") {

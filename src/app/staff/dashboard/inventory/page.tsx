@@ -5,7 +5,8 @@ import { hasAbility } from "@/lib/staff-auth";
 import { createServiceClient } from "@/lib/supabase/server";
 import { pageRange, parsePage, sanitizeSearch } from "@/lib/staff-query";
 import { StockEditorRow } from "@/components/staff/StockEditorRow";
-import { StockSheetUpload } from "@/components/staff/StockSheetUpload";
+import { SheetUpload } from "@/components/staff/SheetUpload";
+import { applyStockImport, previewStockImport } from "@/app/actions/staff-inventory";
 import { Pagination } from "@/components/staff/Pagination";
 import type { ProductWithImages } from "@/types/database";
 
@@ -74,7 +75,20 @@ export default async function StaffInventoryPage({
       </p>
 
       <div className="mb-6">
-        <StockSheetUpload />
+        <SheetUpload
+          title="Stock count"
+          description={
+            <>
+              Download the stock sheet, fill in <code>new_stock</code> with what you physically count, and
+              upload it here. Rows you leave blank aren&apos;t changed, so you can count one shelf at a time.
+            </>
+          }
+          downloadHref="/staff/dashboard/inventory/stock-sheet"
+          downloadLabel="Download stock sheet"
+          valueFormat="count"
+          previewAction={previewStockImport}
+          applyAction={applyStockImport}
+        />
       </div>
 
       <form className="mb-4 flex flex-wrap gap-2">

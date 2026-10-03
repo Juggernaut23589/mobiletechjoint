@@ -2,10 +2,15 @@
 
 import { revalidatePath } from "next/cache";
 import { createServiceClient } from "@/lib/supabase/server";
-import { fetchAll } from "@/lib/supabase/fetch-all";
 import { requireStaffAbility } from "@/lib/staff-session";
 import { logStaffActivity, logStaffActivities } from "@/lib/activity-log";
-import { parseCsv } from "@/lib/csv";
+import {
+  analyseProductSheet,
+  EMPTY_SHEET_PREVIEW,
+  parseWholeNumber,
+  type SheetChange,
+  type SheetPreview,
+} from "@/lib/sheet-import";
 import { changeStock, MANUAL_STOCK_REASONS, STOCK_REASON_LABELS } from "@/lib/stock";
 import type { StaffSession } from "@/lib/staff-auth";
 import type { StockReason } from "@/types/database";
@@ -96,96 +101,21 @@ export async function updateReorderLevel(formData: FormData): Promise<{ error?: 
   return {};
 }
 
-export interface StockImportChange {
-  id: string;
-  slug: string;
-  name: string;
-  from: number;
-  to: number;
-}
+export type { SheetPreview as StockImportPreview } from "@/lib/sheet-import";
 
-export interface StockImportPreview {
-  error?: string;
-  changes: StockImportChange[];
-  unchangedCount: number;
-  blankCount: number;
-  unknownSlugs: string[];
-  invalidRows: { row: number; slug: string; value: string }[];
-}
-
-const EMPTY_PREVIEW: StockImportPreview = {
-  changes: [],
-  unchangedCount: 0,
-  blankCount: 0,
-  unknownSlugs: [],
-  invalidRows: [],
-};
-
-/** Reads a stock sheet (the one exported from the Inventory page, or any
- *  CSV with `slug` and `new_stock` columns). Rows with a blank new_stock
- *  are treated as "not counted" and left alone, so a partial count is safe. */
-async function analyseStockSheet(csvText: string): Promise<StockImportPreview> {
-  const rows = parseCsv(csvText);
-  if (rows.length < 2) return { ...EMPTY_PREVIEW, error: "The file has no data rows." };
-
-  const header = rows[0].map((h) => h.trim().toLowerCase());
-  const slugCol = header.indexOf("slug");
-  const stockCol = header.indexOf("new_stock");
-  if (slugCol === -1 || stockCol === -1) {
-    return { ...EMPTY_PREVIEW, error: 'The file needs "slug" and "new_stock" columns — start from the downloaded stock sheet.' };
-  }
-
-  const products = await fetchAll<{ id: string; slug: string; name: string; stock_quantity: number }>(
-    (from, to) =>
-      createServiceClient()
-        .from("products")
-        .select("id, slug, name, stock_quantity")
-        .order("id")
-        .range(from, to)
-  );
-  const bySlug = new Map(products.map((p) => [p.slug, p]));
-
-  const preview: StockImportPreview = { ...EMPTY_PREVIEW, changes: [], unknownSlugs: [], invalidRows: [] };
-  const seen = new Set<string>();
-
-  rows.slice(1).forEach((row, i) => {
-    const slug = (row[slugCol] ?? "").trim();
-    const raw = (row[stockCol] ?? "").trim();
-    if (!slug) return;
-    if (raw === "") {
-      preview.blankCount++;
-      return;
-    }
-    const value = Number(raw);
-    if (!Number.isInteger(value) || value < 0) {
-      preview.invalidRows.push({ row: i + 2, slug, value: raw });
-      return;
-    }
-    const product = bySlug.get(slug);
-    if (!product) {
-      preview.unknownSlugs.push(slug);
-      return;
-    }
-    if (seen.has(slug)) {
-      preview.invalidRows.push({ row: i + 2, slug, value: `${raw} (duplicate row)` });
-      return;
-    }
-    seen.add(slug);
-    if (product.stock_quantity === value) {
-      preview.unchangedCount++;
-      return;
-    }
-    preview.changes.push({ id: product.id, slug, name: product.name, from: product.stock_quantity, to: value });
+function analyseStockSheet(csvText: string) {
+  return analyseProductSheet(csvText, {
+    valueColumn: "new_stock",
+    field: "stock_quantity",
+    parse: parseWholeNumber,
   });
-
-  return preview;
 }
 
-export async function previewStockImport(csvText: string): Promise<StockImportPreview> {
+export async function previewStockImport(csvText: string): Promise<SheetPreview> {
   try {
     await requireStaffAbility("manage_inventory");
   } catch {
-    return { ...EMPTY_PREVIEW, error: "Forbidden." };
+    return { ...EMPTY_SHEET_PREVIEW, error: "Forbidden." };
   }
   return analyseStockSheet(csvText);
 }
@@ -205,7 +135,7 @@ export async function applyStockImport(csvText: string): Promise<{ error?: strin
   const preview = await analyseStockSheet(csvText);
   if (preview.error) return { error: preview.error };
 
-  const applied: StockImportChange[] = [];
+  const applied: SheetChange[] = [];
   let failed = 0;
 
   for (let i = 0; i < preview.changes.length; i += UPDATE_CONCURRENCY) {

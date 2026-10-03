@@ -36,19 +36,23 @@ export interface AttentionCounts {
   lowStock: number;
   outOfStock: number;
   pendingStaff: number;
+  expensesAwaitingApproval: number;
+  purchaseOrdersAwaitingDelivery: number;
 }
 
 /** The "what needs doing now" numbers for the staff overview. */
 export async function getAttentionCounts(): Promise<AttentionCounts> {
   const supabase = createServiceClient();
   const head = { count: "exact" as const, head: true };
-  const [toFulfil, outForDelivery, refunds, lowStock, outOfStock, pendingStaff] = await Promise.all([
+  const [toFulfil, outForDelivery, refunds, lowStock, outOfStock, pendingStaff, expenses, openPos] = await Promise.all([
     supabase.from("orders").select("*", head).eq("status", "paid").in("fulfillment_status", ["unfulfilled", "processing", "packed"]),
     supabase.from("orders").select("*", head).eq("fulfillment_status", "dispatched"),
     supabase.from("refunds").select("*", head).eq("status", "pending_approval"),
     supabase.from("products").select("*", head).eq("status", "published").eq("is_low_stock", true).gt("stock_quantity", 0),
     supabase.from("products").select("*", head).eq("status", "published").lte("stock_quantity", 0),
     supabase.from("staff_profiles").select("*", head).eq("is_pending", true),
+    supabase.from("expenses").select("*", head).eq("status", "pending_approval").is("voided_at", null),
+    supabase.from("purchase_orders").select("*", head).in("status", ["ordered", "partially_received"]),
   ]);
   return {
     toFulfil: toFulfil.count ?? 0,
@@ -57,6 +61,8 @@ export async function getAttentionCounts(): Promise<AttentionCounts> {
     lowStock: lowStock.count ?? 0,
     outOfStock: outOfStock.count ?? 0,
     pendingStaff: pendingStaff.count ?? 0,
+    expensesAwaitingApproval: expenses.count ?? 0,
+    purchaseOrdersAwaitingDelivery: openPos.count ?? 0,
   };
 }
 
@@ -160,109 +166,41 @@ export interface Expense {
   category: string | null;
   incurred_on: string;
   created_at: string;
+  status: "pending_approval" | "approved" | "rejected";
+  recorded_by_name: string | null;
+  approved_by_name: string | null;
+  receipt_path: string | null;
+  voided_at: string | null;
+  voided_by_name: string | null;
+  void_reason: string | null;
 }
 
-export async function getExpenses(limit = 200): Promise<Expense[]> {
-  const supabase = createServiceClient();
-  const { data, error } = await supabase
+export async function getExpenses({
+  from,
+  to,
+  rangeFrom,
+  rangeTo,
+}: {
+  from: string;
+  to: string;
+  rangeFrom: number;
+  rangeTo: number;
+}): Promise<{ expenses: Expense[]; total: number }> {
+  const { data, count, error } = await createServiceClient()
     .from("expenses")
-    .select("id, description, amount_kobo, category, incurred_on, created_at")
+    .select(
+      "id, description, amount_kobo, category, incurred_on, created_at, status, recorded_by_name, approved_by_name, receipt_path, voided_at, voided_by_name, void_reason",
+      { count: "exact" }
+    )
+    .gte("incurred_on", from)
+    .lte("incurred_on", to)
     .order("incurred_on", { ascending: false })
-    .limit(limit);
+    .order("created_at", { ascending: false })
+    .range(rangeFrom, rangeTo);
 
   if (error) {
     console.error("getExpenses failed:", error.message);
-    return [];
+    return { expenses: [], total: 0 };
   }
-  return data ?? [];
-}
-
-export interface SalesStats {
-  /** Everything customers paid, before refunds. */
-  grossKobo: number;
-  refundedKobo: number;
-  /** grossKobo − refundedKobo. */
-  revenueKobo: number;
-  paidOrderCount: number;
-  averageOrderKobo: number;
-  totalExpensesKobo: number;
-  netIncomeKobo: number;
-  dailyRevenue: { date: string; revenueKobo: number }[];
-  topProducts: { name: string; quantitySold: number; revenueKobo: number }[];
-}
-
-export async function getSalesStats(): Promise<SalesStats> {
-  const supabase = createServiceClient();
-  const [orders, expenseRows] = await Promise.all([
-    fetchAll<{
-      id: string;
-      status: string;
-      total_kobo: number;
-      refunded_kobo: number;
-      paystack_verified_at: string | null;
-      created_at: string;
-    }>((from, to) =>
-      supabase
-        .from("orders")
-        .select("id, status, total_kobo, refunded_kobo, paystack_verified_at, created_at")
-        .in("status", ["paid", "refunded"])
-        .order("id")
-        .range(from, to)
-    ),
-    fetchAll<{ amount_kobo: number }>((from, to) =>
-      supabase.from("expenses").select("amount_kobo").order("id").range(from, to)
-    ),
-  ]);
-
-  const totalExpensesKobo = expenseRows.reduce((sum, e) => sum + e.amount_kobo, 0);
-  const grossKobo = orders.reduce((sum, o) => sum + o.total_kobo, 0);
-  const refundedKobo = orders.reduce((sum, o) => sum + o.refunded_kobo, 0);
-  const revenueKobo = grossKobo - refundedKobo;
-  const paidOrderCount = orders.filter((o) => o.status === "paid").length;
-  const averageOrderKobo = orders.length > 0 ? Math.round(grossKobo / orders.length) : 0;
-
-  const byDay = new Map<string, number>();
-  for (const order of orders) {
-    const date = (order.paystack_verified_at ?? order.created_at).slice(0, 10);
-    byDay.set(date, (byDay.get(date) ?? 0) + order.total_kobo - order.refunded_kobo);
-  }
-  const dailyRevenue = Array.from(byDay.entries())
-    .map(([date, revenueKobo]) => ({ date, revenueKobo }))
-    .sort((a, b) => b.date.localeCompare(a.date))
-    .slice(0, 14);
-
-  const orderIds = orders.map((o) => o.id);
-  const topProducts: SalesStats["topProducts"] = [];
-  if (orderIds.length > 0) {
-    const { data: items } = await supabase
-      .from("order_items")
-      .select("product_name_snapshot, quantity, unit_price_kobo_snapshot")
-      .in("order_id", orderIds);
-
-    const byProduct = new Map<string, { quantitySold: number; revenueKobo: number }>();
-    for (const item of items ?? []) {
-      const existing = byProduct.get(item.product_name_snapshot) ?? { quantitySold: 0, revenueKobo: 0 };
-      existing.quantitySold += item.quantity;
-      existing.revenueKobo += item.quantity * item.unit_price_kobo_snapshot;
-      byProduct.set(item.product_name_snapshot, existing);
-    }
-    topProducts.push(
-      ...Array.from(byProduct.entries())
-        .map(([name, stats]) => ({ name, ...stats }))
-        .sort((a, b) => b.revenueKobo - a.revenueKobo)
-        .slice(0, 10)
-    );
-  }
-
-  return {
-    grossKobo,
-    refundedKobo,
-    revenueKobo,
-    paidOrderCount,
-    averageOrderKobo,
-    totalExpensesKobo,
-    netIncomeKobo: revenueKobo - totalExpensesKobo,
-    dailyRevenue,
-    topProducts,
-  };
+  return { expenses: (data ?? []) as Expense[], total: count ?? 0 };
 }

@@ -15,6 +15,7 @@ function entityHref(row: ActivityRow): string | null {
   if (!row.entity_id) return null;
   if (row.entity_type === "product") return `/staff/dashboard/products/${row.entity_id}/edit`;
   if (row.entity_type === "order") return `/staff/dashboard/orders/${row.entity_id}`;
+  if (row.entity_type === "purchase_order") return `/staff/dashboard/purchase-orders/${row.entity_id}`;
   return null;
 }
 

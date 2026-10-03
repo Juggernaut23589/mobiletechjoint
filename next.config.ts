@@ -1,6 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    serverActions: {
+      // Product media uploads allow up to 25MB per file (admin-products.ts)
+      // and expense receipts 10MB; Next's default 1MB body limit silently
+      // rejected anything bigger. Headroom covers multipart overhead.
+      bodySizeLimit: "26mb",
+    },
+  },
   images: {
     // Self-hosted, so every optimized variant is produced by this one server
     // and expiring it means a Supabase re-fetch plus a sharp re-encode. Next

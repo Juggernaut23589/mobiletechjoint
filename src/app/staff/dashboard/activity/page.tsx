@@ -11,6 +11,8 @@ const ENTITY_TYPES = [
   { value: "product", label: "Products & stock" },
   { value: "order", label: "Orders" },
   { value: "expense", label: "Expenses" },
+  { value: "purchase_order", label: "Purchase orders" },
+  { value: "supplier", label: "Suppliers" },
   { value: "delivery_rate", label: "Delivery pricing" },
   { value: "customer", label: "Customer emails" },
   { value: "cross_sell", label: "Cross-sells" },
