@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, Suspense } from "react";
+import Link from "next/link";
 import { loginStaff } from "@/app/actions/staff-auth";
 import { STAFF_ABILITIES } from "@/lib/staff-auth";
 import { Logo } from "@/components/Logo";
@@ -41,9 +42,14 @@ function LoginForm() {
             />
           </div>
           <div className="mb-1">
-            <label htmlFor="password" className="mb-1.5 block text-[12.5px] font-semibold text-neutral-700">
-              Password
-            </label>
+            <div className="mb-1.5 flex items-center justify-between">
+              <label htmlFor="password" className="block text-[12.5px] font-semibold text-neutral-700">
+                Password
+              </label>
+              <Link href="/staff/forgot-password" className="text-[12px] font-semibold text-brand-600 hover:text-brand-700">
+                Forgot password?
+              </Link>
+            </div>
             <input
               id="password"
               name="password"

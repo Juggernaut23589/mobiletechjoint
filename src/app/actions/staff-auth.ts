@@ -1,6 +1,6 @@
 "use server";
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 import {
@@ -148,4 +148,69 @@ export async function logoutStaff() {
 
 export async function getStaffSession() {
   return getVerifiedStaffSession();
+}
+
+/** Emails a password-reset link via Supabase Auth's own mailer (so it
+ *  works without Resend). Only staff accounts are sent a link; the reply is
+ *  the same either way so the form can't be used to discover who's staff. */
+export async function requestStaffPasswordReset(
+  _prev: StaffAuthResult,
+  formData: FormData
+): Promise<StaffAuthResult> {
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { error: "Enter a valid email address." };
+
+  const adminClient = createClient(URL, SERVICE, { auth: { persistSession: false } });
+  const { data: staff } = await adminClient.from("staff_profiles").select("id").eq("email", email).maybeSingle();
+
+  if (staff) {
+    const h = await headers();
+    const origin = `${h.get("x-forwarded-proto") ?? "https"}://${h.get("x-forwarded-host") ?? h.get("host")}`;
+    // Implicit flow: the link lands on /staff/reset-password with the
+    // session in the URL fragment, which never reaches any server log.
+    const anonClient = createClient(URL, ANON, {
+      auth: { flowType: "implicit", persistSession: false, autoRefreshToken: false },
+    });
+    const { error } = await anonClient.auth.resetPasswordForEmail(email, {
+      redirectTo: `${origin}/staff/reset-password`,
+    });
+    if (error) {
+      console.error("Staff password reset email failed:", error.message);
+      if (/rate limit/i.test(error.message)) {
+        return { error: "Too many reset emails have been sent recently. Please try again in an hour." };
+      }
+    }
+  }
+
+  return { success: true };
+}
+
+/** Second half of the reset: the page passes the access token from the
+ *  emailed link. Supabase verifies it; only then is the password changed,
+ *  and that link's session is revoked so it can't be reused. */
+export async function completeStaffPasswordReset(
+  _prev: StaffAuthResult,
+  formData: FormData
+): Promise<StaffAuthResult> {
+  const accessToken = String(formData.get("accessToken") ?? "");
+  const password = String(formData.get("password") ?? "");
+  const confirm = String(formData.get("confirm") ?? "");
+  if (password.length < 8) return { error: "Password must be at least 8 characters." };
+  if (password !== confirm) return { error: "The two passwords don't match." };
+
+  const anonClient = createClient(URL, ANON, { auth: { persistSession: false } });
+  const { data, error } = await anonClient.auth.getUser(accessToken);
+  if (error || !data.user) {
+    return { error: "This reset link has expired or was already used. Request a new one." };
+  }
+
+  const adminClient = createClient(URL, SERVICE, { auth: { persistSession: false } });
+  const { data: staff } = await adminClient.from("staff_profiles").select("id").eq("id", data.user.id).maybeSingle();
+  if (!staff) return { error: "This link isn't for a staff account." };
+
+  const { error: updateError } = await adminClient.auth.admin.updateUserById(data.user.id, { password });
+  if (updateError) return { error: updateError.message };
+  await adminClient.auth.admin.signOut(accessToken);
+
+  return { success: true };
 }

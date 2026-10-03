@@ -78,7 +78,7 @@ export async function proxy(request: NextRequest) {
   // they're approved (isPending) or have the right ability for a given
   // page is checked in the page itself, since that needs the full
   // session object, not just a redirect decision.
-  const isStaffAuthPage = pathname === "/staff/login" || pathname === "/staff/register";
+  const isStaffAuthPage = ["/staff/login", "/staff/register", "/staff/forgot-password", "/staff/reset-password"].includes(pathname);
   if (pathname.startsWith("/staff/dashboard") || (pathname.startsWith("/staff") && !isStaffAuthPage)) {
     const staffCookie = request.cookies.get(STAFF_COOKIE_NAME);
     const staffSession = staffCookie ? await decodeStaffSession(staffCookie.value) : null;
