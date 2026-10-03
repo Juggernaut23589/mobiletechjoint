@@ -1,7 +1,6 @@
 "use client";
 
 import { useActionState, Suspense } from "react";
-import Link from "next/link";
 import { loginStaff } from "@/app/actions/staff-auth";
 import { STAFF_ABILITIES } from "@/lib/staff-auth";
 import { Logo } from "@/components/Logo";
@@ -88,10 +87,7 @@ function LoginForm() {
       </div>
 
       <p className="mt-4.5 text-[12.5px] text-neutral-500">
-        New staff member?{" "}
-        <Link href="/staff/register" className="font-semibold text-brand-600 hover:text-brand-700">
-          Request access →
-        </Link>
+        New staff member? Ask an admin for an invite link.
       </p>
     </div>
   );

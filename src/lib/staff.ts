@@ -1,4 +1,5 @@
 import { createServiceClient } from "@/lib/supabase/server";
+import { fetchAll } from "@/lib/supabase/fetch-all";
 import type { OrderWithItems } from "@/types/database";
 
 /** Every function here uses the service client with no per-row scoping —
@@ -7,15 +8,17 @@ import type { OrderWithItems } from "@/types/database";
 
 export async function getDashboardStats() {
   const supabase = createServiceClient();
-  const [{ count: productCount }, { count: customerCount }, { count: orderCount }, { data: paidOrders }] =
+  const [{ count: productCount }, { count: customerCount }, { count: orderCount }, paidOrders] =
     await Promise.all([
       supabase.from("products").select("*", { count: "exact", head: true }).eq("status", "published"),
       supabase.from("customer_profiles").select("*", { count: "exact", head: true }),
       supabase.from("orders").select("*", { count: "exact", head: true }),
-      supabase.from("orders").select("total_kobo").eq("status", "paid"),
+      fetchAll<{ total_kobo: number }>((from, to) =>
+        supabase.from("orders").select("total_kobo").eq("status", "paid").order("id").range(from, to)
+      ),
     ]);
 
-  const revenueKobo = (paidOrders ?? []).reduce((sum, o) => sum + o.total_kobo, 0);
+  const revenueKobo = paidOrders.reduce((sum, o) => sum + o.total_kobo, 0);
 
   return {
     productCount: productCount ?? 0,
@@ -23,21 +26,6 @@ export async function getDashboardStats() {
     orderCount: orderCount ?? 0,
     revenueKobo,
   };
-}
-
-export async function getAllOrders(limit = 100): Promise<OrderWithItems[]> {
-  const supabase = createServiceClient();
-  const { data, error } = await supabase
-    .from("orders")
-    .select("*, order_items(*)")
-    .order("created_at", { ascending: false })
-    .limit(limit);
-
-  if (error) {
-    console.error("getAllOrders failed:", error.message);
-    return [];
-  }
-  return (data ?? []) as unknown as OrderWithItems[];
 }
 
 export async function getOrderById(orderId: string): Promise<OrderWithItems | null> {
@@ -65,11 +53,33 @@ export interface CustomerSummary {
   total_spent_kobo: number;
 }
 
-export async function getAllCustomers(): Promise<CustomerSummary[]> {
+/** One page of customers with their order stats. Email lives on
+ *  auth.users (customer_profiles doesn't store it), so it's looked up per
+ *  customer on the page rather than guessed from their latest order. */
+export async function getCustomersPage({
+  search,
+  from,
+  to,
+}: {
+  search: string;
+  from: number;
+  to: number;
+}): Promise<{ customers: CustomerSummary[]; total: number }> {
   const supabase = createServiceClient();
-  const [{ data: profiles }, { data: orders }] = await Promise.all([
-    supabase.from("customer_profiles").select("*").order("created_at", { ascending: false }),
-    supabase.from("orders").select("customer_id, total_kobo, status, customer_email").not("customer_id", "is", null),
+  let query = supabase
+    .from("customer_profiles")
+    .select("*", { count: "exact" })
+    .order("created_at", { ascending: false })
+    .range(from, to);
+  if (search) query = query.or(`full_name.ilike.%${search}%,phone.ilike.%${search}%`);
+  const { data: profiles, count } = await query;
+
+  const ids = (profiles ?? []).map((p) => p.id);
+  if (ids.length === 0) return { customers: [], total: count ?? 0 };
+
+  const [{ data: orders }, users] = await Promise.all([
+    supabase.from("orders").select("customer_id, total_kobo, status").in("customer_id", ids),
+    Promise.all(ids.map((id) => supabase.auth.admin.getUserById(id))),
   ]);
 
   const statsByCustomer = new Map<string, { count: number; spent: number }>();
@@ -80,28 +90,23 @@ export async function getAllCustomers(): Promise<CustomerSummary[]> {
     if (order.status === "paid") existing.spent += order.total_kobo;
     statsByCustomer.set(order.customer_id, existing);
   }
+  const emailById = new Map(ids.map((id, i) => [id, users[i].data.user?.email ?? "—"]));
 
-  // customer_profiles doesn't store email (that lives on auth.users) — use
-  // the most recent order's email as a display fallback, since every
-  // customer with orders will have one; profiles with zero orders won't
-  // have an email to show, which is an acceptable gap for a v1 staff view.
-  const emailByCustomer = new Map<string, string>();
-  for (const order of orders ?? []) {
-    if (order.customer_id && order.customer_email) emailByCustomer.set(order.customer_id, order.customer_email);
-  }
-
-  return (profiles ?? []).map((profile) => {
-    const stats = statsByCustomer.get(profile.id) ?? { count: 0, spent: 0 };
-    return {
-      id: profile.id,
-      full_name: profile.full_name,
-      phone: profile.phone,
-      email: emailByCustomer.get(profile.id) ?? "—",
-      created_at: profile.created_at,
-      order_count: stats.count,
-      total_spent_kobo: stats.spent,
-    };
-  });
+  return {
+    total: count ?? 0,
+    customers: (profiles ?? []).map((profile) => {
+      const stats = statsByCustomer.get(profile.id) ?? { count: 0, spent: 0 };
+      return {
+        id: profile.id,
+        full_name: profile.full_name,
+        phone: profile.phone,
+        email: emailById.get(profile.id) ?? "—",
+        created_at: profile.created_at,
+        order_count: stats.count,
+        total_spent_kobo: stats.spent,
+      };
+    }),
+  };
 }
 
 export async function getCustomerOrdersForStaff(customerId: string): Promise<OrderWithItems[]> {
@@ -152,13 +157,22 @@ export interface SalesStats {
 
 export async function getSalesStats(): Promise<SalesStats> {
   const supabase = createServiceClient();
-  const [{ data: paidOrders }, { data: expenseRows }] = await Promise.all([
-    supabase.from("orders").select("id, total_kobo, paystack_verified_at, created_at").eq("status", "paid"),
-    supabase.from("expenses").select("amount_kobo"),
+  const [orders, expenseRows] = await Promise.all([
+    fetchAll<{ id: string; total_kobo: number; paystack_verified_at: string | null; created_at: string }>(
+      (from, to) =>
+        supabase
+          .from("orders")
+          .select("id, total_kobo, paystack_verified_at, created_at")
+          .eq("status", "paid")
+          .order("id")
+          .range(from, to)
+    ),
+    fetchAll<{ amount_kobo: number }>((from, to) =>
+      supabase.from("expenses").select("amount_kobo").order("id").range(from, to)
+    ),
   ]);
 
-  const orders = paidOrders ?? [];
-  const totalExpensesKobo = (expenseRows ?? []).reduce((sum, e) => sum + e.amount_kobo, 0);
+  const totalExpensesKobo = expenseRows.reduce((sum, e) => sum + e.amount_kobo, 0);
   const revenueKobo = orders.reduce((sum, o) => sum + o.total_kobo, 0);
   const paidOrderCount = orders.length;
   const averageOrderKobo = paidOrderCount > 0 ? Math.round(revenueKobo / paidOrderCount) : 0;

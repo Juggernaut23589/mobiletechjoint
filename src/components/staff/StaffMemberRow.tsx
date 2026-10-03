@@ -3,7 +3,8 @@
 import { useState, useTransition } from "react";
 import {
   approveStaffMember,
-  deactivateStaffMember,
+  rejectStaffRegistration,
+  setStaffActive,
   updateStaffRole,
   updateStaffAbilities,
 } from "@/app/actions/staff-team";
@@ -19,20 +20,27 @@ export function StaffMemberRow({
 }) {
   const [isPending, startTransition] = useTransition();
   const [expanded, setExpanded] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const isSelf = member.id === currentUserId;
 
-  function run(action: (formData: FormData) => Promise<{ error?: string }>, extra?: FormData) {
-    const formData = extra ?? new FormData();
+  function run(
+    action: (formData: FormData) => Promise<{ error?: string }>,
+    fields: Record<string, string> = {},
+    base?: FormData
+  ) {
+    const formData = base ?? new FormData();
     formData.set("staffId", member.id);
-    startTransition(() => {
-      action(formData);
+    for (const [k, v] of Object.entries(fields)) formData.set(k, v);
+    setError(null);
+    startTransition(async () => {
+      const result = await action(formData);
+      if (result?.error) setError(result.error);
     });
   }
 
   function handleAbilitiesSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    run(updateStaffAbilities, formData);
+    run(updateStaffAbilities, {}, new FormData(e.currentTarget));
   }
 
   return (
@@ -48,6 +56,11 @@ export function StaffMemberRow({
           </p>
         </div>
 
+        {!member.is_pending && !member.is_active && (
+          <span className="rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-600">
+            Deactivated
+          </span>
+        )}
         <span
           className={`rounded-full px-2 py-0.5 text-xs font-medium ${
             member.role === "super_admin" ? "bg-brand-100 text-brand-700" : "bg-neutral-100 text-neutral-600"
@@ -57,14 +70,28 @@ export function StaffMemberRow({
         </span>
 
         {member.is_pending ? (
-          <button
-            type="button"
-            disabled={isPending}
-            onClick={() => run(approveStaffMember)}
-            className="rounded-full bg-brand-gradient px-3 py-1 text-xs font-semibold text-white shadow-glow disabled:opacity-50"
-          >
-            Approve
-          </button>
+          <>
+            <button
+              type="button"
+              disabled={isPending}
+              onClick={() => run(approveStaffMember)}
+              className="rounded-full bg-brand-gradient px-3 py-1 text-xs font-semibold text-white shadow-glow disabled:opacity-50"
+            >
+              Approve
+            </button>
+            <button
+              type="button"
+              disabled={isPending}
+              onClick={() => {
+                if (confirm(`Reject and delete the registration from ${member.email}?`)) {
+                  run(rejectStaffRegistration);
+                }
+              }}
+              className="rounded-full border border-red-200 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50 disabled:opacity-50"
+            >
+              Reject
+            </button>
+          </>
         ) : (
           <>
             {!isSelf && (
@@ -72,11 +99,7 @@ export function StaffMemberRow({
                 type="button"
                 disabled={isPending}
                 onClick={() =>
-                  run(updateStaffRole, (() => {
-                    const fd = new FormData();
-                    fd.set("role", member.role === "super_admin" ? "staff" : "super_admin");
-                    return fd;
-                  })())
+                  run(updateStaffRole, { role: member.role === "super_admin" ? "staff" : "super_admin" })
                 }
                 className="rounded-full border border-neutral-300 px-3 py-1 text-xs font-medium text-neutral-600 hover:bg-neutral-50 disabled:opacity-50"
               >
@@ -96,7 +119,7 @@ export function StaffMemberRow({
               <button
                 type="button"
                 disabled={isPending}
-                onClick={() => run(deactivateStaffMember)}
+                onClick={() => run(setStaffActive, { isActive: String(!member.is_active) })}
                 className="text-xs text-neutral-400 hover:text-red-600 disabled:opacity-50"
               >
                 {member.is_active ? "Deactivate" : "Reactivate"}
@@ -105,6 +128,8 @@ export function StaffMemberRow({
           </>
         )}
       </div>
+
+      {error && <p className="mt-2 text-xs text-red-600">{error}</p>}
 
       {expanded && member.role !== "super_admin" && (
         <form onSubmit={handleAbilitiesSubmit} className="mt-3 rounded-md bg-neutral-50 p-3">

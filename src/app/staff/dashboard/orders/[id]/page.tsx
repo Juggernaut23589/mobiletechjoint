@@ -63,7 +63,7 @@ export default async function StaffOrderDetailPage({
         <div className="rounded-lg border border-neutral-200 bg-white p-4 text-sm">
           <p className="mb-1 font-medium text-neutral-900">Update status</p>
           <p className="mb-2 text-xs text-neutral-500">
-            "Paid" is only ever set automatically by Paystack settlement — staff can mark an
+            &ldquo;Paid&rdquo; is only ever set automatically by Paystack settlement — staff can mark an
             order failed or refunded (e.g. after an offline refund).
           </p>
           <OrderStatusForm orderId={order.id} currentStatus={order.status} />

@@ -1,19 +1,14 @@
 "use server";
 
-import { cookies } from "next/headers";
-import { STAFF_COOKIE_NAME, decodeStaffSession, hasAbility } from "@/lib/staff-auth";
+import { requireStaffAbility } from "@/lib/staff-session";
+import { logStaffActivity } from "@/lib/activity-log";
 import { sendEmail } from "@/lib/email";
-
-async function assertCanManageDisputes() {
-  const cookieStore = await cookies();
-  const staffCookie = cookieStore.get(STAFF_COOKIE_NAME)?.value;
-  const session = staffCookie ? await decodeStaffSession(staffCookie) : null;
-  if (!hasAbility(session, "manage_disputes")) throw new Error("Unauthorized");
-}
+import type { StaffSession } from "@/lib/staff-auth";
 
 export async function emailCustomer(formData: FormData): Promise<{ error?: string; success?: boolean }> {
+  let actor: StaffSession;
   try {
-    await assertCanManageDisputes();
+    actor = await requireStaffAbility("manage_disputes");
   } catch {
     return { error: "Forbidden." };
   }
@@ -21,7 +16,6 @@ export async function emailCustomer(formData: FormData): Promise<{ error?: strin
   const to = formData.get("to") as string;
   const subject = (formData.get("subject") as string)?.trim();
   const message = (formData.get("message") as string)?.trim();
-
   if (!to || !subject || !message) {
     return { error: "Subject and message are required." };
   }
@@ -29,5 +23,11 @@ export async function emailCustomer(formData: FormData): Promise<{ error?: strin
   const result = await sendEmail({ to, subject, text: message });
   if (!result.ok) return { error: result.error };
 
+  await logStaffActivity(actor, {
+    action: "customer.email",
+    entityType: "customer",
+    entityId: to,
+    summary: `Emailed ${to}: "${subject}"`,
+  });
   return { success: true };
 }

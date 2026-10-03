@@ -72,6 +72,8 @@ function fromBase64url(b64url: string): Uint8Array {
 }
 
 async function hmacHex(payload: string): Promise<string> {
+  // An empty key would make every token trivially forgeable — fail closed.
+  if (!SECRET_STRING) throw new Error("STAFF_SESSION_SECRET is not set");
   const enc = new TextEncoder();
   const key = await globalThis.crypto.subtle.importKey(
     "raw",
@@ -86,31 +88,61 @@ async function hmacHex(payload: string): Promise<string> {
     .join("");
 }
 
-export async function encodeStaffSession(session: StaffSession): Promise<string> {
-  const b64 = toBase64url(new TextEncoder().encode(JSON.stringify(session)));
-  const sig = await hmacHex(b64);
+// `purpose` is mixed into the signed bytes so a token minted for one use
+// (e.g. an invite link) can never be replayed as another (a session).
+async function signToken(purpose: string, payload: unknown): Promise<string> {
+  const b64 = toBase64url(new TextEncoder().encode(JSON.stringify(payload)));
+  const sig = await hmacHex(`${purpose}.${b64}`);
   return `${b64}.${sig}`;
 }
 
-export async function decodeStaffSession(token: string): Promise<StaffSession | null> {
+async function verifyToken<T>(purpose: string, token: string): Promise<T | null> {
   try {
     const lastDot = token.lastIndexOf(".");
     if (lastDot === -1) return null;
     const b64 = token.slice(0, lastDot);
     const sig = token.slice(lastDot + 1);
     if (!b64 || !sig) return null;
-    const expected = await hmacHex(b64);
+    const expected = await hmacHex(`${purpose}.${b64}`);
     if (sig.length !== expected.length) return null;
     // Constant-time comparison — works in the Edge runtime (no Node
     // crypto.timingSafeEqual there).
     let diff = 0;
     for (let i = 0; i < sig.length; i++) diff |= sig.charCodeAt(i) ^ expected.charCodeAt(i);
     if (diff !== 0) return null;
-    return JSON.parse(new TextDecoder().decode(fromBase64url(b64))) as StaffSession;
+    return JSON.parse(new TextDecoder().decode(fromBase64url(b64))) as T;
   } catch {
     return null;
   }
 }
 
+export function encodeStaffSession(session: StaffSession): Promise<string> {
+  return signToken("session", session);
+}
+
+export function decodeStaffSession(token: string): Promise<StaffSession | null> {
+  return verifyToken<StaffSession>("session", token);
+}
+
+export const STAFF_INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
+export interface StaffInvite {
+  email: string;
+  invitedBy: string;
+  expiresAt: number;
+}
+
+export function encodeStaffInvite(invite: StaffInvite): Promise<string> {
+  return signToken("invite", invite);
+}
+
+/** Null if the token is forged, malformed, or expired. Single use is
+ *  enforced by registration itself — an email can only be registered once. */
+export async function decodeStaffInvite(token: string): Promise<StaffInvite | null> {
+  const invite = await verifyToken<StaffInvite>("invite", token);
+  if (!invite || typeof invite.email !== "string" || invite.expiresAt < Date.now()) return null;
+  return invite;
+}
+
 // Routes only super_admin can reach, regardless of any staff's abilities.
-export const SUPER_ADMIN_ONLY_ROUTES = ["/staff/dashboard/team"];
+export const SUPER_ADMIN_ONLY_ROUTES = ["/staff/dashboard/team", "/staff/dashboard/activity"];

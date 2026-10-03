@@ -1,30 +1,27 @@
 "use server";
 
-import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import slugify from "slugify";
 import { createServiceClient } from "@/lib/supabase/server";
-import { nairaToKobo } from "@/lib/money";
-import { STAFF_COOKIE_NAME, decodeStaffSession, hasAbility } from "@/lib/staff-auth";
+import { formatNaira, nairaToKobo } from "@/lib/money";
+import { requireStaffAbility } from "@/lib/staff-session";
+import { diffFields, logStaffActivity } from "@/lib/activity-log";
+import type { StaffSession } from "@/lib/staff-auth";
 
-/** Every admin Server Action re-checks the session cookie itself — proxy.ts
+/** Every product Server Action re-checks the caller itself — proxy.ts
  *  protects page navigation, but a Server Action can be invoked directly,
- *  so it must not rely on the page-level gate alone.
- *
- *  Accepts EITHER the legacy shared-password admin cookie (used by
- *  /admin/*, kept as a break-glass fallback) OR a valid staff session
- *  with the "manage_products" ability — so both the old admin pages and
- *  the new /staff/dashboard/products pages can call the same actions. */
-async function assertAdmin() {
-  const cookieStore = await cookies();
-  const legacyCookie = cookieStore.get("mtj_admin_session")?.value;
-  if (legacyCookie && legacyCookie === process.env.ADMIN_SESSION_SECRET) return;
+ *  so it must not rely on the page-level gate alone. */
+function requireProductEditor(): Promise<StaffSession> {
+  return requireStaffAbility("manage_products");
+}
 
-  const staffCookie = cookieStore.get(STAFF_COOKIE_NAME)?.value;
-  const session = staffCookie ? await decodeStaffSession(staffCookie) : null;
-  if (!hasAbility(session, "manage_products")) {
-    throw new Error("Unauthorized");
-  }
+async function getProductSnapshot(productId: string) {
+  const { data } = await createServiceClient()
+    .from("products")
+    .select("name, description, price_kobo, compare_at_price_kobo, stock_quantity, status, brand_id, category_id, is_featured, is_trending")
+    .eq("id", productId)
+    .maybeSingle();
+  return data;
 }
 
 const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
@@ -41,8 +38,9 @@ const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
 export async function createProduct(
   formData: FormData
 ): Promise<{ error?: string; productId?: string }> {
+  let actor: StaffSession;
   try {
-    await assertAdmin();
+    actor = await requireProductEditor();
   } catch {
     return { error: "Forbidden." };
   }
@@ -144,8 +142,15 @@ export async function createProduct(
     if (imageError) uploadErrors.push(`${file.name}: ${imageError.message}`);
   }
 
+  await logStaffActivity(actor, {
+    action: "product.create",
+    entityType: "product",
+    entityId: product.id,
+    summary: `Created ${status} product "${name}"${priceNaira !== null ? ` at ${formatNaira(nairaToKobo(priceNaira))}` : ""}`,
+    changes: { status, price_kobo: priceNaira !== null ? nairaToKobo(priceNaira) : null, stock_quantity: stockQuantity },
+  });
+
   revalidatePath("/staff/dashboard/products");
-  revalidatePath("/admin/products");
   revalidatePath("/");
   revalidatePath("/category", "layout");
   revalidatePath("/brand", "layout");
@@ -159,57 +164,18 @@ export async function createProduct(
   return { productId: product.id };
 }
 
-export async function publishDraftProduct(formData: FormData): Promise<{ error?: string }> {
-  await assertAdmin();
-
-  const productId = formData.get("productId") as string;
-  const priceNaira = Number(formData.get("priceNaira"));
-  const stockQuantity = Number(formData.get("stockQuantity"));
-  const compareAtPriceNairaRaw = formData.get("compareAtPriceNaira");
-  const compareAtPriceNaira = compareAtPriceNairaRaw ? Number(compareAtPriceNairaRaw) : null;
-
-  if (!productId) return { error: "Missing product." };
-  if (!priceNaira || priceNaira <= 0) return { error: "Enter a valid price." };
-  if (!Number.isFinite(stockQuantity) || stockQuantity < 0) {
-    return { error: "Enter a valid stock quantity." };
-  }
-  if (compareAtPriceNaira !== null && compareAtPriceNaira <= priceNaira) {
-    return { error: "The \"was\" price must be higher than the actual price." };
-  }
-
-  const supabase = createServiceClient();
-  const { error } = await supabase
-    .from("products")
-    .update({
-      price_kobo: nairaToKobo(priceNaira),
-      compare_at_price_kobo: compareAtPriceNaira ? nairaToKobo(compareAtPriceNaira) : null,
-      stock_quantity: stockQuantity,
-      status: "published",
-    })
-    .eq("id", productId);
-
-  if (error) return { error: error.message };
-
-  revalidatePath("/admin/products");
-  revalidatePath("/");
-  return {};
+async function lookupName(table: "brands" | "categories", id: string | null): Promise<string> {
+  if (!id) return "none";
+  const { data } = await createServiceClient().from(table).select("name").eq("id", id).maybeSingle();
+  return data?.name ?? "unknown";
 }
 
-export async function archiveProduct(formData: FormData): Promise<{ error?: string }> {
-  await assertAdmin();
-  const productId = formData.get("productId") as string;
-  if (!productId) return { error: "Missing product." };
-
-  const supabase = createServiceClient();
-  const { error } = await supabase
-    .from("products")
-    .update({ status: "archived" })
-    .eq("id", productId);
-
-  if (error) return { error: error.message };
-
-  revalidatePath("/admin/products");
-  return {};
+function revalidateProduct(productId: string) {
+  revalidatePath(`/staff/dashboard/products/${productId}/edit`);
+  revalidatePath("/staff/dashboard/products");
+  revalidatePath("/");
+  revalidatePath("/category", "layout");
+  revalidatePath("/brand", "layout");
 }
 
 /** Assigns (or clears) a product's manufacturer/brand — separate from the
@@ -217,22 +183,31 @@ export async function archiveProduct(formData: FormData): Promise<{ error?: stri
  *  correction path for the WooCommerce backfill's keyword-matching, which
  *  is inherently imperfect (see scripts/backfill-brands.ts). */
 export async function assignProductBrand(formData: FormData): Promise<{ error?: string }> {
-  await assertAdmin();
+  const actor = await requireProductEditor();
   const productId = formData.get("productId") as string;
-  const brandId = formData.get("brandId") as string;
-
+  const brandId = (formData.get("brandId") as string) || null;
   if (!productId) return { error: "Missing product." };
 
-  const supabase = createServiceClient();
-  const { error } = await supabase
-    .from("products")
-    .update({ brand_id: brandId || null })
-    .eq("id", productId);
+  const before = await getProductSnapshot(productId);
+  if (!before) return { error: "Product not found." };
 
+  const { error } = await createServiceClient()
+    .from("products")
+    .update({ brand_id: brandId })
+    .eq("id", productId);
   if (error) return { error: error.message };
 
-  revalidatePath("/admin/products");
-  revalidatePath("/category", "layout");
+  if (before.brand_id !== brandId) {
+    const [from, to] = await Promise.all([lookupName("brands", before.brand_id), lookupName("brands", brandId)]);
+    await logStaffActivity(actor, {
+      action: "product.brand",
+      entityType: "product",
+      entityId: productId,
+      summary: `Brand for ${before.name}: ${from} → ${to}`,
+      changes: { brand_id: { from: before.brand_id, to: brandId } },
+    });
+  }
+  revalidateProduct(productId);
   return {};
 }
 
@@ -240,38 +215,42 @@ export async function assignProductBrand(formData: FormData): Promise<{ error?: 
  *  real (never fabricated) discount badge on ProductCard. Empty input
  *  clears it. */
 export async function setCompareAtPrice(formData: FormData): Promise<{ error?: string }> {
-  await assertAdmin();
+  const actor = await requireProductEditor();
   const productId = formData.get("productId") as string;
   const compareAtPriceNairaRaw = formData.get("compareAtPriceNaira");
   const compareAtPriceNaira = compareAtPriceNairaRaw ? Number(compareAtPriceNairaRaw) : null;
-
   if (!productId) return { error: "Missing product." };
 
-  const supabase = createServiceClient();
-  const { data: product } = await supabase
-    .from("products")
-    .select("price_kobo")
-    .eq("id", productId)
-    .maybeSingle();
+  const before = await getProductSnapshot(productId);
+  if (!before) return { error: "Product not found." };
 
   if (compareAtPriceNaira !== null) {
     if (!Number.isFinite(compareAtPriceNaira) || compareAtPriceNaira <= 0) {
       return { error: "Enter a valid amount." };
     }
-    if (product?.price_kobo != null && nairaToKobo(compareAtPriceNaira) <= product.price_kobo) {
+    if (before.price_kobo != null && nairaToKobo(compareAtPriceNaira) <= before.price_kobo) {
       return { error: "The \"was\" price must be higher than the actual price." };
     }
   }
 
-  const { error } = await supabase
+  const compareAtKobo = compareAtPriceNaira ? nairaToKobo(compareAtPriceNaira) : null;
+  const { error } = await createServiceClient()
     .from("products")
-    .update({ compare_at_price_kobo: compareAtPriceNaira ? nairaToKobo(compareAtPriceNaira) : null })
+    .update({ compare_at_price_kobo: compareAtKobo })
     .eq("id", productId);
-
   if (error) return { error: error.message };
 
-  revalidatePath("/admin/products");
-  revalidatePath("/");
+  if (before.compare_at_price_kobo !== compareAtKobo) {
+    const fmt = (k: number | null) => (k ? formatNaira(k) : "none");
+    await logStaffActivity(actor, {
+      action: "product.compare_at_price",
+      entityType: "product",
+      entityId: productId,
+      summary: `"Was" price for ${before.name}: ${fmt(before.compare_at_price_kobo)} → ${fmt(compareAtKobo)}`,
+      changes: { compare_at_price_kobo: { from: before.compare_at_price_kobo, to: compareAtKobo } },
+    });
+  }
+  revalidateProduct(productId);
   return {};
 }
 
@@ -279,23 +258,35 @@ export async function setCompareAtPrice(formData: FormData): Promise<{ error?: s
  *  scripts/categorize-uncategorized.ts, which is keyword-matching on free
  *  text titles and won't always get it right. */
 export async function assignProductCategory(formData: FormData): Promise<{ error?: string }> {
-  await assertAdmin();
+  const actor = await requireProductEditor();
   const productId = formData.get("productId") as string;
   const categoryId = formData.get("categoryId") as string;
-
   if (!productId) return { error: "Missing product." };
   if (!categoryId) return { error: "Missing category." };
 
-  const supabase = createServiceClient();
-  const { error } = await supabase
+  const before = await getProductSnapshot(productId);
+  if (!before) return { error: "Product not found." };
+
+  const { error } = await createServiceClient()
     .from("products")
     .update({ category_id: categoryId })
     .eq("id", productId);
-
   if (error) return { error: error.message };
 
-  revalidatePath("/admin/products");
-  revalidatePath("/category", "layout");
+  if (before.category_id !== categoryId) {
+    const [from, to] = await Promise.all([
+      lookupName("categories", before.category_id),
+      lookupName("categories", categoryId),
+    ]);
+    await logStaffActivity(actor, {
+      action: "product.category",
+      entityType: "product",
+      entityId: productId,
+      summary: `Category for ${before.name}: ${from} → ${to}`,
+      changes: { category_id: { from: before.category_id, to: categoryId } },
+    });
+  }
+  revalidateProduct(productId);
   return {};
 }
 
@@ -303,26 +294,33 @@ export async function assignProductCategory(formData: FormData): Promise<{ error
  *  computed — there's no order history yet to derive real "hot selling"
  *  data from (see the merchandising migration's comment). */
 export async function toggleMerchandisingFlag(formData: FormData): Promise<{ error?: string }> {
-  await assertAdmin();
+  const actor = await requireProductEditor();
   const productId = formData.get("productId") as string;
   const field = formData.get("field") as string;
   const nextValue = formData.get("nextValue") === "true";
-
   if (!productId) return { error: "Missing product." };
   if (field !== "is_featured" && field !== "is_trending") {
     return { error: "Invalid field." };
   }
 
-  const supabase = createServiceClient();
-  const { error } = await supabase
+  const before = await getProductSnapshot(productId);
+  if (!before) return { error: "Product not found." };
+
+  const { error } = await createServiceClient()
     .from("products")
     .update({ [field]: nextValue })
     .eq("id", productId);
-
   if (error) return { error: error.message };
 
-  revalidatePath("/admin/products");
-  revalidatePath("/");
+  const label = field === "is_featured" ? "hero" : "trending";
+  await logStaffActivity(actor, {
+    action: "product.merchandising",
+    entityType: "product",
+    entityId: productId,
+    summary: `${nextValue ? "Added" : "Removed"} ${before.name} ${nextValue ? "to" : "from"} ${label}`,
+    changes: { [field]: { from: before[field], to: nextValue } },
+  });
+  revalidateProduct(productId);
   return {};
 }
 
@@ -331,7 +329,7 @@ export async function toggleMerchandisingFlag(formData: FormData): Promise<{ err
  *  toggle a few flags on a published product, but no way to actually
  *  rewrite a product's name/description once it existed. */
 export async function updateProductDetails(formData: FormData): Promise<{ error?: string }> {
-  await assertAdmin();
+  const actor = await requireProductEditor();
 
   const productId = formData.get("productId") as string;
   const name = (formData.get("name") as string)?.trim();
@@ -347,40 +345,65 @@ export async function updateProductDetails(formData: FormData): Promise<{ error?
     description: description || null,
   };
   if (priceNaira !== null) {
-    if (priceNaira <= 0) return { error: "Enter a valid price." };
+    if (!Number.isFinite(priceNaira) || priceNaira <= 0) return { error: "Enter a valid price." };
     update.price_kobo = nairaToKobo(priceNaira);
   }
   if (stockQuantity !== null) {
-    if (stockQuantity < 0) return { error: "Enter a valid stock quantity." };
+    if (!Number.isInteger(stockQuantity) || stockQuantity < 0) return { error: "Enter a valid stock quantity." };
     update.stock_quantity = stockQuantity;
   }
 
-  const supabase = createServiceClient();
-  const { error } = await supabase.from("products").update(update).eq("id", productId);
+  const before = await getProductSnapshot(productId);
+  if (!before) return { error: "Product not found." };
 
+  const { error } = await createServiceClient().from("products").update(update).eq("id", productId);
   if (error) return { error: error.message };
 
-  revalidatePath(`/staff/dashboard/products/${productId}/edit`);
-  revalidatePath("/admin/products");
-  revalidatePath("/");
-  revalidatePath("/category", "layout");
+  const changes = diffFields(before, update);
+  if (Object.keys(changes).length > 0) {
+    const parts: string[] = [];
+    if (changes.name) parts.push(`renamed to "${name}"`);
+    if (changes.description) parts.push("description edited");
+    if (changes.price_kobo) {
+      parts.push(`price ${formatNaira((before.price_kobo as number | null) ?? 0)} → ${formatNaira(update.price_kobo as number)}`);
+    }
+    if (changes.stock_quantity) parts.push(`stock ${before.stock_quantity} → ${update.stock_quantity}`);
+    if (changes.description) changes.description = { from: "(previous text)", to: "(new text)" };
+    await logStaffActivity(actor, {
+      action: "product.update",
+      entityType: "product",
+      entityId: productId,
+      summary: `Edited ${before.name}: ${parts.join(", ")}`,
+      changes,
+    });
+  }
+  revalidateProduct(productId);
   return {};
 }
 
 export async function updateProductStatus(formData: FormData): Promise<{ error?: string }> {
-  await assertAdmin();
+  const actor = await requireProductEditor();
   const productId = formData.get("productId") as string;
   const status = formData.get("status") as string;
   if (!productId) return { error: "Missing product." };
   if (!["draft", "published", "archived"].includes(status)) return { error: "Invalid status." };
 
-  const supabase = createServiceClient();
-  const { error } = await supabase.from("products").update({ status }).eq("id", productId);
+  const before = await getProductSnapshot(productId);
+  if (!before) return { error: "Product not found." };
+
+  const { error } = await createServiceClient().from("products").update({ status }).eq("id", productId);
   if (error) return { error: error.message };
 
-  revalidatePath(`/staff/dashboard/products/${productId}/edit`);
-  revalidatePath("/admin/products");
-  revalidatePath("/");
+  if (before.status !== status) {
+    await logStaffActivity(actor, {
+      action: "product.status",
+      entityType: "product",
+      entityId: productId,
+      summary: `${before.name}: ${before.status} → ${status}`,
+      changes: { status: { from: before.status, to: status } },
+    });
+  }
+  revalidateProduct(productId);
   return {};
 }
 
@@ -389,7 +412,7 @@ export async function updateProductStatus(formData: FormData): Promise<{ error?:
  *  this project already writes to (the WooCommerce migration, the
  *  Instagram sync). */
 export async function uploadProductImage(formData: FormData): Promise<{ error?: string }> {
-  await assertAdmin();
+  const actor = await requireProductEditor();
 
   const productId = formData.get("productId") as string;
   const file = formData.get("file") as File | null;
@@ -426,13 +449,20 @@ export async function uploadProductImage(formData: FormData): Promise<{ error?: 
 
   if (insertError) return { error: insertError.message };
 
-  revalidatePath(`/staff/dashboard/products/${productId}/edit`);
-  revalidatePath("/");
+  const product = await getProductSnapshot(productId);
+  await logStaffActivity(actor, {
+    action: "product.media_add",
+    entityType: "product",
+    entityId: productId,
+    summary: `Added ${isVideo ? "a video" : "an image"} to ${product?.name ?? "a product"}`,
+    changes: { url: publicUrlData.publicUrl },
+  });
+  revalidateProduct(productId);
   return {};
 }
 
 export async function deleteProductImage(formData: FormData): Promise<{ error?: string }> {
-  await assertAdmin();
+  const actor = await requireProductEditor();
   const imageId = formData.get("imageId") as string;
   const productId = formData.get("productId") as string;
   if (!imageId) return { error: "Missing image." };
@@ -441,7 +471,7 @@ export async function deleteProductImage(formData: FormData): Promise<{ error?: 
 
   const { data: image } = await supabase
     .from("product_images")
-    .select("url")
+    .select("url, is_video, product_id")
     .eq("id", imageId)
     .maybeSingle();
 
@@ -459,7 +489,17 @@ export async function deleteProductImage(formData: FormData): Promise<{ error?: 
     await supabase.storage.from("product-media").remove([path]);
   }
 
-  if (productId) revalidatePath(`/staff/dashboard/products/${productId}/edit`);
-  revalidatePath("/");
+  if (image) {
+    const product = await getProductSnapshot(image.product_id);
+    await logStaffActivity(actor, {
+      action: "product.media_remove",
+      entityType: "product",
+      entityId: image.product_id,
+      summary: `Removed ${image.is_video ? "a video" : "an image"} from ${product?.name ?? "a product"}`,
+      changes: { url: image.url },
+    });
+  }
+
+  if (productId) revalidateProduct(productId);
   return {};
 }

@@ -4,6 +4,7 @@ import { hasAbility } from "@/lib/staff-auth";
 import { createServiceClient } from "@/lib/supabase/server";
 import { ProductEditForm } from "@/components/staff/ProductEditForm";
 import { ProductImageManager } from "@/components/staff/ProductImageManager";
+import { ActivityList, type ActivityRow } from "@/components/staff/ActivityList";
 import type { ProductWithImages, Category, Brand } from "@/types/database";
 
 export const dynamic = "force-dynamic";
@@ -24,7 +25,7 @@ export default async function StaffProductEditPage({
   const { created, notice } = await searchParams;
   const supabase = createServiceClient();
 
-  const [{ data: product }, { data: categories }, { data: brands }] = await Promise.all([
+  const [{ data: product }, { data: categories }, { data: brands }, { data: history }] = await Promise.all([
     supabase
       .from("products")
       .select("*, product_images(*), category:categories(*), brand:brands(*)")
@@ -32,6 +33,13 @@ export default async function StaffProductEditPage({
       .maybeSingle(),
     supabase.from("categories").select("*").order("name"),
     supabase.from("brands").select("*").order("name"),
+    supabase
+      .from("staff_activity_log")
+      .select("id, staff_name, action, entity_type, entity_id, summary, changes, created_at")
+      .eq("entity_type", "product")
+      .eq("entity_id", id)
+      .order("created_at", { ascending: false })
+      .limit(30),
   ]);
 
   if (!product) notFound();
@@ -64,6 +72,16 @@ export default async function StaffProductEditPage({
         <ProductImageManager
           productId={product.id}
           images={(product.product_images ?? []) as ProductWithImages["product_images"]}
+        />
+      </div>
+
+      <div className="mt-10">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-neutral-500">
+          History
+        </h2>
+        <ActivityList
+          rows={(history ?? []) as ActivityRow[]}
+          emptyText="No changes recorded for this product yet."
         />
       </div>
     </div>

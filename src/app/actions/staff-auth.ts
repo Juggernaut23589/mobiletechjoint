@@ -5,11 +5,12 @@ import { redirect } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 import {
   encodeStaffSession,
-  decodeStaffSession,
+  decodeStaffInvite,
   STAFF_COOKIE_NAME,
   STAFF_COOKIE_MAX_AGE,
   type StaffRole,
 } from "@/lib/staff-auth";
+import { getVerifiedStaffSession } from "@/lib/staff-session";
 
 const URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -20,21 +21,26 @@ export interface StaffAuthResult {
   success?: boolean;
 }
 
-/** Self-registration — lands as role='staff', is_pending=true,
- *  is_active=false, abilities={}. A super_admin has to approve the
- *  account and grant abilities from /staff/dashboard/team before it can
- *  do anything (see getStaffSession's isPending check downstream). */
+/** Invite-only registration: requires a signed invite link minted by a
+ *  super_admin from Team, and the email must match the invite. Still lands
+ *  as role='staff', is_pending=true, abilities={} — the super_admin then
+ *  approves and grants abilities from /staff/dashboard/team. */
 export async function registerStaff(
   _prev: StaffAuthResult,
   formData: FormData
 ): Promise<StaffAuthResult> {
+  const invite = await decodeStaffInvite(String(formData.get("invite") ?? ""));
+  if (!invite) {
+    return { error: "This invite link is invalid or has expired. Ask an admin for a new one." };
+  }
+
   const fullName = String(formData.get("fullName") ?? "").trim();
-  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const email = invite.email.trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
   const phone = String(formData.get("phone") ?? "").trim();
   const jobTitle = String(formData.get("jobTitle") ?? "").trim();
 
-  if (!fullName || !email || !password || !jobTitle) {
+  if (!fullName || !password || !jobTitle) {
     return { error: "Name, email, password, and job title are required." };
   }
   if (password.length < 8) {
@@ -141,8 +147,5 @@ export async function logoutStaff() {
 }
 
 export async function getStaffSession() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(STAFF_COOKIE_NAME)?.value;
-  if (!token) return null;
-  return decodeStaffSession(token);
+  return getVerifiedStaffSession();
 }

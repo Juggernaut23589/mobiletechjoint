@@ -41,7 +41,10 @@ export default async function StaffDashboardLayout({ children }: { children: Rea
     (item) => !item.ability || session.role === "super_admin" || hasAbility(session, item.ability)
   );
   if (session.role === "super_admin") {
-    visibleNav.push({ href: "/staff/dashboard/team", label: "Team", ability: null });
+    visibleNav.push(
+      { href: "/staff/dashboard/activity", label: "Activity log", ability: null },
+      { href: "/staff/dashboard/team", label: "Team", ability: null }
+    );
   }
 
   const initials = session.fullName

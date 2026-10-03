@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getStaffSession } from "@/app/actions/staff-auth";
 import { createServiceClient } from "@/lib/supabase/server";
 import { StaffMemberRow } from "@/components/staff/StaffMemberRow";
+import { StaffInviteForm } from "@/components/staff/StaffInviteForm";
 
 export const dynamic = "force-dynamic";
 
@@ -22,8 +23,12 @@ export default async function TeamPage() {
     <div>
       <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-brand-900">Team</h1>
       <p className="mb-6 text-sm text-neutral-500">
-        Approve new staff accounts and grant exactly the abilities each person needs.
+        Invite staff, approve their accounts, and grant exactly the abilities each person needs.
       </p>
+
+      <div className="mb-8">
+        <StaffInviteForm />
+      </div>
 
       {pending.length > 0 && (
         <div className="mb-8">

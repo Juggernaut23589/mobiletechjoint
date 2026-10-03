@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getStaffSession } from "@/app/actions/staff-auth";
 import { hasAbility } from "@/lib/staff-auth";
 import { createServiceClient } from "@/lib/supabase/server";
-import { CategoryComplementForm } from "@/components/admin/CategoryComplementForm";
+import { CategoryComplementForm } from "@/components/staff/CategoryComplementForm";
 import { removeCategoryComplement } from "@/app/actions/admin-crosssells";
 import type { Category } from "@/types/database";
 

@@ -6,8 +6,9 @@ import { STAFF_COOKIE_NAME, SUPER_ADMIN_ONLY_ROUTES, decodeStaffSession } from "
 /**
  * Two independent things happen here:
  *
- * 1. /admin/* stays gated behind the single shared-secret cookie — see the
- *    original comment below, unchanged from v1.
+ * 1. /staff/* requires a validly-signed staff session cookie. This is only
+ *    a cheap first gate — role, abilities and active status are re-checked
+ *    against the database on every page and action (lib/staff-session.ts).
  * 2. /account/* (customer accounts) is gated behind a real Supabase Auth
  *    session. This function also refreshes that session's cookies on every
  *    matched request — the standard @supabase/ssr middleware pattern —
@@ -48,21 +49,10 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // This is the simplest thing that works for v1 — a single admin secret,
-  // not a full multi-user auth system, since the only job here is "someone
-  // completes a draft product's price/stock before publishing." If the
-  // team grows beyond one or two people needing admin access, replace this
-  // with real per-user auth.
-  if (pathname === "/admin/login") {
-    return response;
-  }
+  // The old shared-password /admin area was retired in favour of per-user
+  // staff accounts; keep old bookmarks working.
   if (pathname.startsWith("/admin")) {
-    const cookie = request.cookies.get("mtj_admin_session");
-    if (cookie?.value !== process.env.ADMIN_SESSION_SECRET) {
-      const loginUrl = new URL("/admin/login", request.url);
-      loginUrl.searchParams.set("next", pathname);
-      return NextResponse.redirect(loginUrl);
-    }
+    return NextResponse.redirect(new URL("/staff/dashboard", request.url));
   }
 
   const isAuthPage = pathname === "/account/login" || pathname === "/account/signup";
@@ -83,8 +73,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Staff portal — separate from the customer account system above and
-  // from the legacy shared-password /admin above. A valid session here
+  // Staff portal — separate from the customer account system above. A valid session here
   // just means "a real staff account exists and is logged in"; whether
   // they're approved (isPending) or have the right ability for a given
   // page is checked in the page itself, since that needs the full

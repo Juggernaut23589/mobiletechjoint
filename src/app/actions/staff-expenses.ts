@@ -1,27 +1,20 @@
 "use server";
 
-import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { createServiceClient } from "@/lib/supabase/server";
-import { STAFF_COOKIE_NAME, decodeStaffSession, hasAbility, type StaffSession } from "@/lib/staff-auth";
-import { nairaToKobo } from "@/lib/money";
-
-async function assertCanManageExpenses(): Promise<StaffSession> {
-  const cookieStore = await cookies();
-  const staffCookie = cookieStore.get(STAFF_COOKIE_NAME)?.value;
-  const session = staffCookie ? await decodeStaffSession(staffCookie) : null;
-  if (!hasAbility(session, "manage_expenses") || !session) throw new Error("Unauthorized");
-  return session;
-}
+import { requireStaffAbility } from "@/lib/staff-session";
+import { logStaffActivity } from "@/lib/activity-log";
+import { formatNaira, nairaToKobo } from "@/lib/money";
+import type { StaffSession } from "@/lib/staff-auth";
 
 /** recorded_by references auth.users, but staff accounts are Supabase
  *  Auth users too (created via admin.createUser at registration) — so the
  *  staff session's userId is a valid auth.users id here, same identity
  *  space the customer account system also lives in. */
 export async function addExpense(formData: FormData): Promise<{ error?: string }> {
-  let session: StaffSession;
+  let actor: StaffSession;
   try {
-    session = await assertCanManageExpenses();
+    actor = await requireStaffAbility("manage_expenses");
   } catch {
     return { error: "Forbidden." };
   }
@@ -36,16 +29,23 @@ export async function addExpense(formData: FormData): Promise<{ error?: string }
     return { error: "Enter a valid amount." };
   }
 
-  const supabase = createServiceClient();
-  const { error } = await supabase.from("expenses").insert({
+  const row = {
     description,
     amount_kobo: nairaToKobo(amountNaira),
     category: category || null,
     incurred_on: incurredOn || new Date().toISOString().slice(0, 10),
-    recorded_by: session.userId,
-  });
-
+    recorded_by: actor.userId,
+  };
+  const { data, error } = await createServiceClient().from("expenses").insert(row).select("id").single();
   if (error) return { error: error.message };
+
+  await logStaffActivity(actor, {
+    action: "expense.add",
+    entityType: "expense",
+    entityId: data.id,
+    summary: `Recorded expense ${formatNaira(row.amount_kobo)} — ${description}`,
+    changes: row,
+  });
 
   revalidatePath("/staff/dashboard/expenses");
   revalidatePath("/staff/dashboard/sales");
@@ -55,10 +55,12 @@ export async function addExpense(formData: FormData): Promise<{ error?: string }
 /** Void return, not {error?} — invoked directly as a Server Component
  *  <form action>, whose type signature requires void/Promise<void> (see
  *  removeCategoryComplement in admin-crosssells.ts for the same pattern
- *  and reasoning). A failed delete just leaves the row in place. */
+ *  and reasoning). A failed delete just leaves the row in place. The full
+ *  deleted row is kept in the activity log so the expense isn't lost. */
 export async function deleteExpense(formData: FormData): Promise<void> {
+  let actor: StaffSession;
   try {
-    await assertCanManageExpenses();
+    actor = await requireStaffAbility("manage_expenses");
   } catch {
     return;
   }
@@ -67,7 +69,19 @@ export async function deleteExpense(formData: FormData): Promise<void> {
   if (!id) return;
 
   const supabase = createServiceClient();
-  await supabase.from("expenses").delete().eq("id", id);
+  const { data: expense } = await supabase.from("expenses").select("*").eq("id", id).maybeSingle();
+  if (!expense) return;
+
+  const { error } = await supabase.from("expenses").delete().eq("id", id);
+  if (error) return;
+
+  await logStaffActivity(actor, {
+    action: "expense.delete",
+    entityType: "expense",
+    entityId: id,
+    summary: `Deleted expense ${formatNaira(expense.amount_kobo)} — ${expense.description}`,
+    changes: expense,
+  });
 
   revalidatePath("/staff/dashboard/expenses");
   revalidatePath("/staff/dashboard/sales");
