@@ -1,22 +1,17 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import Image from "next/image";
 import { Plus } from "lucide-react";
 import { getStaffSession } from "@/app/actions/staff-auth";
 import { hasAbility } from "@/lib/staff-auth";
 import { createServiceClient } from "@/lib/supabase/server";
-import { formatNaira } from "@/lib/money";
 import { pageRange, parsePage, sanitizeSearch } from "@/lib/staff-query";
 import { Pagination } from "@/components/staff/Pagination";
+import { ProductBulkList } from "@/components/staff/ProductBulkList";
+import { SheetUpload } from "@/components/staff/SheetUpload";
+import { applyPriceImport, previewPriceImport } from "@/app/actions/admin-products";
 import type { ProductWithImages } from "@/types/database";
 
 export const dynamic = "force-dynamic";
-
-const STATUS_STYLES: Record<string, string> = {
-  published: "bg-green-100 text-green-700",
-  draft: "bg-amber-100 text-amber-700",
-  archived: "bg-neutral-200 text-neutral-600",
-};
 
 const STATUSES = ["published", "draft", "archived"];
 const ISSUES = [
@@ -142,48 +137,44 @@ export default async function StaffProductsPage({
         )}
       </form>
 
-      <div className="flex flex-col divide-y divide-neutral-200 rounded-lg border border-neutral-200 bg-white">
-        {items.length === 0 && (
-          <p className="p-6 text-sm text-neutral-500">
-            {hasFilters ? "No products match these filters." : "No products yet — add the first one."}
-          </p>
-        )}
-        {items.map((product) => {
-          const cover = product.product_images.find((img) => !img.is_video) ?? null;
-          return (
-            <Link
-              key={product.id}
-              href={`/staff/dashboard/products/${product.id}/edit`}
-              className="flex items-center gap-3 p-3 hover:bg-neutral-50"
-            >
-              <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md bg-neutral-100">
-                {cover ? (
-                  <Image src={cover.url} alt={product.name} fill sizes="48px" className="object-cover" />
-                ) : null}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium">{product.name}</p>
-                <p className="text-xs text-neutral-500">
-                  {product.price_kobo ? formatNaira(product.price_kobo) : "No price set"}
-                  {" · "}
-                  {product.brand?.name ?? "No brand"} · Stock {product.stock_quantity}
-                </p>
-              </div>
-              <span
-                className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium capitalize ${STATUS_STYLES[product.status]}`}
-              >
-                {product.status}
-              </span>
-            </Link>
-          );
-        })}
-      </div>
+      <ProductBulkList
+        items={items.map((product) => ({
+          id: product.id,
+          name: product.name,
+          coverUrl: product.product_images.find((img) => !img.is_video)?.url ?? null,
+          priceKobo: product.price_kobo,
+          brandName: product.brand?.name ?? null,
+          stock: product.stock_quantity,
+          status: product.status,
+        }))}
+        categories={categories ?? []}
+        brands={brands ?? []}
+        emptyText={hasFilters ? "No products match these filters." : "No products yet — add the first one."}
+      />
       <Pagination
         basePath="/staff/dashboard/products"
         params={{ q, status, brand, category, issue }}
         page={page}
         total={count ?? 0}
       />
+
+      <div className="mt-10">
+        <SheetUpload
+          title="Bulk price update"
+          description={
+            <>
+              Download the price sheet, fill in <code>new_price_ngn</code> for the products you want to reprice, and
+              upload it. Blank rows aren&apos;t changed. If a new price reaches a product&apos;s &quot;was&quot; price,
+              the &quot;was&quot; price is cleared so no fake discount shows.
+            </>
+          }
+          downloadHref="/staff/dashboard/products/price-sheet"
+          downloadLabel="Download price sheet"
+          valueFormat="naira"
+          previewAction={previewPriceImport}
+          applyAction={applyPriceImport}
+        />
+      </div>
     </div>
   );
 }

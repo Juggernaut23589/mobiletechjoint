@@ -10,7 +10,8 @@ export type ActivityEntityType =
   | "cross_sell"
   | "customer"
   | "supplier"
-  | "purchase_order";
+  | "purchase_order"
+  | "discount_code";
 
 export type FieldChanges = Record<string, { from: unknown; to: unknown }>;
 

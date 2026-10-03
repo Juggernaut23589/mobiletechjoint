@@ -131,6 +131,7 @@ export default async function StaffFinancePage({
       <div className="mb-8 grid gap-6 lg:grid-cols-2">
         <div className="rounded-lg border border-neutral-200 bg-white py-2">
           <Line label="Product sales" kobo={pnl.productSalesKobo} note={`${pnl.unitsSold} units`} />
+          {pnl.discountsKobo > 0 && <Line label="Discount codes" kobo={pnl.discountsKobo} sign="−" />}
           <Line label="Refunds" kobo={pnl.refundsKobo} sign="−" />
           <Line label="Net sales" kobo={pnl.netSalesKobo} strong />
           <Line label="Cost of goods sold" kobo={pnl.cogsKobo} sign="−" />

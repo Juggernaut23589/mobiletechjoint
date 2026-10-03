@@ -139,6 +139,12 @@ export default async function StaffOrderDetailPage({
             </p>
           </div>
         ))}
+        {order.discount_kobo > 0 && (
+          <div className="flex items-center justify-between px-4 pt-4 text-sm text-green-700">
+            <span>Discount ({order.discount_code})</span>
+            <span>−{formatNaira(order.discount_kobo)}</span>
+          </div>
+        )}
         <div className="flex items-center justify-between p-4">
           <span className="text-sm font-semibold text-brand-900">Total</span>
           <span className="text-sm font-semibold text-brand-900">{formatNaira(order.total_kobo)}</span>

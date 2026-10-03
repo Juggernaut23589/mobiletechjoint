@@ -5,6 +5,7 @@ import { createServiceClient, createServerAuthClient } from "@/lib/supabase/serv
 import { initializeTransaction, chargeAuthorization } from "@/lib/paystack";
 import { getDeliveryFeeKobo } from "@/lib/delivery";
 import { NIGERIA_STATES } from "@/lib/nigeria-locations";
+import { describeDiscount, validateDiscountCode } from "@/lib/discounts";
 
 export interface CheckoutInput {
   customerName: string;
@@ -20,6 +21,8 @@ export interface CheckoutInput {
   /** If set, pays by directly charging this saved card (no redirect to
    *  Paystack) instead of starting a new hosted-page transaction. */
   savedPaymentMethodId?: string;
+  /** Re-validated server-side; the client never supplies an amount. */
+  discountCode?: string;
 }
 
 export type CheckoutResult =
@@ -119,10 +122,22 @@ export async function initiateCheckout(input: CheckoutInput): Promise<CheckoutRe
     });
   }
 
+  const subtotalKobo = totalKobo;
+  let discount: { id: string; code: string; kobo: number } | null = null;
+  if (input.discountCode?.trim()) {
+    const result = await validateDiscountCode(input.discountCode, { subtotalKobo, customerId: user.id });
+    if (!result.ok) return { ok: false, error: result.error };
+    discount = { id: result.code.id, code: result.code.code, kobo: result.discountKobo };
+    totalKobo -= result.discountKobo;
+  }
+
   // Delivery fee is looked up server-side from the state name only — never
   // trust a client-supplied amount, same principle as re-pricing every
   // cart item from the database above.
   totalKobo += deliveryFeeKobo;
+  if (totalKobo <= 0) {
+    return { ok: false, error: "The order total must be more than ₦0." };
+  }
 
   const reference = `mtj_${crypto.randomBytes(12).toString("hex")}`;
 
@@ -142,6 +157,9 @@ export async function initiateCheckout(input: CheckoutInput): Promise<CheckoutRe
       delivery_lga: input.deliveryLga,
       delivery_address: input.deliveryAddress.trim(),
       delivery_fee_kobo: deliveryFeeKobo,
+      discount_code_id: discount?.id ?? null,
+      discount_code: discount?.code ?? null,
+      discount_kobo: discount?.kobo ?? 0,
     })
     .select("id")
     .single();
@@ -224,4 +242,30 @@ export async function initiateCheckout(input: CheckoutInput): Promise<CheckoutRe
   }
 
   return { ok: true, authorizationUrl: result.authorizationUrl };
+}
+
+/** Lets the checkout page show the discount before paying. Re-prices the
+ *  cart from the database exactly as initiateCheckout does; the real
+ *  amount is always recomputed again at payment time. */
+export async function checkDiscountCode(
+  code: string,
+  items: { productId: string; quantity: number }[]
+): Promise<{ ok: true; discountKobo: number; label: string; code: string } | { ok: false; error: string }> {
+  const authClient = await createServerAuthClient();
+  const {
+    data: { user },
+  } = await authClient.auth.getUser();
+  if (!user) return { ok: false, error: "Please log in to use a discount code." };
+  if (!code.trim()) return { ok: false, error: "Enter a code." };
+
+  const { data: products } = await createServiceClient()
+    .from("products")
+    .select("id, price_kobo, status")
+    .in("id", items.map((i) => i.productId));
+  const priceById = new Map((products ?? []).filter((p) => p.status === "published").map((p) => [p.id, p.price_kobo ?? 0]));
+  const subtotalKobo = items.reduce((s, i) => s + (priceById.get(i.productId) ?? 0) * Math.max(0, Math.floor(i.quantity)), 0);
+
+  const result = await validateDiscountCode(code, { subtotalKobo, customerId: user.id });
+  if (!result.ok) return result;
+  return { ok: true, discountKobo: result.discountKobo, label: describeDiscount(result.code), code: result.code.code };
 }

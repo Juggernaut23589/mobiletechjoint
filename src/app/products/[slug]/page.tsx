@@ -5,6 +5,7 @@ import {
   getPublishedProductBySlug,
   getComplementaryProducts,
   getRelatedProducts,
+  getVariantOptions,
 } from "@/lib/products";
 import { formatNaira, discountPercent } from "@/lib/money";
 import { AddToCartForm } from "@/components/AddToCartForm";
@@ -39,9 +40,10 @@ export default async function ProductPage({
 
   if (!product) notFound();
 
-  const [frequentlyBoughtTogether, related] = await Promise.all([
+  const [frequentlyBoughtTogether, related, variants] = await Promise.all([
     getComplementaryProducts(product.category_id, product.id, 4),
     getRelatedProducts(product.category_id, product.id, 8),
+    getVariantOptions(product.variant_group_id),
   ]);
 
   // price_kobo is NOT NULL for any product with status='published' — enforced
@@ -110,6 +112,36 @@ export default async function ProductPage({
               </>
             )}
           </div>
+
+          {variants.length > 0 && (
+            <div className="mb-5">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-neutral-500">
+                Available options
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {variants.map((v) =>
+                  v.id === product.id ? (
+                    <span
+                      key={v.id}
+                      aria-current="true"
+                      className="rounded-full border-2 border-brand-600 bg-brand-50 px-3.5 py-1.5 text-[13px] font-semibold text-brand-700"
+                    >
+                      {v.label ?? v.name}
+                    </span>
+                  ) : (
+                    <Link
+                      key={v.id}
+                      href={`/products/${v.slug}`}
+                      className={`rounded-full border border-neutral-300 px-3.5 py-1.5 text-[13px] font-medium text-neutral-700 hover:border-brand-600 hover:text-brand-700 ${v.inStock ? "" : "opacity-60"}`}
+                    >
+                      {v.label ?? v.name}
+                      {!v.inStock && " · sold out"}
+                    </Link>
+                  )
+                )}
+              </div>
+            </div>
+          )}
 
           {product.description && (
             <p className="mb-5 whitespace-pre-line text-sm leading-relaxed text-neutral-600">

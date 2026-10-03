@@ -69,6 +69,7 @@ export interface ProfitAndLoss {
   orderCount: number;
   unitsSold: number;
   productSalesKobo: number;
+  discountsKobo: number;
   deliveryFeesKobo: number;
   refundsKobo: number;
   netSalesKobo: number;
@@ -90,6 +91,7 @@ export interface ProfitAndLoss {
 export interface OrderRow {
   id: string;
   delivery_fee_kobo: number;
+  discount_kobo: number;
   refunded_kobo: number;
   paystack_fee_kobo: number;
   paystack_verified_at: string | null;
@@ -137,7 +139,7 @@ export async function getProfitAndLoss(period: Period): Promise<ProfitAndLoss> {
   const orders = await fetchAll<OrderRow>((from, to) =>
     supabase
       .from("orders")
-      .select("id, delivery_fee_kobo, refunded_kobo, paystack_fee_kobo, paystack_verified_at, created_at")
+      .select("id, delivery_fee_kobo, discount_kobo, refunded_kobo, paystack_fee_kobo, paystack_verified_at, created_at")
       .in("status", ["paid", "refunded"])
       .gte("paystack_verified_at", start)
       .lte("paystack_verified_at", end)
@@ -227,8 +229,9 @@ export function computeProfitAndLoss(
 
   const deliveryFeesKobo = orders.reduce((s, o) => s + o.delivery_fee_kobo, 0);
   const refundsKobo = orders.reduce((s, o) => s + o.refunded_kobo, 0);
+  const discountsKobo = orders.reduce((s, o) => s + o.discount_kobo, 0);
   const paymentFeesKobo = orders.reduce((s, o) => s + o.paystack_fee_kobo, 0);
-  const netSalesKobo = productSalesKobo - refundsKobo;
+  const netSalesKobo = productSalesKobo - discountsKobo - refundsKobo;
   const grossProfitKobo = netSalesKobo - cogsKobo;
 
   const expenseMap = new Map<string, number>();
@@ -243,7 +246,7 @@ export function computeProfitAndLoss(
     const lagosDate = new Date(new Date(o.paystack_verified_at ?? o.created_at).getTime() + 3600000)
       .toISOString()
       .slice(0, 10);
-    const net = (salesByOrder.get(o.id) ?? 0) + o.delivery_fee_kobo - o.refunded_kobo;
+    const net = (salesByOrder.get(o.id) ?? 0) - o.discount_kobo + o.delivery_fee_kobo - o.refunded_kobo;
     dailyMap.set(lagosDate, (dailyMap.get(lagosDate) ?? 0) + net);
   }
 
@@ -254,6 +257,7 @@ export function computeProfitAndLoss(
     orderCount: orders.length,
     unitsSold,
     productSalesKobo,
+    discountsKobo,
     deliveryFeesKobo,
     refundsKobo,
     netSalesKobo,

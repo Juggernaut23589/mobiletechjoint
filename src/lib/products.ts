@@ -569,3 +569,31 @@ export async function getPublishedProductsByBrandSlug(
     total: count ?? 0,
   };
 }
+
+export interface VariantOption {
+  id: string;
+  slug: string;
+  name: string;
+  label: string | null;
+  inStock: boolean;
+}
+
+/** Published products in the same variant group (including this one),
+ *  for the "Also available for" switcher on the product page. */
+export async function getVariantOptions(groupId: string | null): Promise<VariantOption[]> {
+  if (!groupId) return [];
+  const { data } = await createPublicClient()
+    .from("products")
+    .select("id, slug, name, variant_label, stock_quantity")
+    .eq("status", "published")
+    .eq("variant_group_id", groupId)
+    .order("variant_label", { nullsFirst: false });
+  const options = (data ?? []).map((p) => ({
+    id: p.id,
+    slug: p.slug,
+    name: p.name,
+    label: p.variant_label,
+    inStock: p.stock_quantity > 0,
+  }));
+  return options.length > 1 ? options : [];
+}

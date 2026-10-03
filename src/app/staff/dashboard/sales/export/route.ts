@@ -45,6 +45,8 @@ export async function GET(request: NextRequest) {
       delivery_state: string | null;
       total_kobo: number;
       delivery_fee_kobo: number;
+      discount_kobo: number;
+      discount_code: string | null;
       refunded_kobo: number;
       paystack_fee_kobo: number;
       order_items: { quantity: number; unit_price_kobo_snapshot: number; unit_cost_kobo_snapshot: number | null }[];
@@ -52,7 +54,7 @@ export async function GET(request: NextRequest) {
       supabase
         .from("orders")
         .select(
-          "paystack_reference, paystack_verified_at, status, fulfillment_status, customer_name, customer_email, delivery_state, total_kobo, delivery_fee_kobo, refunded_kobo, paystack_fee_kobo, order_items(quantity, unit_price_kobo_snapshot, unit_cost_kobo_snapshot)"
+          "paystack_reference, paystack_verified_at, status, fulfillment_status, customer_name, customer_email, delivery_state, total_kobo, delivery_fee_kobo, discount_kobo, discount_code, refunded_kobo, paystack_fee_kobo, order_items(quantity, unit_price_kobo_snapshot, unit_cost_kobo_snapshot)"
         )
         .in("status", ["paid", "refunded"])
         .gte("paystack_verified_at", start)
@@ -61,12 +63,12 @@ export async function GET(request: NextRequest) {
         .range(from, to)
     );
     rows = [
-      ["paid_at", "reference", "payment_status", "fulfilment", "customer", "email", "state", "product_sales_ngn", "delivery_fee_ngn", "total_paid_ngn", "refunded_ngn", "paystack_fee_ngn", "cost_of_goods_ngn", "items_missing_cost"],
+      ["paid_at", "reference", "payment_status", "fulfilment", "customer", "email", "state", "product_sales_ngn", "discount_code", "discount_ngn", "delivery_fee_ngn", "total_paid_ngn", "refunded_ngn", "paystack_fee_ngn", "cost_of_goods_ngn", "items_missing_cost"],
       ...orders.map((o) => {
         const sales = o.order_items.reduce((s, i) => s + i.quantity * i.unit_price_kobo_snapshot, 0);
         const cogs = o.order_items.reduce((s, i) => s + i.quantity * (i.unit_cost_kobo_snapshot ?? 0), 0);
         const missing = o.order_items.filter((i) => i.unit_cost_kobo_snapshot === null).length;
-        return [o.paystack_verified_at, o.paystack_reference, o.status, o.fulfillment_status, o.customer_name, o.customer_email, o.delivery_state ?? "", naira(sales), naira(o.delivery_fee_kobo), naira(o.total_kobo), naira(o.refunded_kobo), naira(o.paystack_fee_kobo), naira(cogs), missing];
+        return [o.paystack_verified_at, o.paystack_reference, o.status, o.fulfillment_status, o.customer_name, o.customer_email, o.delivery_state ?? "", naira(sales), o.discount_code ?? "", naira(o.discount_kobo), naira(o.delivery_fee_kobo), naira(o.total_kobo), naira(o.refunded_kobo), naira(o.paystack_fee_kobo), naira(cogs), missing];
       }),
     ];
   } else if (type === "expenses") {

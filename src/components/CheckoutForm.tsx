@@ -6,7 +6,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/store/cart";
 import { formatNaira } from "@/lib/money";
-import { initiateCheckout } from "@/app/actions/checkout";
+import { checkDiscountCode, initiateCheckout } from "@/app/actions/checkout";
 import { Button } from "@/components/ui/Button";
 import { NIGERIA_STATES, lgasForState } from "@/lib/nigeria-locations";
 import type { SavedPaymentMethod } from "@/types/database";
@@ -42,6 +42,10 @@ export function CheckoutForm({
   const [saveCard, setSaveCard] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [codeInput, setCodeInput] = useState("");
+  const [discount, setDiscount] = useState<{ code: string; discountKobo: number; label: string } | null>(null);
+  const [codeError, setCodeError] = useState<string | null>(null);
+  const [applyingCode, setApplyingCode] = useState(false);
 
   const [rates, setRates] = useState<{ state: string; price_kobo: number }[]>([]);
   useEffect(() => {
@@ -56,7 +60,24 @@ export function CheckoutForm({
     [rates, state]
   );
   const lgaOptions = useMemo(() => lgasForState(state), [state]);
-  const totalWithDeliveryKobo = subtotalKobo + (deliveryFeeKobo ?? 0);
+  const discountKobo = discount ? Math.min(discount.discountKobo, subtotalKobo) : 0;
+  const totalWithDeliveryKobo = subtotalKobo - discountKobo + (deliveryFeeKobo ?? 0);
+
+  async function applyCode() {
+    setCodeError(null);
+    setApplyingCode(true);
+    const result = await checkDiscountCode(
+      codeInput,
+      items.map((i) => ({ productId: i.productId, quantity: i.quantity }))
+    );
+    setApplyingCode(false);
+    if (!result.ok) {
+      setDiscount(null);
+      setCodeError(result.error);
+      return;
+    }
+    setDiscount({ code: result.code, discountKobo: result.discountKobo, label: result.label });
+  }
 
   if (!mounted) return null;
 
@@ -90,6 +111,7 @@ export function CheckoutForm({
       deliveryAddress: address,
       saveCard: useNewCard ? saveCard : false,
       savedPaymentMethodId: !useNewCard ? selectedMethodId : undefined,
+      discountCode: discount?.code,
     });
 
     if (!result.ok) {
@@ -309,11 +331,54 @@ export function CheckoutForm({
                 </div>
               </div>
             ))}
+            <div className="border-t border-neutral-200 py-3">
+              {discount ? (
+                <div className="flex items-center justify-between text-[13px]">
+                  <span className="font-semibold text-green-700">
+                    {discount.code} · {discount.label}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDiscount(null);
+                      setCodeInput("");
+                    }}
+                    className="text-xs text-neutral-500 underline"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <input
+                    value={codeInput}
+                    onChange={(e) => setCodeInput(e.target.value)}
+                    placeholder="Discount code"
+                    className="min-w-0 flex-1 rounded-lg border border-neutral-200 px-3 py-2 text-[13px] uppercase"
+                  />
+                  <button
+                    type="button"
+                    onClick={applyCode}
+                    disabled={applyingCode || !codeInput.trim()}
+                    className="rounded-lg border border-neutral-300 px-3 py-2 text-[13px] font-semibold disabled:opacity-50"
+                  >
+                    {applyingCode ? "…" : "Apply"}
+                  </button>
+                </div>
+              )}
+              {codeError && <p className="mt-1.5 text-xs text-red-600">{codeError}</p>}
+            </div>
             <div className="border-t border-neutral-200 pt-3">
               <div className="flex justify-between py-1.5 text-[13.5px] text-neutral-500">
                 <span>Subtotal</span>
                 <span className="text-neutral-900">{formatNaira(subtotalKobo)}</span>
               </div>
+              {discountKobo > 0 && (
+                <div className="flex justify-between py-1.5 text-[13.5px] text-green-700">
+                  <span>Discount</span>
+                  <span>−{formatNaira(discountKobo)}</span>
+                </div>
+              )}
               <div className="flex justify-between py-1.5 text-[13.5px] text-neutral-500">
                 <span>Delivery{state ? ` (${state})` : ""}</span>
                 <span className="text-neutral-900">

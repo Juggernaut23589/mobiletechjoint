@@ -8,9 +8,13 @@ import { formatNaira } from "@/lib/money";
 export function ProductPicker({
   onPick,
   excludeIds = [],
+  search = searchPurchasableProducts,
+  placeholder = "Search products to add…",
 }: {
   onPick: (product: PurchasableProduct) => void;
   excludeIds?: string[];
+  search?: (query: string) => Promise<PurchasableProduct[]>;
+  placeholder?: string;
 }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<PurchasableProduct[]>([]);
@@ -21,7 +25,7 @@ export function ProductPicker({
     let cancelled = false;
     const timer = setTimeout(async () => {
       setLoading(true);
-      const found = await searchPurchasableProducts(query);
+      const found = await search(query);
       if (!cancelled) {
         setResults(found);
         setLoading(false);
@@ -31,7 +35,7 @@ export function ProductPicker({
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [query]);
+  }, [query, search]);
 
   const visible = query.trim().length < 2 ? [] : results.filter((r) => !excludeIds.includes(r.id));
 
@@ -40,7 +44,7 @@ export function ProductPicker({
       <input
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search products to add…"
+        placeholder={placeholder}
         className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm"
       />
       {loading && <span className="absolute right-3 top-2.5 text-xs text-neutral-400">Searching…</span>}

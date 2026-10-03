@@ -35,7 +35,7 @@ export async function analyseProductSheet(
   csvText: string,
   options: {
     valueColumn: string;
-    field: "stock_quantity" | "cost_kobo";
+    field: "stock_quantity" | "cost_kobo" | "price_kobo";
     parse: (raw: string) => number | null;
   }
 ): Promise<SheetPreview> {

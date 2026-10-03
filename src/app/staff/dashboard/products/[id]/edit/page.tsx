@@ -7,6 +7,7 @@ import { ProductImageManager } from "@/components/staff/ProductImageManager";
 import { ActivityList, type ActivityRow } from "@/components/staff/ActivityList";
 import { StockHistory } from "@/components/staff/StockHistory";
 import { ProductCostForm } from "@/components/staff/ProductCostForm";
+import { VariantsPanel } from "@/components/staff/VariantsPanel";
 import type { ProductWithImages, Category, Brand, StockMovement } from "@/types/database";
 
 export const dynamic = "force-dynamic";
@@ -52,6 +53,14 @@ export default async function StaffProductEditPage({
 
   if (!product) notFound();
 
+  const { data: variantMembers } = product.variant_group_id
+    ? await supabase
+        .from("products")
+        .select("id, name, variant_label, status")
+        .eq("variant_group_id", product.variant_group_id)
+        .order("variant_label", { nullsFirst: false })
+    : { data: [] };
+
   return (
     <div>
       <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-brand-900">
@@ -80,6 +89,13 @@ export default async function StaffProductEditPage({
         <ProductImageManager
           productId={product.id}
           images={(product.product_images ?? []) as ProductWithImages["product_images"]}
+        />
+      </div>
+
+      <div className="mt-8 max-w-xl">
+        <VariantsPanel
+          productId={product.id}
+          members={(variantMembers ?? []).map((m) => ({ id: m.id, name: m.name, label: m.variant_label, status: m.status }))}
         />
       </div>
 

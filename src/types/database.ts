@@ -130,6 +130,10 @@ export interface Product {
   brand_id: string | null;
   /** Weighted-average cost in kobo; null until known. */
   cost_kobo: number | null;
+  /** Products sharing this id are versions of one another (e.g. lens mounts). */
+  variant_group_id: string | null;
+  /** Short label shown on the variant switcher, e.g. "Sony E". */
+  variant_label: string | null;
   /** Stock at or below this counts as low (per product). */
   reorder_level: number;
   /** Generated column: stock_quantity <= reorder_level. */
@@ -176,6 +180,9 @@ export interface Order {
   returned_at: string | null;
   refunded_kobo: number;
   paystack_fee_kobo: number;
+  discount_code_id: string | null;
+  discount_code: string | null;
+  discount_kobo: number;
   created_at: string;
   updated_at: string;
 }
