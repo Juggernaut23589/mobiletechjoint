@@ -44,6 +44,12 @@ export async function requireStaffAbility(ability: StaffAbility): Promise<StaffS
   return session;
 }
 
+export async function requireAnyStaffAbility(abilities: StaffAbility[]): Promise<StaffSession> {
+  const session = await getVerifiedStaffSession();
+  if (!session || !abilities.some((a) => hasAbility(session, a))) throw new Error("Unauthorized");
+  return session;
+}
+
 export async function requireSuperAdmin(): Promise<StaffSession> {
   const session = await getVerifiedStaffSession();
   if (!session || session.isPending || session.role !== "super_admin") {

@@ -1,19 +1,19 @@
 import { redirect } from "next/navigation";
 import { getStaffSession, logoutStaff } from "@/app/actions/staff-auth";
-import { hasAbility } from "@/lib/staff-auth";
+import { hasAbility, type StaffAbility } from "@/lib/staff-auth";
 import { StaffDashboardNav } from "@/components/staff/StaffDashboardNav";
 import { Logo } from "@/components/Logo";
 
-const NAV = [
-  { href: "/staff/dashboard", label: "Overview", ability: null },
-  { href: "/staff/dashboard/products", label: "Products", ability: "manage_products" as const },
-  { href: "/staff/dashboard/inventory", label: "Inventory", ability: "manage_inventory" as const },
-  { href: "/staff/dashboard/customers", label: "Customers", ability: "manage_customers" as const },
-  { href: "/staff/dashboard/orders", label: "Orders", ability: "manage_orders" as const },
-  { href: "/staff/dashboard/deliveries", label: "Deliveries", ability: "manage_deliveries" as const },
-  { href: "/staff/dashboard/sales", label: "Sales & Income", ability: "view_sales" as const },
-  { href: "/staff/dashboard/expenses", label: "Expenses", ability: "manage_expenses" as const },
-  { href: "/staff/dashboard/cross-sells", label: "Cross-sells", ability: "manage_cross_sells" as const },
+const NAV: { href: string; label: string; abilities: StaffAbility[] | null }[] = [
+  { href: "/staff/dashboard", label: "Overview", abilities: null },
+  { href: "/staff/dashboard/products", label: "Products", abilities: ["manage_products"] },
+  { href: "/staff/dashboard/inventory", label: "Inventory", abilities: ["manage_inventory"] },
+  { href: "/staff/dashboard/customers", label: "Customers", abilities: ["manage_customers"] },
+  { href: "/staff/dashboard/orders", label: "Orders", abilities: ["manage_orders", "manage_deliveries"] },
+  { href: "/staff/dashboard/deliveries", label: "Delivery pricing", abilities: ["manage_deliveries"] },
+  { href: "/staff/dashboard/sales", label: "Sales & Income", abilities: ["view_sales"] },
+  { href: "/staff/dashboard/expenses", label: "Expenses", abilities: ["manage_expenses"] },
+  { href: "/staff/dashboard/cross-sells", label: "Cross-sells", abilities: ["manage_cross_sells"] },
 ];
 
 export default async function StaffDashboardLayout({ children }: { children: React.ReactNode }) {
@@ -38,12 +38,12 @@ export default async function StaffDashboardLayout({ children }: { children: Rea
   }
 
   const visibleNav = NAV.filter(
-    (item) => !item.ability || session.role === "super_admin" || hasAbility(session, item.ability)
+    (item) => !item.abilities || item.abilities.some((a) => hasAbility(session, a))
   );
   if (session.role === "super_admin") {
     visibleNav.push(
-      { href: "/staff/dashboard/activity", label: "Activity log", ability: null },
-      { href: "/staff/dashboard/team", label: "Team", ability: null }
+      { href: "/staff/dashboard/activity", label: "Activity log", abilities: null },
+      { href: "/staff/dashboard/team", label: "Team", abilities: null }
     );
   }
 

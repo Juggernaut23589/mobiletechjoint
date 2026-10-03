@@ -21,8 +21,8 @@ export default async function StaffSalesPage() {
         Sales &amp; Income
       </h1>
       <p className="mb-6 text-sm text-neutral-500">
-        Revenue is based on paid orders only; expenses come from whatever staff with the
-        Expenses ability have recorded.
+        Revenue is what customers paid, minus refunds; expenses come from whatever staff with
+        the Expenses ability have recorded.
       </p>
 
       <div className="mb-8 grid gap-4 sm:grid-cols-3">
@@ -30,7 +30,11 @@ export default async function StaffSalesPage() {
           <p className="font-display text-2xl font-bold text-brand-900">
             {formatNaira(stats.revenueKobo)}
           </p>
-          <p className="text-sm text-neutral-500">Total revenue</p>
+          <p className="text-sm text-neutral-500">Net revenue</p>
+          <p className="mt-1 text-xs text-neutral-400">
+            {formatNaira(stats.grossKobo)} paid
+            {stats.refundedKobo > 0 && <> − {formatNaira(stats.refundedKobo)} refunded</>}
+          </p>
         </div>
         <div className="rounded-lg border border-neutral-200 bg-white p-4">
           <p className="font-display text-2xl font-bold text-brand-900">{stats.paidOrderCount}</p>
@@ -54,7 +58,7 @@ export default async function StaffSalesPage() {
           >
             {formatNaira(stats.netIncomeKobo)}
           </p>
-          <p className="text-sm text-neutral-500">Net income (revenue − expenses)</p>
+          <p className="text-sm text-neutral-500">Net income (net revenue − expenses)</p>
         </div>
       </div>
 

@@ -5,7 +5,8 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { ProductEditForm } from "@/components/staff/ProductEditForm";
 import { ProductImageManager } from "@/components/staff/ProductImageManager";
 import { ActivityList, type ActivityRow } from "@/components/staff/ActivityList";
-import type { ProductWithImages, Category, Brand } from "@/types/database";
+import { StockHistory } from "@/components/staff/StockHistory";
+import type { ProductWithImages, Category, Brand, StockMovement } from "@/types/database";
 
 export const dynamic = "force-dynamic";
 
@@ -25,7 +26,7 @@ export default async function StaffProductEditPage({
   const { created, notice } = await searchParams;
   const supabase = createServiceClient();
 
-  const [{ data: product }, { data: categories }, { data: brands }, { data: history }] = await Promise.all([
+  const [{ data: product }, { data: categories }, { data: brands }, { data: history }, { data: movements }] = await Promise.all([
     supabase
       .from("products")
       .select("*, product_images(*), category:categories(*), brand:brands(*)")
@@ -40,6 +41,12 @@ export default async function StaffProductEditPage({
       .eq("entity_id", id)
       .order("created_at", { ascending: false })
       .limit(30),
+    supabase
+      .from("stock_movements")
+      .select("*")
+      .eq("product_id", id)
+      .order("created_at", { ascending: false })
+      .limit(50),
   ]);
 
   if (!product) notFound();
@@ -75,9 +82,16 @@ export default async function StaffProductEditPage({
         />
       </div>
 
+      <div id="stock-history" className="mt-10 scroll-mt-24">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-neutral-500">
+          Stock history
+        </h2>
+        <StockHistory movements={(movements ?? []) as StockMovement[]} />
+      </div>
+
       <div className="mt-10">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-neutral-500">
-          History
+          Edit history
         </h2>
         <ActivityList
           rows={(history ?? []) as ActivityRow[]}

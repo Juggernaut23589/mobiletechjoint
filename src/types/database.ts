@@ -4,7 +4,27 @@
 
 export type ProductStatus = "draft" | "published" | "archived";
 export type ProductSource = "manual" | "woocommerce_import" | "instagram" | "catalogue_import";
-export type OrderStatus = "pending" | "paid" | "failed" | "refunded";
+export type OrderStatus = "pending" | "paid" | "failed" | "refunded" | "expired";
+export type FulfillmentStatus =
+  | "unfulfilled"
+  | "processing"
+  | "packed"
+  | "dispatched"
+  | "delivered"
+  | "cancelled"
+  | "returned";
+export type RefundStatus = "pending_approval" | "processing" | "completed" | "failed" | "rejected";
+export type StockReason =
+  | "initial"
+  | "sale"
+  | "restock"
+  | "count"
+  | "correction"
+  | "damage"
+  | "loss"
+  | "return"
+  | "refund_restock"
+  | "cancellation";
 export type ImportStatus = "pending_review" | "imported" | "skipped" | "failed";
 
 export interface Category {
@@ -107,6 +127,10 @@ export interface Product {
    *  title keyword-matching for the WooCommerce import — imperfect, null
    *  for anything that didn't match a known brand name. */
   brand_id: string | null;
+  /** Stock at or below this counts as low (per product). */
+  reorder_level: number;
+  /** Generated column: stock_quantity <= reorder_level. */
+  is_low_stock: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -136,8 +160,52 @@ export interface Order {
   delivery_lga: string | null;
   delivery_address: string | null;
   delivery_fee_kobo: number;
+  fulfillment_status: FulfillmentStatus;
+  dispatch_method: "rider" | "courier" | null;
+  rider_staff_id: string | null;
+  courier_name: string | null;
+  tracking_number: string | null;
+  processing_at: string | null;
+  packed_at: string | null;
+  dispatched_at: string | null;
+  delivered_at: string | null;
+  cancelled_at: string | null;
+  returned_at: string | null;
+  refunded_kobo: number;
   created_at: string;
   updated_at: string;
+}
+
+export interface Refund {
+  id: string;
+  order_id: string;
+  amount_kobo: number;
+  reason: string;
+  method: "paystack" | "offline";
+  restock_items: { product_id: string; name: string; quantity: number }[];
+  status: RefundStatus;
+  requested_by: string | null;
+  requested_by_name: string;
+  decided_by: string | null;
+  decided_by_name: string | null;
+  paystack_refund_id: string | null;
+  failure_reason: string | null;
+  completed_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StockMovement {
+  id: string;
+  product_id: string;
+  delta: number;
+  quantity_after: number;
+  reason: StockReason;
+  note: string | null;
+  order_id: string | null;
+  staff_id: string | null;
+  staff_name: string | null;
+  created_at: string;
 }
 
 export interface OrderWithItems extends Order {

@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import { createServiceClient } from "@/lib/supabase/server";
+import { changeStock } from "@/lib/stock";
 
 const PAYSTACK_SECRET = process.env.PAYSTACK_SECRET_KEY ?? "";
 
@@ -47,6 +48,42 @@ export async function initializeTransaction(params: {
     return { ok: false, error: data.message ?? "Could not start payment." };
   }
   return { ok: true, authorizationUrl: data.data.authorization_url };
+}
+
+/** Sends money back to the customer's original payment method. Paystack
+ *  processes refunds asynchronously — the final outcome arrives later as a
+ *  refund.processed / refund.failed webhook. */
+export async function createPaystackRefund(params: {
+  reference: string;
+  amountKobo: number;
+  merchantNote: string;
+}): Promise<{ ok: true; refundId: string; status: string } | { ok: false; error: string }> {
+  if (!/^sk_(test|live)_/.test(PAYSTACK_SECRET)) {
+    return { ok: false, error: "Payment gateway is not configured." };
+  }
+
+  const res = await fetch("https://api.paystack.co/refund", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${PAYSTACK_SECRET}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      transaction: params.reference,
+      amount: params.amountKobo,
+      merchant_note: params.merchantNote.slice(0, 200),
+    }),
+  });
+
+  const data = (await res.json().catch(() => ({}))) as {
+    status?: boolean;
+    message?: string;
+    data?: { id: number | string; status: string };
+  };
+  if (!data.status || !data.data) {
+    return { ok: false, error: data.message ?? `Paystack refund request failed (${res.status}).` };
+  }
+  return { ok: true, refundId: String(data.data.id), status: data.data.status };
 }
 
 export interface PaystackAuthorization {
@@ -230,10 +267,18 @@ export async function settlePaidOrder(params: {
 
   for (const item of items ?? []) {
     if (!item.product_id) continue;
-    await supabase.rpc("decrement_stock", {
-      p_product_id: item.product_id,
-      p_quantity: item.quantity,
-    });
+    try {
+      await changeStock({
+        productId: item.product_id,
+        mode: "delta",
+        value: -item.quantity,
+        reason: "sale",
+        orderId: order.id,
+      });
+    } catch (err) {
+      // Never leave a completed payment unsettled over a stock write.
+      console.error(`Stock decrement failed for order ${order.id}:`, err);
+    }
   }
 
   // Only persist the card if the customer was logged in, explicitly asked

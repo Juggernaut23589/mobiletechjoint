@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyWebhookSignature, settlePaidOrder, markOrderFailed } from "@/lib/paystack";
 import type { PaystackAuthorization } from "@/lib/paystack";
+import { handleRefundWebhook } from "@/lib/refunds";
 
 export async function POST(request: NextRequest) {
   const rawBody = await request.text();
@@ -18,6 +19,8 @@ export async function POST(request: NextRequest) {
       paid_at: string;
       status: string;
       authorization?: PaystackAuthorization;
+      id?: number | string;
+      transaction_reference?: string;
     };
   };
 
@@ -32,6 +35,8 @@ export async function POST(request: NextRequest) {
     });
   } else if (event.event === "charge.failed") {
     await markOrderFailed(event.data.reference);
+  } else if (event.event.startsWith("refund.")) {
+    await handleRefundWebhook(event.event, event.data);
   }
 
   return NextResponse.json({ received: true });

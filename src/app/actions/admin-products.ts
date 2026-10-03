@@ -6,6 +6,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { formatNaira, nairaToKobo } from "@/lib/money";
 import { requireStaffAbility } from "@/lib/staff-session";
 import { diffFields, logStaffActivity } from "@/lib/activity-log";
+import { changeStock } from "@/lib/stock";
 import type { StaffSession } from "@/lib/staff-auth";
 
 /** Every product Server Action re-checks the caller itself — proxy.ts
@@ -106,7 +107,7 @@ export async function createProduct(
       description: description || null,
       price_kobo: priceNaira !== null ? nairaToKobo(priceNaira) : null,
       compare_at_price_kobo: compareAtNaira !== null ? nairaToKobo(compareAtNaira) : null,
-      stock_quantity: stockQuantity,
+      stock_quantity: 0,
       status,
       source: "manual",
       category_id: categoryId,
@@ -116,6 +117,11 @@ export async function createProduct(
     .single();
 
   if (insertError || !product) return { error: insertError?.message ?? "Could not create product." };
+
+  // Opening stock goes through the ledger like every other stock change.
+  if (stockQuantity > 0) {
+    await changeStock({ productId: product.id, mode: "set", value: stockQuantity, reason: "initial", actor });
+  }
 
   const uploadErrors: string[] = [];
   for (const [position, file] of files.entries()) {
@@ -348,9 +354,8 @@ export async function updateProductDetails(formData: FormData): Promise<{ error?
     if (!Number.isFinite(priceNaira) || priceNaira <= 0) return { error: "Enter a valid price." };
     update.price_kobo = nairaToKobo(priceNaira);
   }
-  if (stockQuantity !== null) {
-    if (!Number.isInteger(stockQuantity) || stockQuantity < 0) return { error: "Enter a valid stock quantity." };
-    update.stock_quantity = stockQuantity;
+  if (stockQuantity !== null && (!Number.isInteger(stockQuantity) || stockQuantity < 0)) {
+    return { error: "Enter a valid stock quantity." };
   }
 
   const before = await getProductSnapshot(productId);
@@ -358,6 +363,18 @@ export async function updateProductDetails(formData: FormData): Promise<{ error?
 
   const { error } = await createServiceClient().from("products").update(update).eq("id", productId);
   if (error) return { error: error.message };
+
+  if (stockQuantity !== null && stockQuantity !== before.stock_quantity) {
+    await changeStock({
+      productId,
+      mode: "set",
+      value: stockQuantity,
+      reason: "correction",
+      note: "Edited on the product page",
+      actor,
+    });
+    update.stock_quantity = stockQuantity;
+  }
 
   const changes = diffFields(before, update);
   if (Object.keys(changes).length > 0) {

@@ -5,20 +5,27 @@ import { hasAbility } from "@/lib/staff-auth";
 import { createServiceClient } from "@/lib/supabase/server";
 import { isIsoDate, pageRange, parsePage, sanitizeSearch } from "@/lib/staff-query";
 import { formatNaira } from "@/lib/money";
-import { OrderStatusBadge } from "@/components/OrderStatusBadge";
+import { FulfillmentBadge, OrderStatusBadge } from "@/components/OrderStatusBadge";
+import { TO_FULFIL } from "@/lib/fulfillment";
 import { Pagination } from "@/components/staff/Pagination";
 
 export const dynamic = "force-dynamic";
 
-const STATUSES = ["pending", "paid", "failed", "refunded"];
+const STATUSES = ["pending", "paid", "failed", "refunded", "expired"];
+const VIEWS = [
+  { value: "", label: "All orders" },
+  { value: "to_fulfil", label: "To fulfil" },
+  { value: "out_for_delivery", label: "Out for delivery" },
+  { value: "refund_approval", label: "Refunds awaiting approval" },
+];
 
 export default async function StaffOrdersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; status?: string; from?: string; to?: string; page?: string }>;
+  searchParams: Promise<{ q?: string; status?: string; from?: string; to?: string; view?: string; page?: string }>;
 }) {
   const session = await getStaffSession();
-  if (!session || (session.role !== "super_admin" && !hasAbility(session, "manage_orders"))) {
+  if (!session || (!hasAbility(session, "manage_orders") && !hasAbility(session, "manage_deliveries"))) {
     redirect("/staff/dashboard?error=forbidden");
   }
 
@@ -28,12 +35,24 @@ export default async function StaffOrdersPage({
   const from = isIsoDate(params.from) ? params.from : undefined;
   const to = isIsoDate(params.to) ? params.to : undefined;
   const page = parsePage(params.page);
+  const view = VIEWS.some((v) => v.value === params.view) ? params.view : "";
+  const supabase = createServiceClient();
 
-  let query = createServiceClient()
+  let refundOrderIds: string[] = [];
+  if (view === "refund_approval") {
+    const { data: pendingRefunds } = await supabase
+      .from("refunds")
+      .select("order_id")
+      .eq("status", "pending_approval");
+    refundOrderIds = [...new Set((pendingRefunds ?? []).map((r) => r.order_id))];
+  }
+
+  let query = supabase
     .from("orders")
-    .select("id, customer_name, customer_email, paystack_reference, created_at, total_kobo, status", {
-      count: "exact",
-    })
+    .select(
+      "id, customer_name, customer_email, paystack_reference, created_at, total_kobo, status, fulfillment_status, delivery_state",
+      { count: "exact" }
+    )
     .order("created_at", { ascending: false })
     .range(...pageRange(page));
   if (q) {
@@ -42,11 +61,14 @@ export default async function StaffOrdersPage({
     );
   }
   if (status) query = query.eq("status", status);
+  if (view === "to_fulfil") query = query.eq("status", "paid").in("fulfillment_status", TO_FULFIL);
+  if (view === "out_for_delivery") query = query.eq("fulfillment_status", "dispatched");
+  if (view === "refund_approval") query = query.in("id", refundOrderIds.length ? refundOrderIds : ["00000000-0000-0000-0000-000000000000"]);
   if (from) query = query.gte("created_at", `${from}T00:00:00`);
   if (to) query = query.lte("created_at", `${to}T23:59:59.999`);
   const { data: orders, count } = await query;
 
-  const hasFilters = Boolean(q || status || from || to);
+  const hasFilters = Boolean(q || status || from || to || view);
 
   return (
     <div>
@@ -55,7 +77,22 @@ export default async function StaffOrdersPage({
         {(count ?? 0).toLocaleString()} {hasFilters ? "matching" : "total"} order{count === 1 ? "" : "s"}.
       </p>
 
+      <div className="mb-3 flex flex-wrap gap-2">
+        {VIEWS.map((v) => (
+          <Link
+            key={v.value}
+            href={v.value ? `/staff/dashboard/orders?view=${v.value}` : "/staff/dashboard/orders"}
+            className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
+              view === v.value ? "bg-brand-900 text-white" : "border border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-50"
+            }`}
+          >
+            {v.label}
+          </Link>
+        ))}
+      </div>
+
       <form className="mb-4 flex flex-wrap gap-2">
+        {view && <input type="hidden" name="view" value={view} />}
         <input
           name="q"
           type="search"
@@ -105,11 +142,15 @@ export default async function StaffOrdersPage({
                 </p>
                 <p className="text-xs text-neutral-500">
                   {order.paystack_reference} · {new Date(order.created_at).toLocaleString()}
+                  {order.delivery_state ? ` · ${order.delivery_state}` : ""}
                 </p>
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-sm font-semibold">{formatNaira(order.total_kobo)}</span>
                 <OrderStatusBadge status={order.status} />
+                {(order.status === "paid" || order.status === "refunded") && (
+                  <FulfillmentBadge status={order.fulfillment_status} />
+                )}
               </div>
             </Link>
           ))}
@@ -117,7 +158,7 @@ export default async function StaffOrdersPage({
       )}
       <Pagination
         basePath="/staff/dashboard/orders"
-        params={{ q, status, from, to }}
+        params={{ q, status, from, to, view }}
         page={page}
         total={count ?? 0}
       />

@@ -13,18 +13,50 @@ export async function getDashboardStats() {
       supabase.from("products").select("*", { count: "exact", head: true }).eq("status", "published"),
       supabase.from("customer_profiles").select("*", { count: "exact", head: true }),
       supabase.from("orders").select("*", { count: "exact", head: true }),
-      fetchAll<{ total_kobo: number }>((from, to) =>
-        supabase.from("orders").select("total_kobo").eq("status", "paid").order("id").range(from, to)
+      fetchAll<{ total_kobo: number; refunded_kobo: number }>((from, to) =>
+        supabase.from("orders").select("total_kobo, refunded_kobo").eq("status", "paid").order("id").range(from, to)
       ),
     ]);
 
-  const revenueKobo = paidOrders.reduce((sum, o) => sum + o.total_kobo, 0);
+  // Net of partial refunds; fully refunded orders have status 'refunded'.
+  const revenueKobo = paidOrders.reduce((sum, o) => sum + o.total_kobo - o.refunded_kobo, 0);
 
   return {
     productCount: productCount ?? 0,
     customerCount: customerCount ?? 0,
     orderCount: orderCount ?? 0,
     revenueKobo,
+  };
+}
+
+export interface AttentionCounts {
+  toFulfil: number;
+  outForDelivery: number;
+  refundsAwaitingApproval: number;
+  lowStock: number;
+  outOfStock: number;
+  pendingStaff: number;
+}
+
+/** The "what needs doing now" numbers for the staff overview. */
+export async function getAttentionCounts(): Promise<AttentionCounts> {
+  const supabase = createServiceClient();
+  const head = { count: "exact" as const, head: true };
+  const [toFulfil, outForDelivery, refunds, lowStock, outOfStock, pendingStaff] = await Promise.all([
+    supabase.from("orders").select("*", head).eq("status", "paid").in("fulfillment_status", ["unfulfilled", "processing", "packed"]),
+    supabase.from("orders").select("*", head).eq("fulfillment_status", "dispatched"),
+    supabase.from("refunds").select("*", head).eq("status", "pending_approval"),
+    supabase.from("products").select("*", head).eq("status", "published").eq("is_low_stock", true).gt("stock_quantity", 0),
+    supabase.from("products").select("*", head).eq("status", "published").lte("stock_quantity", 0),
+    supabase.from("staff_profiles").select("*", head).eq("is_pending", true),
+  ]);
+  return {
+    toFulfil: toFulfil.count ?? 0,
+    outForDelivery: outForDelivery.count ?? 0,
+    refundsAwaitingApproval: refunds.count ?? 0,
+    lowStock: lowStock.count ?? 0,
+    outOfStock: outOfStock.count ?? 0,
+    pendingStaff: pendingStaff.count ?? 0,
   };
 }
 
@@ -146,6 +178,10 @@ export async function getExpenses(limit = 200): Promise<Expense[]> {
 }
 
 export interface SalesStats {
+  /** Everything customers paid, before refunds. */
+  grossKobo: number;
+  refundedKobo: number;
+  /** grossKobo − refundedKobo. */
   revenueKobo: number;
   paidOrderCount: number;
   averageOrderKobo: number;
@@ -158,14 +194,20 @@ export interface SalesStats {
 export async function getSalesStats(): Promise<SalesStats> {
   const supabase = createServiceClient();
   const [orders, expenseRows] = await Promise.all([
-    fetchAll<{ id: string; total_kobo: number; paystack_verified_at: string | null; created_at: string }>(
-      (from, to) =>
-        supabase
-          .from("orders")
-          .select("id, total_kobo, paystack_verified_at, created_at")
-          .eq("status", "paid")
-          .order("id")
-          .range(from, to)
+    fetchAll<{
+      id: string;
+      status: string;
+      total_kobo: number;
+      refunded_kobo: number;
+      paystack_verified_at: string | null;
+      created_at: string;
+    }>((from, to) =>
+      supabase
+        .from("orders")
+        .select("id, status, total_kobo, refunded_kobo, paystack_verified_at, created_at")
+        .in("status", ["paid", "refunded"])
+        .order("id")
+        .range(from, to)
     ),
     fetchAll<{ amount_kobo: number }>((from, to) =>
       supabase.from("expenses").select("amount_kobo").order("id").range(from, to)
@@ -173,14 +215,16 @@ export async function getSalesStats(): Promise<SalesStats> {
   ]);
 
   const totalExpensesKobo = expenseRows.reduce((sum, e) => sum + e.amount_kobo, 0);
-  const revenueKobo = orders.reduce((sum, o) => sum + o.total_kobo, 0);
-  const paidOrderCount = orders.length;
-  const averageOrderKobo = paidOrderCount > 0 ? Math.round(revenueKobo / paidOrderCount) : 0;
+  const grossKobo = orders.reduce((sum, o) => sum + o.total_kobo, 0);
+  const refundedKobo = orders.reduce((sum, o) => sum + o.refunded_kobo, 0);
+  const revenueKobo = grossKobo - refundedKobo;
+  const paidOrderCount = orders.filter((o) => o.status === "paid").length;
+  const averageOrderKobo = orders.length > 0 ? Math.round(grossKobo / orders.length) : 0;
 
   const byDay = new Map<string, number>();
   for (const order of orders) {
     const date = (order.paystack_verified_at ?? order.created_at).slice(0, 10);
-    byDay.set(date, (byDay.get(date) ?? 0) + order.total_kobo);
+    byDay.set(date, (byDay.get(date) ?? 0) + order.total_kobo - order.refunded_kobo);
   }
   const dailyRevenue = Array.from(byDay.entries())
     .map(([date, revenueKobo]) => ({ date, revenueKobo }))
@@ -211,6 +255,8 @@ export async function getSalesStats(): Promise<SalesStats> {
   }
 
   return {
+    grossKobo,
+    refundedKobo,
     revenueKobo,
     paidOrderCount,
     averageOrderKobo,
