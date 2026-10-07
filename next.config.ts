@@ -22,6 +22,12 @@ const nextConfig: NextConfig = {
     // edited in place, so a long TTL is safe (the docs recommend exactly this
     // when sources don't change).
     minimumCacheTTL: 60 * 60 * 24 * 31,
+    // Self-hosted Storage lives on the same machine (127.0.0.1), which
+    // Next's image optimizer refuses by default as an SSRF guard. Safe
+    // here: every URL it ever fetches comes from product_images.url in
+    // our own database (written only by staff actions / the purchasing
+    // flow), never from user-supplied input.
+    dangerouslyAllowLocalIP: supabaseUrl.hostname === "127.0.0.1" || supabaseUrl.hostname === "localhost",
     remotePatterns: [
       {
         protocol: supabaseUrl.protocol.replace(":", "") as "http" | "https",
