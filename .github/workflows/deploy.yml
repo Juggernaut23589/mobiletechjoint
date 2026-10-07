@@ -95,7 +95,10 @@ jobs:
               mv /tmp/mtj-image-cache .next/cache/images
             fi
             npm ci --omit=dev --prefer-offline
-            pm2 restart mobiletechjoint-store --update-env
+            # startOrReload re-reads ecosystem.config.cjs (and therefore
+            # .env.production.local) fresh every deploy -- see that file's
+            # header comment for why a bare `pm2 restart` isn't enough.
+            pm2 startOrReload ecosystem.config.cjs --update-env
             pm2 save
           REMOTE
 
