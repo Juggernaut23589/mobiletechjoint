@@ -58,7 +58,10 @@ const COUNTED_STATUSES = ["pending", "paid", "refunded"];
 
 export async function validateDiscountCode(
   rawCode: string,
-  params: { subtotalKobo: number; customerId: string }
+  // customerId is null for a guest checkout — there's no reliable identity
+  // to enforce a per-customer limit against, so that rule simply doesn't
+  // apply to guest orders (the usage_limit total still does).
+  params: { subtotalKobo: number; customerId: string | null }
 ): Promise<{ ok: true; code: DiscountCode; discountKobo: number } | { ok: false; error: string }> {
   const supabase = createServiceClient();
   const { data: code } = await supabase
@@ -74,12 +77,14 @@ export async function validateDiscountCode(
       .select("*", { count: "exact", head: true })
       .eq("discount_code_id", code.id)
       .in("status", COUNTED_STATUSES),
-    supabase
-      .from("orders")
-      .select("*", { count: "exact", head: true })
-      .eq("discount_code_id", code.id)
-      .eq("customer_id", params.customerId)
-      .in("status", COUNTED_STATUSES),
+    params.customerId
+      ? supabase
+          .from("orders")
+          .select("*", { count: "exact", head: true })
+          .eq("discount_code_id", code.id)
+          .eq("customer_id", params.customerId)
+          .in("status", COUNTED_STATUSES)
+      : Promise.resolve({ count: 0 }),
   ]);
 
   const error = checkEligibility(code, {

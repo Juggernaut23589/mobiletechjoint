@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Minus, Plus, Check } from "lucide-react";
 import { useCartStore } from "@/store/cart";
+import { useCartUIStore } from "@/store/cart-ui";
 import { Button } from "@/components/ui/Button";
 
 export function AddToCartForm({
@@ -25,6 +26,7 @@ export function AddToCartForm({
 }) {
   const router = useRouter();
   const addItem = useCartStore((s) => s.addItem);
+  const openCart = useCartUIStore((s) => s.openCart);
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
 
@@ -36,6 +38,10 @@ export function AddToCartForm({
       quantity
     );
     setAdded(true);
+    // The header's cart badge is easy to miss, especially now that this
+    // button sits well above the fold — opening the drawer confirms the
+    // add with the actual item, image and running subtotal.
+    openCart();
     setTimeout(() => setAdded(false), 1500);
   }
 

@@ -61,18 +61,15 @@ export function BrandShelf({ shelf, index }: { shelf: BrandShelfData; index: num
         {/* Phones: a swipeable row. Tablets: three across. Desktop: the
             wrapper dissolves (`contents`) and the cards join the 4-col grid
             beside the spotlight panel. */}
+        {/* Not reveal-wrapped — merchandising, not decoration (see ProductSection). */}
         <div className="scrollbar-none -mx-4 flex snap-x snap-mandatory gap-3.5 overflow-x-auto px-4 pb-1 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:overflow-visible sm:px-0 sm:pb-0 lg:contents">
-          {products.map((product, i) => (
-            <RevealOnScroll
-              key={product.id}
-              delay={0.06 * (i + 1)}
-              className="h-full w-[68%] shrink-0 snap-start sm:w-auto sm:shrink"
-            >
+          {products.map((product) => (
+            <div key={product.id} className="h-full w-[68%] shrink-0 snap-start sm:w-auto sm:shrink">
               <ProductCard
                 product={product}
                 sizes="(min-width: 1024px) 320px, (min-width: 640px) 33vw, 68vw"
               />
-            </RevealOnScroll>
+            </div>
           ))}
         </div>
       </div>

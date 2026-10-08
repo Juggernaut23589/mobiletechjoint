@@ -16,11 +16,13 @@ export function CheckoutForm({
   defaultEmail,
   defaultPhone,
   savedMethods,
+  isGuest,
 }: {
   defaultName: string;
   defaultEmail: string;
   defaultPhone: string;
   savedMethods: SavedPaymentMethod[];
+  isGuest: boolean;
 }) {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
@@ -153,6 +155,17 @@ export function CheckoutForm({
 
       <form onSubmit={handleSubmit} className="grid gap-10 lg:grid-cols-[1fr_380px]">
         <div>
+          {isGuest && (
+            <div className="mb-5 flex flex-wrap items-center justify-between gap-2 rounded-[12px] border border-neutral-200 bg-neutral-50 px-4 py-3 text-[13px] text-neutral-600">
+              <span>Checking out as a guest.</span>
+              <Link
+                href="/account/login?next=/checkout"
+                className="font-semibold text-brand-700 hover:text-brand-900"
+              >
+                Log in instead
+              </Link>
+            </div>
+          )}
           <h2 className="font-display mb-4.5 text-lg text-brand-900">Shipping Information</h2>
           <div className="grid grid-cols-2 gap-3.5">
             <div>
@@ -294,7 +307,7 @@ export function CheckoutForm({
             You&apos;ll be taken to Paystack&apos;s secure checkout to enter your card, bank
             transfer, or USSD details — this site never sees or stores your card number.
           </div>
-          {useNewCard && (
+          {useNewCard && !isGuest && (
             <label className="mt-3.5 flex items-center gap-2 text-sm text-neutral-600">
               <input
                 type="checkbox"

@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Plus, Check } from "lucide-react";
 import { useState } from "react";
 import { useCartStore } from "@/store/cart";
+import { useCartUIStore } from "@/store/cart-ui";
 
 /** Overlay button on a product card's image — adds one unit without
  *  leaving the grid. Stays out of the way (opacity-0, revealed on card
@@ -27,6 +28,7 @@ export function QuickAddButton({
   outOfStock: boolean;
 }) {
   const addItem = useCartStore((s) => s.addItem);
+  const openCart = useCartUIStore((s) => s.openCart);
   const [added, setAdded] = useState(false);
 
   if (outOfStock) return null;
@@ -36,6 +38,9 @@ export function QuickAddButton({
     e.stopPropagation();
     addItem({ productId, slug, name, priceKoboSnapshot: priceKobo, imageUrl, categoryId }, 1);
     setAdded(true);
+    // A card-overlay click is otherwise confirmed only by a small header
+    // badge changing — easy to miss while scanning a grid.
+    openCart();
     setTimeout(() => setAdded(false), 1200);
   }
 

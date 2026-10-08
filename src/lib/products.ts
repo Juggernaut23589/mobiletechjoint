@@ -33,13 +33,17 @@ async function selectAllRows<T>(
 }
 
 /** All published products, newest first, with images and category joined. */
-export async function getPublishedProducts(limit?: number): Promise<ProductWithImages[]> {
+export async function getPublishedProducts(
+  limit?: number,
+  { inStockOnly = false }: { inStockOnly?: boolean } = {}
+): Promise<ProductWithImages[]> {
   const supabase = createPublicClient();
   let query = supabase
     .from("products")
     .select("*, product_images(*), category:categories(*), brand:brands(*)")
     .eq("status", "published")
     .order("created_at", { ascending: false });
+  if (inStockOnly) query = query.gt("stock_quantity", 0);
   if (limit) query = query.limit(limit);
   const { data, error } = await query;
 
@@ -154,7 +158,10 @@ export async function getTrendingProducts(limit = 8): Promise<ProductWithImages[
 
 /** Genuinely real, not curated: just the newest published products. */
 export async function getNewArrivals(limit = 8): Promise<ProductWithImages[]> {
-  return getPublishedProducts(limit);
+  // In-stock only — this carousel used to be dominated by out-of-stock
+  // items competing equally with things a shopper could actually buy,
+  // wasting the homepage's most prominent "what's new" real estate.
+  return getPublishedProducts(limit, { inStockOnly: true });
 }
 
 /** Products with a real admin-entered "was" price — never a fabricated
@@ -316,24 +323,53 @@ export async function getBrandsForCategory(categoryId: string): Promise<BrandWit
 
 /** Published products matching a free-text query against name/description —
  *  backs the navbar search box. Empty/whitespace query returns no results
- *  rather than the full catalog, so an empty submit doesn't look broken. */
+ *  rather than the full catalog, so an empty submit doesn't look broken.
+ *
+ *  Two passes rather than one combined ilike-on-either-column query: a
+ *  plain `name OR description` match sorted by recency let a product whose
+ *  long migrated description happened to mention the search term (e.g.
+ *  "tripod" inside unrelated gimbal copy) outrank products actually named
+ *  for it — searching "tripod" surfaced microphones before any tripod.
+ *  Name matches are real intent signal and always come first now; the
+ *  description-only tier only fills in the remaining slots. */
 export async function searchProducts(query: string, limit = 24): Promise<ProductWithImages[]> {
   const q = query.trim();
   if (!q) return [];
+  const pattern = `%${q}%`;
   const supabase = createPublicClient();
-  const { data, error } = await supabase
+  const select = "*, product_images(*), category:categories(*), brand:brands(*)";
+
+  const { data: nameMatches, error: nameError } = await supabase
     .from("products")
-    .select("*, product_images(*), category:categories(*), brand:brands(*)")
+    .select(select)
     .eq("status", "published")
-    .or(`name.ilike.%${q}%,description.ilike.%${q}%`)
+    .ilike("name", pattern)
     .order("created_at", { ascending: false })
     .limit(limit);
 
-  if (error) {
-    console.error("searchProducts failed:", error.message);
+  if (nameError) {
+    console.error("searchProducts (name) failed:", nameError.message);
     return [];
   }
-  return (data ?? []) as unknown as ProductWithImages[];
+
+  const results = (nameMatches ?? []) as unknown as ProductWithImages[];
+  if (results.length >= limit) return results.slice(0, limit);
+
+  const { data: descMatches, error: descError } = await supabase
+    .from("products")
+    .select(select)
+    .eq("status", "published")
+    .ilike("description", pattern)
+    .not("name", "ilike", pattern)
+    .order("created_at", { ascending: false })
+    .limit(limit - results.length);
+
+  if (descError) {
+    console.error("searchProducts (description) failed:", descError.message);
+    return results;
+  }
+
+  return [...results, ...((descMatches ?? []) as unknown as ProductWithImages[])];
 }
 
 /** Complementary cross-sells: real products pulled from whichever categories

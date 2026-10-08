@@ -66,14 +66,19 @@ export default async function CategoryPage({
     getCategoryMaxPriceKobo(category.id),
   ]);
 
-  const hasActiveFilters = brandSlugs.length > 0 || inStockOnly || maxPrice != null;
+  // The price slider always submits a value, even untouched — without this,
+  // applying any other filter also baked the slider's full-range default
+  // into the URL as if the shopper had deliberately capped the price.
+  const isMaxPriceActive = maxPrice != null && maxPrice < categoryMaxPrice;
+
+  const hasActiveFilters = brandSlugs.length > 0 || inStockOnly || isMaxPriceActive;
   const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
 
   function pageHref(p: number) {
     const params = new URLSearchParams();
     brandSlugs.forEach((b) => params.append("brand", b));
     if (inStockOnly) params.set("inStock", "1");
-    if (maxPrice != null) params.set("maxPrice", String(maxPrice));
+    if (isMaxPriceActive) params.set("maxPrice", String(maxPrice));
     if (sort !== "featured") params.set("sort", sort);
     if (p > 1) params.set("page", String(p));
     const qs = params.toString();
@@ -119,7 +124,7 @@ export default async function CategoryPage({
                 const params = new URLSearchParams();
                 remaining.forEach((b) => params.append("brand", b));
                 if (inStockOnly) params.set("inStock", "1");
-                if (maxPrice != null) params.set("maxPrice", String(maxPrice));
+                if (isMaxPriceActive) params.set("maxPrice", String(maxPrice));
                 if (sort !== "featured") params.set("sort", sort);
                 return (
                   <Link
@@ -135,7 +140,7 @@ export default async function CategoryPage({
                 (() => {
                   const params = new URLSearchParams();
                   brandSlugs.forEach((b) => params.append("brand", b));
-                  if (maxPrice != null) params.set("maxPrice", String(maxPrice));
+                  if (isMaxPriceActive) params.set("maxPrice", String(maxPrice));
                   if (sort !== "featured") params.set("sort", sort);
                   const qs = params.toString();
                   return (

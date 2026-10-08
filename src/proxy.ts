@@ -62,16 +62,14 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Checkout requires an account (explicit decision — was guest-checkout
-  // by default before). /checkout/callback is deliberately NOT gated here:
-  // Paystack redirects there with only a `reference` query param, which
-  // the page never trusts for anything beyond "which reference to ask
-  // Paystack about" — it doesn't need a session to do that safely.
-  if (pathname === "/checkout" && !user) {
-    const loginUrl = new URL("/account/login", request.url);
-    loginUrl.searchParams.set("next", "/checkout");
-    return NextResponse.redirect(loginUrl);
-  }
+  // /checkout no longer requires an account — guest checkout was
+  // re-enabled after a front-end audit found the account gate was a
+  // significant source of cart abandonment (a prior, documented decision
+  // to require one was deliberately reversed; orders.customer_id has
+  // always been nullable for exactly this). /checkout/callback is never
+  // gated: Paystack redirects there with only a `reference` query param,
+  // which the page never trusts for anything beyond "which reference to
+  // ask Paystack about."
 
   // Staff portal — separate from the customer account system above. A valid session here
   // just means "a real staff account exists and is logged in"; whether

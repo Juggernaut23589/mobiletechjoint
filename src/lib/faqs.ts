@@ -20,7 +20,7 @@ export const FAQS: Faq[] = [
     topic: "Ordering",
     question: "How do I place an order?",
     answer:
-      "Add what you need to your cart, sign in (or create an account in under a minute), confirm your delivery address, and pay securely. You'll get an email confirmation immediately and another when your order is on its way. Prefer to talk it through first? Reach us on Instagram or by phone and we'll guide you.",
+      "Add what you need to your cart, confirm your delivery address, and pay securely — no account required, though creating one lets you track orders and save a card for next time. You'll get an email confirmation immediately and another when your order is on its way. Prefer to talk it through first? Reach us on Instagram or by phone and we'll guide you.",
   },
   {
     id: "payment",

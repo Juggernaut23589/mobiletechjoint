@@ -56,6 +56,40 @@ export function SiteHeader() {
         </div>
       </div>
 
+      {/* Mobile-only search row. The row above hides its search form below
+       *  md (no room next to the hamburger/logo/cart), so without this
+       *  there was no way at all to search on a phone — confirmed missing
+       *  in a full front-end audit. Full-width, always visible, never
+       *  behind a toggle. */}
+      <form
+        action="/search"
+        method="GET"
+        className="relative block px-4 pb-2.5 md:hidden"
+      >
+        <label htmlFor="mtj-mobile-search" className="sr-only">
+          Search products
+        </label>
+        <input
+          id="mtj-mobile-search"
+          type="text"
+          name="q"
+          placeholder="Search cameras, mics, gimbals..."
+          className="w-full rounded-full border border-white/10 bg-[#181C26] py-2.5 pl-9 pr-4 text-[13.5px] text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-brand-600"
+        />
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#7A8299"
+          strokeWidth="2"
+          className="pointer-events-none absolute left-7 top-1/2 -translate-y-1/2"
+        >
+          <circle cx="11" cy="11" r="7" />
+          <path d="M21 21l-4.3-4.3" />
+        </svg>
+      </form>
+
       <CartDrawer />
     </header>
   );

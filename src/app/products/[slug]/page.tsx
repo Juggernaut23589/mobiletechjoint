@@ -84,8 +84,13 @@ export default async function ProductPage({
       {/* Not wrapped in any reveal/fade animation: this is the gallery and
           buy button — the single most important content on this page. It
           must never depend on client JS succeeding just to become visible. */}
-      <div className="grid gap-12 lg:grid-cols-2">
-        <ProductGallery images={images} videos={videos} productName={product.name} />
+      <div className="grid gap-12 lg:grid-cols-2 lg:items-start">
+        {/* Sticky on desktop so the gallery travels with the page instead of
+            leaving blank space once the buy-box column scrolls past it —
+            the right column used to be considerably taller than this one. */}
+        <div className="lg:sticky lg:top-24">
+          <ProductGallery images={images} videos={videos} productName={product.name} />
+        </div>
 
         <div className="flex flex-col gap-1">
           {(product.brand || product.category) && (
@@ -143,12 +148,6 @@ export default async function ProductPage({
             </div>
           )}
 
-          {product.description && (
-            <p className="mb-5 whitespace-pre-line text-sm leading-relaxed text-neutral-600">
-              {product.description}
-            </p>
-          )}
-
           <div className="mb-5">
             {lowStock ? (
               <p className="w-fit rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600">
@@ -185,6 +184,21 @@ export default async function ProductPage({
           </div>
         </div>
       </div>
+
+      {/* The full manufacturer description now lives here, collapsed by
+          default, instead of standing between the shopper and the Add to
+          Cart button above — it used to push the buy box several screens
+          down on products with long migrated copy. */}
+      {product.description && (
+        <details className="mt-12 max-w-3xl border-t border-neutral-200 pt-8">
+          <summary className="cursor-pointer text-base font-semibold text-brand-900">
+            Full description
+          </summary>
+          <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-neutral-600">
+            {product.description}
+          </p>
+        </details>
+      )}
 
       {frequentlyBoughtTogether.length > 0 && (
         <div className="mt-14 border-t border-neutral-200 pt-10">

@@ -40,11 +40,10 @@ export function DealsSection({ products }: { products: ProductWithImages[] }) {
           </div>
         </div>
       </RevealOnScroll>
+      {/* Not reveal-wrapped — merchandising, not decoration (see ProductSection). */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-        {products.map((product, i) => (
-          <RevealOnScroll key={product.id} delay={Math.min(i, 4) * 0.05} className="h-full">
-            <ProductCard product={product} />
-          </RevealOnScroll>
+        {products.map((product) => (
+          <ProductCard key={product.id} product={product} />
         ))}
       </div>
     </section>

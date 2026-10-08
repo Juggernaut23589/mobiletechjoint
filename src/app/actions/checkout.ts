@@ -50,12 +50,9 @@ export async function initiateCheckout(input: CheckoutInput): Promise<CheckoutRe
     data: { user },
   } = await authClient.auth.getUser();
 
-  // Checkout requires an account — proxy.ts already redirects an
-  // unauthenticated visitor away from /checkout, but a Server Action can
-  // be invoked directly, so it must not rely on that page-level gate alone.
-  if (!user) {
-    return { ok: false, error: "Please log in to check out." };
-  }
+  // Guest checkout: orders.customer_id is nullable precisely for this —
+  // an account is optional, not required. A logged-in customer still gets
+  // the order linked to their account automatically (user.id below).
 
   const stateEntry = NIGERIA_STATES.find((s) => s.name === input.deliveryState);
   if (!stateEntry) {
@@ -125,7 +122,7 @@ export async function initiateCheckout(input: CheckoutInput): Promise<CheckoutRe
   const subtotalKobo = totalKobo;
   let discount: { id: string; code: string; kobo: number } | null = null;
   if (input.discountCode?.trim()) {
-    const result = await validateDiscountCode(input.discountCode, { subtotalKobo, customerId: user.id });
+    const result = await validateDiscountCode(input.discountCode, { subtotalKobo, customerId: user?.id ?? null });
     if (!result.ok) return { ok: false, error: result.error };
     discount = { id: result.code.id, code: result.code.code, kobo: result.discountKobo };
     totalKobo -= result.discountKobo;
@@ -147,8 +144,10 @@ export async function initiateCheckout(input: CheckoutInput): Promise<CheckoutRe
       customer_name: input.customerName,
       customer_email: input.customerEmail,
       customer_phone: input.customerPhone || null,
-      customer_id: user.id,
-      save_card_requested: Boolean(input.saveCard),
+      customer_id: user?.id ?? null,
+      // A card can only be saved against a real account — a guest has
+      // nowhere for it to live, regardless of what the client sent.
+      save_card_requested: Boolean(input.saveCard) && Boolean(user),
       status: "pending",
       total_kobo: totalKobo,
       currency: "NGN",
@@ -255,7 +254,6 @@ export async function checkDiscountCode(
   const {
     data: { user },
   } = await authClient.auth.getUser();
-  if (!user) return { ok: false, error: "Please log in to use a discount code." };
   if (!code.trim()) return { ok: false, error: "Enter a code." };
 
   const { data: products } = await createServiceClient()
@@ -265,7 +263,7 @@ export async function checkDiscountCode(
   const priceById = new Map((products ?? []).filter((p) => p.status === "published").map((p) => [p.id, p.price_kobo ?? 0]));
   const subtotalKobo = items.reduce((s, i) => s + (priceById.get(i.productId) ?? 0) * Math.max(0, Math.floor(i.quantity)), 0);
 
-  const result = await validateDiscountCode(code, { subtotalKobo, customerId: user.id });
+  const result = await validateDiscountCode(code, { subtotalKobo, customerId: user?.id ?? null });
   if (!result.ok) return result;
   return { ok: true, discountKobo: result.discountKobo, label: describeDiscount(result.code), code: result.code.code };
 }
