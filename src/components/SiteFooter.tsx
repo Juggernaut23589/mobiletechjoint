@@ -55,6 +55,21 @@ export function SiteFooter() {
                 Deals
               </Link>
             </li>
+            <li>
+              <Link href="/returns-refunds" className="hover:text-white">
+                Returns &amp; Refunds
+              </Link>
+            </li>
+            <li>
+              <Link href="/privacy-policy" className="hover:text-white">
+                Privacy Policy
+              </Link>
+            </li>
+            <li>
+              <Link href="/terms-of-service" className="hover:text-white">
+                Terms of Service
+              </Link>
+            </li>
           </ul>
           <h4 className="mb-3.5 text-[13.5px] font-semibold text-white">Payment</h4>
           <div className="flex items-start gap-2 text-sm">

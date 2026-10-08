@@ -4,6 +4,9 @@ import { useActionState, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { signIn } from "@/app/actions/account";
+import { AuthLayout } from "@/components/AuthLayout";
+import { PasswordInput } from "@/components/PasswordInput";
+import { CheckoutCartReminder } from "@/components/CheckoutCartReminder";
 
 function LoginForm() {
   const searchParams = useSearchParams();
@@ -15,7 +18,8 @@ function LoginForm() {
   );
 
   return (
-    <div className="mx-auto flex min-h-[70vh] max-w-sm items-center px-4 py-8">
+    <AuthLayout>
+      <CheckoutCartReminder next={next} />
       <form action={formAction} className="w-full">
         <h1 className="mb-1 text-xl font-bold text-brand-900">Log in</h1>
         <p className="mb-6 text-sm text-neutral-500">
@@ -41,10 +45,9 @@ function LoginForm() {
         <label htmlFor="password" className="mb-1 block text-sm font-medium">
           Password
         </label>
-        <input
+        <PasswordInput
           id="password"
           name="password"
-          type="password"
           required
           className="mb-3 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
         />
@@ -62,8 +65,17 @@ function LoginForm() {
         >
           {pending ? "Logging in…" : "Log in"}
         </button>
+
+        {next === "/checkout" && (
+          <Link
+            href="/checkout"
+            className="mt-3 block text-center text-[13px] font-medium text-neutral-500 hover:text-brand-700"
+          >
+            Continue as a guest instead
+          </Link>
+        )}
       </form>
-    </div>
+    </AuthLayout>
   );
 }
 

@@ -3,6 +3,8 @@
 import { useActionState } from "react";
 import Link from "next/link";
 import { signUp } from "@/app/actions/account";
+import { AuthLayout } from "@/components/AuthLayout";
+import { PasswordInput } from "@/components/PasswordInput";
 
 export default function SignupPage() {
   const [state, formAction, pending] = useActionState(
@@ -11,7 +13,7 @@ export default function SignupPage() {
   );
 
   return (
-    <div className="mx-auto flex min-h-[70vh] max-w-sm items-center px-4 py-8">
+    <AuthLayout>
       <form action={formAction} className="w-full">
         <h1 className="mb-1 text-xl font-bold text-brand-900">Create an account</h1>
         <p className="mb-6 text-sm text-neutral-500">
@@ -56,10 +58,9 @@ export default function SignupPage() {
         <label htmlFor="password" className="mb-1 block text-sm font-medium">
           Password
         </label>
-        <input
+        <PasswordInput
           id="password"
           name="password"
-          type="password"
           required
           minLength={8}
           className="mb-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
@@ -80,6 +81,6 @@ export default function SignupPage() {
           {pending ? "Creating account…" : "Create account"}
         </button>
       </form>
-    </div>
+    </AuthLayout>
   );
 }
