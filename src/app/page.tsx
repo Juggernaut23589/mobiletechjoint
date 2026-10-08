@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import {
   getFeaturedProducts,
   getNewArrivals,
@@ -5,7 +7,6 @@ import {
   getCategoriesWithCounts,
   getHeroBrandShowcase,
   getBrandShelves,
-  getBrandsWithCounts,
 } from "@/lib/products";
 import { FAQS } from "@/lib/faqs";
 import { ProductSection } from "@/components/ProductSection";
@@ -15,7 +16,6 @@ import { CategoryQuickGrid } from "@/components/CategoryQuickGrid";
 import { PromoBanner } from "@/components/PromoBanner";
 import { NewArrivalsMarquee } from "@/components/NewArrivalsMarquee";
 import { BrandShelf } from "@/components/BrandShelf";
-import { BrandIndexStrip } from "@/components/BrandIndexStrip";
 import { FaqCarousel } from "@/components/FaqCarousel";
 import { TeamSection } from "@/components/TeamSection";
 import { NewsletterForm } from "@/components/NewsletterForm";
@@ -27,19 +27,21 @@ import { SectionHeader } from "@/components/ui/SectionHeader";
 // single request.
 export const revalidate = 60;
 
-const BRAND_SHELVES = 8;
+// Was 8 — a long run of brand shelves (each already a spotlight panel +
+// 3 products) made the homepage read as repetitive. The full catalogue
+// of brands is still one click away via "View all brands" below.
+const BRAND_SHELVES = 3;
 const PRODUCTS_PER_SHELF = 3;
 const NEW_ARRIVALS = 12;
 
 export default async function HomePage() {
-  const [featured, newArrivals, deals, categories, heroBrandSlides, allBrands] =
+  const [featured, newArrivals, deals, categories, heroBrandSlides] =
     await Promise.all([
       getFeaturedProducts(8),
       getNewArrivals(NEW_ARRIVALS),
       getDealsProducts(8),
       getCategoriesWithCounts(),
       getHeroBrandShowcase(),
-      getBrandsWithCounts(),
     ]);
 
   const alreadyShown = [...featured, ...newArrivals, ...deals].map((p) => p.id);
@@ -75,8 +77,14 @@ export default async function HomePage() {
           </div>
         )}
 
-        <div className="pb-16">
-          <BrandIndexStrip brands={allBrands} />
+        <div className="flex justify-center pb-16">
+          <Link
+            href="/brands"
+            className="group inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.03] px-6 py-3 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:border-accent-500 hover:text-accent-400"
+          >
+            View all brands
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+          </Link>
         </div>
       </div>
 

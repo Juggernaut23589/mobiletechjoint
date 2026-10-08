@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Mail, Phone, AtSign, MapPin, ShieldCheck } from "lucide-react";
 import { FooterCategoryLinks } from "@/components/FooterCategoryLinks";
 import { Logo } from "@/components/Logo";
+import { VisaMark, MastercardMark, PaystackMark } from "@/components/PaymentLogos";
 
 /** Dark footer matching the approved design-system mockup (Main.dc.html):
  *  brand blurb, real category links, payment trust badges, and contact —
@@ -127,18 +128,9 @@ export function SiteFooter() {
       <div className="mx-auto mt-9 flex max-w-[1360px] flex-wrap items-center justify-between gap-4 border-t border-[#1C2029] pt-6">
         <p className="text-xs">© {new Date().getFullYear()} mobiletechjoint. All rights reserved.</p>
         <div className="flex items-center gap-2.5">
-          <span className="rounded-md bg-[#151A24] px-3 py-1.5 text-[11.5px] text-[#B7BECF]">
-            Visa
-          </span>
-          <span className="rounded-md bg-[#151A24] px-3 py-1.5 text-[11.5px] text-[#B7BECF]">
-            Mastercard
-          </span>
-          <span className="rounded-md bg-[#151A24] px-3 py-1.5 text-[11.5px] font-semibold text-[#00C3F7]">
-            Paystack
-          </span>
-          <Link href="/staff/login" className="ml-2 text-xs hover:text-white">
-            Staff Login
-          </Link>
+          <VisaMark />
+          <MastercardMark />
+          <PaystackMark />
         </div>
       </div>
     </footer>

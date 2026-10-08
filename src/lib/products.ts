@@ -469,7 +469,10 @@ export async function getHeroBrandShowcase(): Promise<HeroBrandSlide[]> {
         brandName: brand.name,
         brandSlug: brand.slug,
         tagline: look.tagline,
-        gradient: look.gradient,
+        // A fixed dark film, not each brand's own hue (look.gradient) —
+        // nine slides cycling through nine different colors read as
+        // visual noise on an otherwise disciplined black/yellow page.
+        gradient: "linear-gradient(120deg, rgba(8,8,8,0.92) 0%, rgba(8,8,8,0.68) 100%)",
         products: withPhotos,
       };
     })

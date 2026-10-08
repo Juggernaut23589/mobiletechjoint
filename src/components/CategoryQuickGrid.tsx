@@ -6,12 +6,14 @@ import {
   Plug,
   HardDrive,
   Package,
+  Drone,
   type LucideIcon,
 } from "lucide-react";
 import type { CategoryWithCount } from "@/types/database";
 
 function iconFor(name: string): LucideIcon {
   const n = name.toLowerCase();
+  if (n.includes("drone")) return Drone;
   if (n.includes("camera") || n.includes("video")) return Camera;
   if (n.includes("light")) return Lightbulb;
   if (n.includes("audio") || n.includes("mic") || n.includes("sound")) return Headphones;
@@ -22,19 +24,26 @@ function iconFor(name: string): LucideIcon {
 
 /** "Shop by category" row — flat, uniform outlined icon tiles with a
  *  centered label underneath (matching camerajoint.ng's reference layout),
- *  real categories, up to 8, sorted by product count. */
+ *  real categories, sorted by product count, with Drones always pinned in
+ *  even though its count alone wouldn't put it in the natural top 8. */
 export function CategoryQuickGrid({ categories }: { categories: CategoryWithCount[] }) {
-  const top = categories
-    .filter((c) => c.product_count > 0)
-    .sort((a, b) => b.product_count - a.product_count)
-    .slice(0, 8);
+  const withStock = categories.filter((c) => c.product_count > 0);
+  const bySize = [...withStock].sort((a, b) => b.product_count - a.product_count);
+
+  const top = bySize.slice(0, 7);
+  const drones = withStock.find((c) => c.slug === "drones");
+  if (drones && !top.some((c) => c.id === drones.id)) {
+    top.push(drones);
+  } else if (!drones) {
+    top.push(...bySize.slice(7, 8));
+  }
 
   if (top.length === 0) return null;
 
   return (
-    <section className="mx-auto max-w-[1360px] px-4 pb-2 pt-14 sm:px-8">
+    <section className="mx-auto max-w-[1360px] px-4 pb-2 pt-14 text-center sm:px-8">
       <h2 className="font-display mb-5.5 text-2xl text-white">Shop by category</h2>
-      <div className="flex flex-wrap justify-center gap-x-7 gap-y-6 sm:justify-start">
+      <div className="flex flex-wrap justify-center gap-x-7 gap-y-6">
         {top.map((c) => {
           const Icon = iconFor(c.name);
           return (

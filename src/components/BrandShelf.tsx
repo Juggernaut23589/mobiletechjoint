@@ -19,23 +19,21 @@ export function BrandShelf({ shelf, index }: { shelf: BrandShelfData; index: num
         <RevealOnScroll className={`h-full ${flipped ? "lg:order-last" : ""}`}>
           <Link
             href={href}
-            className="group relative flex h-full min-h-[240px] flex-col justify-between overflow-hidden rounded-[22px] p-6 text-white transition-transform duration-300 hover:-translate-y-1.5 hover:shadow-glow lg:min-h-0"
-            style={{ background: editorial.gradient }}
+            className="group relative flex h-full min-h-[240px] flex-col justify-between overflow-hidden rounded-[22px] bg-[linear-gradient(135deg,#161616_0%,#0a0a0a_100%)] p-6 text-white transition-transform duration-300 hover:-translate-y-1.5 hover:shadow-glow lg:min-h-0"
           >
             <div className="bg-grid-texture absolute inset-0 opacity-50" aria-hidden="true" />
+            {/* A fixed yellow glow, not each brand's own hue (editorial.accent
+                is still used for the live /brand/[slug] page) — a run of
+                shelves cycling through different colors read as noise next
+                to the rest of the now-disciplined black/yellow homepage. */}
             <div
-              className="absolute -right-16 -top-16 h-48 w-48 rounded-full opacity-30 blur-3xl transition-opacity duration-500 group-hover:opacity-60"
-              style={{ background: editorial.accent }}
+              className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-accent-500 opacity-20 blur-3xl transition-opacity duration-500 group-hover:opacity-40"
               aria-hidden="true"
             />
 
             <div className="relative">
               <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-white/85 backdrop-blur-sm">
-                <span
-                  className="h-1.5 w-1.5 rounded-full"
-                  style={{ background: editorial.accent }}
-                  aria-hidden="true"
-                />
+                <span className="h-1.5 w-1.5 rounded-full bg-accent-500" aria-hidden="true" />
                 {brand.name}
               </span>
               <h2 className="font-display mt-5 text-[26px] font-bold leading-[1.08] tracking-tight sm:text-[30px]">
