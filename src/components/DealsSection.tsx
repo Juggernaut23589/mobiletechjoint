@@ -14,7 +14,10 @@ export function DealsSection({ products }: { products: ProductWithImages[] }) {
   return (
     <section className="mb-14">
       <RevealOnScroll>
-        <div className="relative mb-5 overflow-hidden rounded-[22px] bg-gradient-to-r from-red via-[#ff5a4a] to-accent-500 px-6 py-5 text-white shadow-glow-accent sm:px-8">
+        {/* Ends in a dark bronze, not accent-500 — that's now a vivid
+            yellow, and this banner carries white text the whole way
+            across it. */}
+        <div className="relative mb-5 overflow-hidden rounded-[22px] bg-gradient-to-r from-red via-[#ff5a4a] to-[#b45309] px-6 py-5 text-white shadow-glow-accent sm:px-8">
           <div className="bg-grid-texture absolute inset-0 opacity-40" aria-hidden="true" />
           <div className="relative flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3.5">

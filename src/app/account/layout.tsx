@@ -35,9 +35,9 @@ export default async function AccountLayout({ children }: { children: React.Reac
               {initials}
             </div>
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-neutral-900">{name}</p>
+              <p className="truncate text-sm font-semibold text-white">{name}</p>
               {memberSinceYear && (
-                <p className="text-xs text-neutral-500">Member since {memberSinceYear}</p>
+                <p className="text-xs text-white/50">Member since {memberSinceYear}</p>
               )}
             </div>
           </div>

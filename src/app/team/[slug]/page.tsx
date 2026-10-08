@@ -88,10 +88,10 @@ export default async function TeamMemberPage({
             <span className="mb-2 inline-block text-[11.5px] font-bold uppercase tracking-[0.16em] text-accent-500">
               What {member.firstName} does here
             </span>
-            <h2 className="font-display mb-6 text-[26px] font-bold leading-[1.1] tracking-tight text-brand-900 sm:text-[30px]">
+            <h2 className="font-display mb-6 text-[26px] font-bold leading-[1.1] tracking-tight text-white sm:text-[30px]">
               Why the {member.role.toLowerCase()} decides what you can buy.
             </h2>
-            <div className="space-y-5 text-[16px] leading-[1.75] text-neutral-700">
+            <div className="space-y-5 text-[16px] leading-[1.75] text-white/70">
               {member.bio.map((paragraph, i) => (
                 <p key={i}>{paragraph}</p>
               ))}
@@ -147,7 +147,7 @@ export default async function TeamMemberPage({
 
             <Link
               href="/team"
-              className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-brand-700 hover:text-brand-900"
+              className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-accent-400 hover:text-white"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to the whole team

@@ -19,10 +19,10 @@ export default async function AccountOverviewPage() {
 
   return (
     <div>
-      <h1 className="mb-1 font-display text-2xl text-brand-900">
+      <h1 className="mb-1 font-display text-2xl text-white">
         Hi{profile?.full_name ? `, ${profile.full_name.split(" ")[0]}` : ""}
       </h1>
-      <p className="mb-6 text-sm text-neutral-500">{user.email}</p>
+      <p className="mb-6 text-sm text-white/50">{user.email}</p>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="rounded-lg border border-neutral-200 bg-white p-4">
@@ -39,20 +39,20 @@ export default async function AccountOverviewPage() {
 
       <div className="mt-8">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-neutral-500">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-white/50">
             Recent Orders
           </h2>
           {orders.length > 0 && (
-            <Link href="/account/orders" className="text-sm font-medium text-brand-600 hover:underline">
+            <Link href="/account/orders" className="text-sm font-medium text-accent-400 hover:text-white hover:underline">
               View all
             </Link>
           )}
         </div>
 
         {recentOrders.length === 0 ? (
-          <p className="text-sm text-neutral-500">
+          <p className="text-sm text-white/50">
             No orders yet.{" "}
-            <Link href="/" className="font-medium text-brand-600 hover:underline">
+            <Link href="/" className="font-medium text-accent-400 hover:text-white hover:underline">
               Start shopping
             </Link>
           </p>

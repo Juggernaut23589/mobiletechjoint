@@ -59,7 +59,7 @@ export function NewArrivalsMarquee({ products }: { products: ProductWithImages[]
         </div>
 
         <div className="mt-5 flex items-center justify-between">
-          <p className="text-xs text-neutral-400">Auto-scrolling · {products.length} new items · pauses while you browse</p>
+          <p className="text-xs text-white/35">Auto-scrolling · {products.length} new items · pauses while you browse</p>
           <div className="flex gap-2.5">
             <button
               type="button"

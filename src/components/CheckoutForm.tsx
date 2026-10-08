@@ -127,11 +127,11 @@ export function CheckoutForm({
 
   const inputClass =
     "w-full rounded-[10px] border border-neutral-200 bg-white px-3.5 py-2.5 text-[13.5px] outline-none transition-colors focus:border-brand-600 focus:ring-2 focus:ring-brand-100";
-  const labelClass = "mb-1.5 block text-[13px] font-semibold text-neutral-900";
+  const labelClass = "mb-1.5 block text-[13px] font-semibold text-white/80";
 
   return (
     <div className="mx-auto max-w-[1000px] px-4 py-10 sm:px-8">
-      <div className="flex items-center gap-2.5 pb-10 text-[13px] text-neutral-500">
+      <div className="flex items-center gap-2.5 pb-10 text-[13px] text-white/50">
         {["Cart", "Shipping", "Payment"].map((label, i, arr) => (
           <div key={label} className="flex flex-1 items-center gap-2.5 last:flex-none">
             <div className="flex items-center gap-2">
@@ -140,15 +140,15 @@ export function CheckoutForm({
                   i < 1
                     ? "bg-[#16C784] text-white"
                     : i === 1
-                      ? "bg-brand-600 text-white"
-                      : "bg-neutral-200 text-neutral-500"
+                      ? "bg-accent-500 text-brand-900"
+                      : "bg-white/10 text-white/50"
                 }`}
               >
                 {i < 1 ? "✓" : i + 1}
               </span>
-              <span className={i === 1 ? "font-semibold text-neutral-900" : ""}>{label}</span>
+              <span className={i === 1 ? "font-semibold text-white" : ""}>{label}</span>
             </div>
-            {i < arr.length - 1 && <div className="h-0.5 flex-1 bg-neutral-200" />}
+            {i < arr.length - 1 && <div className="h-0.5 flex-1 bg-white/10" />}
           </div>
         ))}
       </div>
@@ -166,7 +166,7 @@ export function CheckoutForm({
               </Link>
             </div>
           )}
-          <h2 className="font-display mb-4.5 text-lg text-brand-900">Shipping Information</h2>
+          <h2 className="font-display mb-4.5 text-lg text-white">Shipping Information</h2>
           <div className="grid grid-cols-2 gap-3.5">
             <div>
               <label htmlFor="name" className={labelClass}>
@@ -262,16 +262,16 @@ export function CheckoutForm({
             </div>
           </div>
 
-          <h2 className="font-display mb-4 mt-7 text-lg text-brand-900">Payment Method</h2>
+          <h2 className="font-display mb-4 mt-7 text-lg text-white">Payment Method</h2>
           {savedMethods.length > 0 && (
             <div className="mb-4 flex flex-col gap-2.5">
               {savedMethods.map((method) => (
                 <label
                   key={method.id}
-                  className={`flex items-center gap-2.5 rounded-[14px] border-[1.5px] px-4 py-3.5 text-sm transition-colors ${
+                  className={`flex items-center gap-2.5 rounded-[14px] border-[1.5px] px-4 py-3.5 text-sm text-white transition-colors ${
                     !useNewCard && selectedMethodId === method.id
-                      ? "border-brand-600 bg-brand-50"
-                      : "border-neutral-200"
+                      ? "border-accent-500 bg-accent-500/10"
+                      : "border-white/15"
                   }`}
                 >
                   <input
@@ -289,8 +289,8 @@ export function CheckoutForm({
                 </label>
               ))}
               <label
-                className={`flex items-center gap-2.5 rounded-[14px] border-[1.5px] px-4 py-3.5 text-sm transition-colors ${
-                  useNewCard ? "border-brand-600 bg-brand-50" : "border-neutral-200"
+                className={`flex items-center gap-2.5 rounded-[14px] border-[1.5px] px-4 py-3.5 text-sm text-white transition-colors ${
+                  useNewCard ? "border-accent-500 bg-accent-500/10" : "border-white/15"
                 }`}
               >
                 <input
@@ -308,7 +308,7 @@ export function CheckoutForm({
             transfer, or USSD details — this site never sees or stores your card number.
           </div>
           {useNewCard && !isGuest && (
-            <label className="mt-3.5 flex items-center gap-2 text-sm text-neutral-600">
+            <label className="mt-3.5 flex items-center gap-2 text-sm text-white/70">
               <input
                 type="checkbox"
                 checked={saveCard}

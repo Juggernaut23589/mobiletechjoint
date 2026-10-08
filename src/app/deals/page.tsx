@@ -21,7 +21,7 @@ export default async function DealsPage() {
       </div>
 
       {products.length === 0 ? (
-        <p className="text-neutral-500">No active deals right now — check back soon.</p>
+        <p className="text-white/50">No active deals right now — check back soon.</p>
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {products.map((product) => (

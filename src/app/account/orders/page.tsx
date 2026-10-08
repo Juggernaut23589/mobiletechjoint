@@ -14,12 +14,12 @@ export default async function OrdersPage() {
 
   return (
     <div>
-      <h1 className="mb-6 font-display text-2xl text-brand-900">Your Orders</h1>
+      <h1 className="mb-6 font-display text-2xl text-white">Your Orders</h1>
 
       {orders.length === 0 ? (
-        <p className="text-sm text-neutral-500">
+        <p className="text-sm text-white/50">
           No orders yet.{" "}
-          <Link href="/" className="font-medium text-brand-600 hover:underline">
+          <Link href="/" className="font-medium text-accent-400 hover:text-white hover:underline">
             Start shopping
           </Link>
         </p>

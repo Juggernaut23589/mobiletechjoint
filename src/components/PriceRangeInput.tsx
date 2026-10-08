@@ -21,14 +21,14 @@ export function PriceRangeInput({ max, initial }: { max: number; initial: number
         step={Math.max(1000, Math.round(max / 200))}
         value={value}
         onChange={(e) => setValue(Number(e.target.value))}
-        className="mb-2.5 w-full accent-brand-600"
+        className="mb-2.5 w-full accent-accent-500"
       />
-      <div className="flex items-center gap-2 text-xs text-neutral-500">
-        <span className="flex-1 rounded-md border border-neutral-200 px-2 py-1.5 text-center">
+      <div className="flex items-center gap-2 text-xs text-white/60">
+        <span className="flex-1 rounded-md border border-white/15 px-2 py-1.5 text-center">
           {formatNaira(0)}
         </span>
         <span>–</span>
-        <span className="flex-1 rounded-md border border-neutral-200 px-2 py-1.5 text-center">
+        <span className="flex-1 rounded-md border border-white/15 px-2 py-1.5 text-center">
           {formatNaira(value)}
         </span>
       </div>

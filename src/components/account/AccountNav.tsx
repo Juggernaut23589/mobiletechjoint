@@ -25,7 +25,7 @@ export function AccountNav() {
             key={item.href}
             href={item.href}
             className={`shrink-0 rounded-[10px] px-3.5 py-2.5 text-[13.5px] font-semibold transition-colors ${
-              active ? "bg-brand-50 text-brand-700" : "text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900"
+              active ? "bg-accent-500/10 text-accent-400" : "text-white/50 hover:bg-white/5 hover:text-white"
             }`}
           >
             {item.label}

@@ -97,20 +97,20 @@ export default async function BrandPage({
       </section>
 
       <div className="mx-auto max-w-[1360px] px-4 py-10 sm:px-8 sm:py-12">
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-2 text-sm text-neutral-500">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-2 text-sm text-white/50">
           <span>
-            Showing <strong className="text-neutral-900">{total === 0 ? 0 : first}–{last}</strong>{" "}
-            of <strong className="text-neutral-900">{total}</strong>
+            Showing <strong className="text-white">{total === 0 ? 0 : first}–{last}</strong>{" "}
+            of <strong className="text-white">{total}</strong>
           </span>
           {totalPages > 1 && (
             <span>
-              Page <strong className="text-neutral-900">{page}</strong> of {totalPages}
+              Page <strong className="text-white">{page}</strong> of {totalPages}
             </span>
           )}
         </div>
 
         {products.length === 0 ? (
-          <p className="text-neutral-500">No {brand.name} products are published right now.</p>
+          <p className="text-white/50">No {brand.name} products are published right now.</p>
         ) : (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
             {products.map((product) => (

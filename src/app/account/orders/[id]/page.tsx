@@ -30,10 +30,10 @@ export default async function OrderDetailPage({
     <div>
       <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-brand-900">
+          <h1 className="text-xl font-bold tracking-tight text-white">
             {order.paystack_reference}
           </h1>
-          <p className="text-sm text-neutral-500">
+          <p className="text-sm text-white/50">
             Placed {new Date(order.created_at).toLocaleString()}
           </p>
         </div>

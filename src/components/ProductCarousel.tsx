@@ -25,7 +25,7 @@ export function ProductCarousel({
   return (
     <section className="mx-auto max-w-[1360px] px-4 pt-14 sm:px-8">
       <div className="mb-5 flex items-baseline justify-between">
-        <h2 className="font-display text-2xl text-brand-900">{title}</h2>
+        <h2 className="font-display text-2xl text-white">{title}</h2>
         <div className="flex gap-2.5">
           <button
             type="button"

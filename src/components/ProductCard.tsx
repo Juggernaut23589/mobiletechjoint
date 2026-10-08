@@ -25,7 +25,7 @@ export function ProductCard({
   const lowStock = !outOfStock && product.stock_quantity <= 3;
 
   return (
-    <div className="group relative flex h-full flex-col overflow-hidden rounded-[20px] border border-neutral-200/60 bg-white transition-all duration-300 [container-type:inline-size] hover:-translate-y-1.5 hover:border-transparent hover:shadow-glow">
+    <div className="group relative flex h-full flex-col overflow-hidden rounded-[20px] border border-white/10 bg-[#141414] transition-all duration-300 [container-type:inline-size] hover:-translate-y-1.5 hover:border-accent-500/40 hover:shadow-glow">
       <Link href={`/products/${product.slug}`} className="flex flex-1 flex-col">
         <div className="relative aspect-square overflow-hidden bg-gradient-to-b from-[#f7f8fb] to-[#eef0f6]">
           {cover ? (
@@ -54,7 +54,7 @@ export function ProductCard({
               </span>
             )}
             {!outOfStock && discount === null && isNew && (
-              <span className="bg-accent-gradient rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
+              <span className="bg-accent-gradient rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-brand-900">
                 New
               </span>
             )}
@@ -71,24 +71,24 @@ export function ProductCard({
               {product.category.name}
             </span>
           ) : null}
-          <h3 className="line-clamp-2 text-[13.5px] font-medium leading-snug text-neutral-900">
+          <h3 className="line-clamp-2 text-[13.5px] font-medium leading-snug text-white">
             {product.name}
           </h3>
           {product.rating_count > 0 && product.rating_avg !== null && (
             <div className="flex items-center gap-1.5">
               <StarRating rating={product.rating_avg} size={11} />
-              <span className="text-[10.5px] text-neutral-400">({product.rating_count})</span>
+              <span className="text-[10.5px] text-white/40">({product.rating_count})</span>
             </div>
           )}
           <div className="mt-auto flex items-end justify-between gap-2 pt-1">
             <div className="flex flex-wrap items-baseline gap-x-2">
               {/* price_kobo is NOT NULL for any product with status='published' —
                   enforced by the price_required_when_published CHECK constraint. */}
-              <p className="font-display text-[15.5px] font-bold text-brand-900">
+              <p className="font-display text-[15.5px] font-bold text-white">
                 {formatNaira(priceKobo)}
               </p>
               {discount !== null && (
-                <p className="text-xs text-neutral-400 line-through">
+                <p className="text-xs text-white/35 line-through">
                   {formatNaira(product.compare_at_price_kobo!)}
                 </p>
               )}

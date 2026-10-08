@@ -24,17 +24,17 @@ export default async function SearchPage({
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:py-16">
-      <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-brand-900">
+      <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-white">
         {query ? `Results for "${query}"` : "Search"}
       </h1>
-      <p className="mb-8 text-sm text-neutral-500">
+      <p className="mb-8 text-sm text-white/50">
         {query
           ? `${products.length} product${products.length === 1 ? "" : "s"} found`
           : "Search for cameras, mics, gimbals, and more."}
       </p>
 
       {query && products.length === 0 ? (
-        <p className="text-neutral-500">No products matched your search.</p>
+        <p className="text-white/50">No products matched your search.</p>
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {products.map((product) => (

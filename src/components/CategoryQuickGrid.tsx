@@ -33,7 +33,7 @@ export function CategoryQuickGrid({ categories }: { categories: CategoryWithCoun
 
   return (
     <section className="mx-auto max-w-[1360px] px-4 pb-2 pt-14 sm:px-8">
-      <h2 className="font-display mb-5.5 text-2xl text-brand-900">Shop by category</h2>
+      <h2 className="font-display mb-5.5 text-2xl text-white">Shop by category</h2>
       <div className="flex flex-wrap justify-center gap-x-7 gap-y-6 sm:justify-start">
         {top.map((c) => {
           const Icon = iconFor(c.name);
@@ -43,10 +43,10 @@ export function CategoryQuickGrid({ categories }: { categories: CategoryWithCoun
               href={`/category/${c.slug}`}
               className="group flex w-[92px] flex-col items-center gap-2 text-center"
             >
-              <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-neutral-200 bg-white transition-colors group-hover:border-brand-600">
-                <Icon className="h-5.5 w-5.5 text-brand-900" strokeWidth={1.6} />
+              <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-white/15 bg-white/[0.03] transition-colors group-hover:border-accent-500">
+                <Icon className="h-5.5 w-5.5 text-accent-400" strokeWidth={1.6} />
               </div>
-              <span className="text-[11px] font-bold uppercase leading-tight tracking-wide text-brand-900">
+              <span className="text-[11px] font-bold uppercase leading-tight tracking-wide text-white/80">
                 {c.name}
               </span>
             </Link>

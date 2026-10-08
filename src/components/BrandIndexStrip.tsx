@@ -12,16 +12,16 @@ export function BrandIndexStrip({ brands }: { brands: BrandWithCount[] }) {
 
   return (
     <RevealOnScroll>
-      <section className="rounded-[24px] border border-neutral-200/70 bg-white px-5 py-6 sm:px-8 sm:py-7">
+      <section className="rounded-[24px] border border-white/10 bg-[#141414] px-5 py-6 sm:px-8 sm:py-7">
         <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
           <div className="max-w-sm">
             <span className="mb-1.5 block text-[11.5px] font-bold uppercase tracking-[0.16em] text-accent-500">
               Every manufacturer
             </span>
-            <h3 className="font-display text-xl font-bold tracking-tight text-brand-900">
+            <h3 className="font-display text-xl font-bold tracking-tight text-white">
               Looking for a specific brand?
             </h3>
-            <p className="mt-1.5 text-[13.5px] leading-relaxed text-neutral-500">
+            <p className="mt-1.5 text-[13.5px] leading-relaxed text-white/50">
               Jump straight to a manufacturer, or browse by category from the menu above.
             </p>
           </div>
@@ -30,7 +30,7 @@ export function BrandIndexStrip({ brands }: { brands: BrandWithCount[] }) {
               <li key={b.id}>
                 <Link
                   href={`/brand/${b.slug}`}
-                  className="group inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-surface px-3.5 py-2 text-[13px] font-semibold text-neutral-800 transition-all hover:-translate-y-0.5 hover:border-brand-600 hover:bg-brand-50 hover:text-brand-700"
+                  className="group inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.03] px-3.5 py-2 text-[13px] font-semibold text-white/80 transition-all hover:-translate-y-0.5 hover:border-accent-500 hover:bg-accent-500/10 hover:text-accent-400"
                 >
                   {b.name}
                   <ArrowUpRight className="h-3.5 w-3.5 opacity-0 transition-opacity group-hover:opacity-100" />

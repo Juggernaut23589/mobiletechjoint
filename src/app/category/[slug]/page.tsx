@@ -87,12 +87,12 @@ export default async function CategoryPage({
 
   return (
     <div className="mx-auto max-w-[1360px] px-4 py-6 sm:px-8">
-      <div className="mb-4.5 text-[13px] text-neutral-500">
-        <Link href="/" className="text-brand-600 hover:text-brand-700">
+      <div className="mb-4.5 text-[13px] text-white/50">
+        <Link href="/" className="text-accent-400 hover:text-white">
           Home
         </Link>
         <span className="mx-1.5">/</span>
-        <span className="text-neutral-900">{category.name}</span>
+        <span className="text-white">{category.name}</span>
       </div>
 
       <div className="flex flex-col gap-8 lg:flex-row">
@@ -108,8 +108,8 @@ export default async function CategoryPage({
 
         <div className="min-w-0 flex-1">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-2.5">
-            <div className="text-sm text-neutral-500">
-              Showing <strong className="text-neutral-900">{total}</strong> result
+            <div className="text-sm text-white/50">
+              Showing <strong className="text-white">{total}</strong> result
               {total === 1 ? "" : "s"}
             </div>
             <SortSelect current={sort} />
@@ -156,7 +156,7 @@ export default async function CategoryPage({
           )}
 
           {products.length === 0 ? (
-            <p className="text-neutral-500">
+            <p className="text-white/50">
               {hasActiveFilters
                 ? "No products match these filters."
                 : "No products in this category yet."}

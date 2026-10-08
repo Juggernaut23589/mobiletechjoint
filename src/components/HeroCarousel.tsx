@@ -74,7 +74,7 @@ export function HeroCarousel({ brandSlides }: { brandSlides: HeroBrandSlide[] })
                 <div className="flex flex-wrap gap-3.5">
                   <Link
                     href="/deals"
-                    className="rounded-full bg-accent-500 px-6.5 py-3 text-sm font-semibold text-white shadow-glow-accent transition-all hover:-translate-y-0.5 hover:bg-accent-600"
+                    className="rounded-full bg-accent-500 px-6.5 py-3 text-sm font-semibold text-brand-900 shadow-glow-accent transition-all hover:-translate-y-0.5 hover:bg-accent-600"
                   >
                     Shop Now
                   </Link>

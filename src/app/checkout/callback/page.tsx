@@ -88,15 +88,15 @@ function Result({
   return (
     <div className="mx-auto max-w-md px-4 py-16 text-center">
       <h1
-        className={`mb-2 text-xl font-semibold ${success ? "text-green-700" : "text-neutral-900"}`}
+        className={`mb-2 text-xl font-semibold ${success ? "text-[#16C784]" : "text-white"}`}
       >
         {heading}
       </h1>
-      <p className="mb-6 text-neutral-600">{message}</p>
+      <p className="mb-6 text-white/60">{message}</p>
       {reference && (
-        <p className="mb-6 text-xs text-neutral-400">Reference: {reference}</p>
+        <p className="mb-6 text-xs text-white/35">Reference: {reference}</p>
       )}
-      <Link href="/" className="text-sm font-medium underline">
+      <Link href="/" className="text-sm font-medium text-accent-400 underline hover:text-white">
         {success ? "Continue shopping" : "Return to store"}
       </Link>
     </div>

@@ -22,8 +22,8 @@ export function ReviewForm({
 
   if (!isLoggedIn) {
     return (
-      <div className="rounded-[14px] border border-neutral-200 bg-neutral-50 px-4 py-3.5 text-[13.5px] text-neutral-600">
-        <a href="/account/login" className="font-semibold text-brand-700 hover:underline">
+      <div className="rounded-[14px] border border-white/10 bg-white/[0.03] px-4 py-3.5 text-[13.5px] text-white/60">
+        <a href="/account/login" className="font-semibold text-accent-400 hover:text-white">
           Log in
         </a>{" "}
         to write a review.
@@ -34,8 +34,8 @@ export function ReviewForm({
   const shownRating = hoverRating || rating;
 
   return (
-    <form action={formAction} className="rounded-[14px] border border-neutral-200 p-5">
-      <h3 className="mb-3 text-sm font-semibold text-brand-900">
+    <form action={formAction} className="rounded-[14px] border border-white/10 p-5">
+      <h3 className="mb-3 text-sm font-semibold text-white">
         {myReview ? "Edit your review" : "Write a review"}
       </h3>
       <input type="hidden" name="productId" value={productId} />
@@ -54,7 +54,7 @@ export function ReviewForm({
             className="p-0.5"
           >
             <Star
-              className={n <= shownRating ? "fill-accent-500 text-accent-500" : "text-neutral-300"}
+              className={n <= shownRating ? "fill-accent-500 text-accent-500" : "text-white/20"}
               width={22}
               height={22}
             />
@@ -62,7 +62,7 @@ export function ReviewForm({
         ))}
       </div>
 
-      <label htmlFor="review-title" className="mb-1 block text-xs font-semibold text-neutral-700">
+      <label htmlFor="review-title" className="mb-1 block text-xs font-semibold text-white/70">
         Title (optional)
       </label>
       <input
@@ -70,10 +70,10 @@ export function ReviewForm({
         name="title"
         defaultValue={myReview?.title ?? ""}
         maxLength={120}
-        className="mb-3 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
+        className="mb-3 w-full rounded-md border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/30"
       />
 
-      <label htmlFor="review-body" className="mb-1 block text-xs font-semibold text-neutral-700">
+      <label htmlFor="review-body" className="mb-1 block text-xs font-semibold text-white/70">
         Your review
       </label>
       <textarea
@@ -83,7 +83,7 @@ export function ReviewForm({
         rows={4}
         defaultValue={myReview?.body ?? ""}
         placeholder="What did you use it for, and what stood out?"
-        className="mb-3 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
+        className="mb-3 w-full rounded-md border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/30"
       />
 
       {state.error && (
@@ -95,12 +95,12 @@ export function ReviewForm({
         </p>
       )}
       {myReview?.status === "pending" && !state.notice && (
-        <p className="mb-3 text-xs text-neutral-500">
+        <p className="mb-3 text-xs text-white/50">
           Your review is awaiting approval and isn&apos;t public yet.
         </p>
       )}
       {myReview?.status === "rejected" && !state.notice && (
-        <p className="mb-3 text-xs text-neutral-500">
+        <p className="mb-3 text-xs text-white/50">
           This review wasn&apos;t approved for publication. Editing and resubmitting sends it back
           for another look.
         </p>
@@ -109,7 +109,7 @@ export function ReviewForm({
       <button
         type="submit"
         disabled={pending || rating === 0}
-        className="rounded-full bg-brand-900 px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+        className="rounded-full bg-accent-500 px-5 py-2.5 text-sm font-semibold text-brand-900 disabled:opacity-50"
       >
         {pending ? "Submitting…" : myReview ? "Update review" : "Submit review"}
       </button>

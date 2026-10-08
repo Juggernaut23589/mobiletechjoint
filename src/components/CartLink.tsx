@@ -39,7 +39,7 @@ export function CartLink() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.4, opacity: 0 }}
               transition={{ type: "spring", stiffness: 500, damping: 20 }}
-              className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-accent-500 text-[11px] font-bold text-white"
+              className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-accent-500 text-[11px] font-bold text-brand-900"
             >
               {count}
             </motion.span>

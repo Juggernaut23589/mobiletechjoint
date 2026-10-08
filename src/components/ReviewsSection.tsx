@@ -23,27 +23,27 @@ export async function ReviewsSection({
   ]);
 
   return (
-    <section id="reviews" className="mt-14 max-w-3xl border-t border-neutral-200 pt-10">
-      <h2 className="font-display mb-5 text-xl font-bold text-brand-900">Reviews</h2>
+    <section id="reviews" className="mt-14 max-w-3xl border-t border-white/10 pt-10">
+      <h2 className="font-display mb-5 text-xl font-bold text-white">Reviews</h2>
 
       <div className="mb-7 flex items-center gap-3">
         {ratingCount > 0 && ratingAvg !== null ? (
           <>
             <StarRating rating={ratingAvg} size={18} />
-            <span className="text-sm font-semibold text-brand-900">{ratingAvg.toFixed(1)}</span>
-            <span className="text-sm text-neutral-500">
+            <span className="text-sm font-semibold text-white">{ratingAvg.toFixed(1)}</span>
+            <span className="text-sm text-white/50">
               · {ratingCount} review{ratingCount === 1 ? "" : "s"}
             </span>
           </>
         ) : (
-          <span className="text-sm text-neutral-500">No reviews yet — be the first.</span>
+          <span className="text-sm text-white/50">No reviews yet — be the first.</span>
         )}
       </div>
 
       {reviews.length > 0 && (
         <div className="mb-8 flex flex-col gap-6">
           {reviews.map((r) => (
-            <div key={r.id} className="border-b border-neutral-100 pb-6 last:border-0">
+            <div key={r.id} className="border-b border-white/10 pb-6 last:border-0">
               <div className="mb-1.5 flex items-center gap-2.5">
                 <StarRating rating={r.rating} />
                 {r.is_verified_purchase && (
@@ -53,12 +53,12 @@ export async function ReviewsSection({
                 )}
               </div>
               {r.title && (
-                <h3 className="mb-1 text-[14px] font-semibold text-neutral-900">{r.title}</h3>
+                <h3 className="mb-1 text-[14px] font-semibold text-white">{r.title}</h3>
               )}
-              <p className="mb-2 whitespace-pre-line text-[13.5px] leading-relaxed text-neutral-600">
+              <p className="mb-2 whitespace-pre-line text-[13.5px] leading-relaxed text-white/60">
                 {r.body}
               </p>
-              <p className="text-xs text-neutral-400">
+              <p className="text-xs text-white/35">
                 {r.reviewer_name} ·{" "}
                 {new Date(r.created_at).toLocaleDateString("en-NG", {
                   year: "numeric",
