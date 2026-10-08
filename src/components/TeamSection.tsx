@@ -3,12 +3,15 @@ import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
-import { TEAM } from "@/lib/team";
+import { getPublishedTeamMembers } from "@/lib/team";
 
 /** "Meet the team" block before the footer. Portraits share one grayscale
  *  treatment (the source photos are a mix of colour and B&W) and warm up
  *  to full colour on hover; each card opens the person's profile page. */
-export function TeamSection() {
+export async function TeamSection() {
+  const team = (await getPublishedTeamMembers()).slice(0, 6);
+  if (team.length === 0) return null;
+
   return (
     <section id="team" className="mx-auto max-w-[1360px] px-4 py-16 sm:px-8 sm:py-20">
       <SectionHeader
@@ -19,7 +22,7 @@ export function TeamSection() {
       />
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-        {TEAM.map((member, i) => (
+        {team.map((member, i) => (
           <RevealOnScroll key={member.slug} delay={Math.min(i, 5) * 0.06}>
             <Link
               href={`/team/${member.slug}`}

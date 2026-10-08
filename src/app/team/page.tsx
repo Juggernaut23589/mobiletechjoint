@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
-import { TEAM } from "@/lib/team";
+import { getPublishedTeamMembers } from "@/lib/team";
+
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "Our Team",
@@ -10,7 +12,8 @@ export const metadata: Metadata = {
     "The creators, engineers and shooters who decide what MobileTechJoint stocks — and why.",
 };
 
-export default function TeamIndexPage() {
+export default async function TeamIndexPage() {
+  const team = await getPublishedTeamMembers();
   return (
     <div>
       <section className="bg-brand-900 px-4 py-14 text-white sm:px-8 sm:py-20">
@@ -37,7 +40,7 @@ export default function TeamIndexPage() {
 
       <section className="mx-auto max-w-[1360px] px-4 py-12 sm:px-8 sm:py-16">
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {TEAM.map((member) => (
+          {team.map((member) => (
             <Link
               key={member.slug}
               href={`/team/${member.slug}`}

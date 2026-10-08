@@ -3,11 +3,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, ArrowRight, Quote } from "lucide-react";
-import { TEAM, getTeamMember } from "@/lib/team";
+import { getPublishedTeamMembers, getTeamMember } from "@/lib/team";
 
-export function generateStaticParams() {
-  return TEAM.map((m) => ({ slug: m.slug }));
-}
+export const revalidate = 60;
 
 export async function generateMetadata({
   params,
@@ -15,7 +13,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const member = getTeamMember(slug);
+  const member = await getTeamMember(slug);
   if (!member) return {};
   return {
     title: `${member.name} — ${member.role}`,
@@ -29,11 +27,12 @@ export default async function TeamMemberPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const member = getTeamMember(slug);
+  const member = await getTeamMember(slug);
   if (!member) notFound();
 
-  const index = TEAM.findIndex((m) => m.slug === member.slug);
-  const next = TEAM[(index + 1) % TEAM.length];
+  const team = await getPublishedTeamMembers();
+  const index = team.findIndex((m) => m.slug === member.slug);
+  const next = team[(index + 1) % team.length];
 
   return (
     <div>

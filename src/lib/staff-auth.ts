@@ -24,7 +24,8 @@ export type StaffAbility =
   | "manage_expenses"
   | "manage_disputes"
   | "manage_purchasing"
-  | "manage_promotions";
+  | "manage_promotions"
+  | "manage_content";
 
 export const STAFF_ABILITIES: { key: StaffAbility; label: string; description: string }[] = [
   { key: "manage_products", label: "Products", description: "Edit product postings — images, videos, descriptions, price, publish/archive, brand, category, deals." },
@@ -38,6 +39,7 @@ export const STAFF_ABILITIES: { key: StaffAbility; label: string; description: s
   { key: "manage_cross_sells", label: "Cross-sells", description: "Curate which categories cross-sell with each other." },
   { key: "manage_promotions", label: "Promotions", description: "Create and switch off discount codes, and see how each one is performing." },
   { key: "manage_purchasing", label: "Purchasing", description: "Manage suppliers and purchase orders, receive stock, record supplier payments, and set product cost prices." },
+  { key: "manage_content", label: "Team blog", description: "Add, edit, remove and publish the \"Meet the team\" profiles shown on the homepage and /team." },
 ];
 
 export interface StaffSession {
