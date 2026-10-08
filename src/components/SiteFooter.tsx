@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Mail, Phone, AtSign, ShieldCheck } from "lucide-react";
+import { Mail, Phone, AtSign, MapPin, ShieldCheck } from "lucide-react";
 import { FooterCategoryLinks } from "@/components/FooterCategoryLinks";
 import { Logo } from "@/components/Logo";
 
@@ -12,9 +12,11 @@ import { Logo } from "@/components/Logo";
 export function SiteFooter() {
   const supportEmail = process.env.SUPPORT_EMAIL;
   const supportPhone = process.env.SUPPORT_PHONE;
+  const supportPhone2 = process.env.SUPPORT_PHONE_2;
   const instagramUrl = process.env.INSTAGRAM_URL;
+  const supportAddress = process.env.SUPPORT_ADDRESS;
 
-  const hasContact = supportEmail || supportPhone || instagramUrl;
+  const hasContact = supportEmail || supportPhone || supportPhone2 || instagramUrl || supportAddress;
 
   return (
     <footer className="bg-[#080A0F] px-4 pb-7 pt-14 text-[#8A91A5] sm:px-8">
@@ -94,6 +96,12 @@ export function SiteFooter() {
                   {supportPhone}
                 </a>
               )}
+              {supportPhone2 && (
+                <a href={`tel:${supportPhone2}`} className="flex items-center gap-2 hover:text-white">
+                  <Phone className="h-4 w-4 shrink-0" />
+                  {supportPhone2}
+                </a>
+              )}
               {instagramUrl && (
                 <a
                   href={instagramUrl}
@@ -104,6 +112,12 @@ export function SiteFooter() {
                   <AtSign className="h-4 w-4 shrink-0" />
                   Follow on Instagram
                 </a>
+              )}
+              {supportAddress && (
+                <div className="flex items-start gap-2">
+                  <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
+                  <span>{supportAddress}</span>
+                </div>
               )}
             </div>
           </div>
