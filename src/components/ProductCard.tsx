@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { formatNaira, discountPercent } from "@/lib/money";
 import { QuickAddButton } from "@/components/QuickAddButton";
+import { StarRating } from "@/components/StarRating";
 import { isRecentlyAdded } from "@/lib/recency";
 import type { ProductWithImages } from "@/types/database";
 
@@ -73,6 +74,12 @@ export function ProductCard({
           <h3 className="line-clamp-2 text-[13.5px] font-medium leading-snug text-neutral-900">
             {product.name}
           </h3>
+          {product.rating_count > 0 && product.rating_avg !== null && (
+            <div className="flex items-center gap-1.5">
+              <StarRating rating={product.rating_avg} size={11} />
+              <span className="text-[10.5px] text-neutral-400">({product.rating_count})</span>
+            </div>
+          )}
           <div className="mt-auto flex items-end justify-between gap-2 pt-1">
             <div className="flex flex-wrap items-baseline gap-x-2">
               {/* price_kobo is NOT NULL for any product with status='published' —

@@ -12,7 +12,8 @@ export type ActivityEntityType =
   | "supplier"
   | "purchase_order"
   | "discount_code"
-  | "team_member";
+  | "team_member"
+  | "product_review";
 
 export type FieldChanges = Record<string, { from: unknown; to: unknown }>;
 

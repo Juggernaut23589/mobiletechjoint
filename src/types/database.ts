@@ -138,6 +138,30 @@ export interface Product {
   reorder_level: number;
   /** Generated column: stock_quantity <= reorder_level. */
   is_low_stock: boolean;
+  /** Denormalised from approved product_reviews — kept in sync by a
+   *  trigger (refresh_product_rating), never computed in app code. */
+  rating_avg: number | null;
+  rating_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export type ReviewStatus = "pending" | "approved" | "rejected";
+
+export interface ProductReview {
+  id: string;
+  product_id: string;
+  customer_id: string | null;
+  order_id: string | null;
+  is_verified_purchase: boolean;
+  reviewer_name: string;
+  rating: number;
+  title: string | null;
+  body: string;
+  status: ReviewStatus;
+  moderated_by: string | null;
+  moderated_at: string | null;
+  moderation_note: string | null;
   created_at: string;
   updated_at: string;
 }

@@ -11,6 +11,8 @@ import { formatNaira, discountPercent } from "@/lib/money";
 import { AddToCartForm } from "@/components/AddToCartForm";
 import { ProductCarousel } from "@/components/ProductCarousel";
 import { ProductGallery } from "@/components/ProductGallery";
+import { StarRating } from "@/components/StarRating";
+import { ReviewsSection } from "@/components/ReviewsSection";
 
 // See app/page.tsx — same reasoning: stock/price can change (admin edits,
 // the Instagram poller flipping a draft to published) between deploys.
@@ -101,6 +103,16 @@ export default async function ProductPage({
           <h1 className="font-display mb-2.5 text-[26px] leading-tight text-brand-900">
             {product.name}
           </h1>
+
+          {product.rating_count > 0 && product.rating_avg !== null && (
+            <a href="#reviews" className="mb-2.5 flex items-center gap-2 text-[13px]">
+              <StarRating rating={product.rating_avg} />
+              <span className="font-semibold text-neutral-700">{product.rating_avg.toFixed(1)}</span>
+              <span className="text-neutral-400">
+                ({product.rating_count} review{product.rating_count === 1 ? "" : "s"})
+              </span>
+            </a>
+          )}
 
           <div className="mb-4.5 flex flex-wrap items-baseline gap-3">
             <p className="font-display text-[30px] font-bold text-brand-900">
@@ -211,6 +223,13 @@ export default async function ProductPage({
           <ProductCarousel title="You May Also Like" products={related} />
         </div>
       )}
+
+      <ReviewsSection
+        productId={product.id}
+        slug={product.slug}
+        ratingAvg={product.rating_avg}
+        ratingCount={product.rating_count}
+      />
     </div>
   );
 }
