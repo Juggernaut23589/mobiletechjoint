@@ -15,7 +15,7 @@ export default async function DealsPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
-      <div className="mb-6 flex items-center gap-2 rounded-2xl bg-gradient-to-r from-red-500 to-orange-500 px-5 py-4 text-white shadow-glow">
+      <div className="bg-promo-gradient mb-6 flex items-center gap-2 rounded-2xl px-5 py-4 text-white shadow-glow-accent">
         <Zap className="h-5 w-5 fill-white" />
         <h1 className="font-display text-xl font-bold tracking-tight">Deals — Real Price Cuts</h1>
       </div>

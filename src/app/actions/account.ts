@@ -6,6 +6,7 @@ import { createServerAuthClient, createServiceClient } from "@/lib/supabase/serv
 
 export interface AuthResult {
   error?: string;
+  notice?: string;
 }
 
 /** Creates the Supabase Auth user, then the app-side profile row (full
@@ -74,4 +75,49 @@ export async function getCurrentUser() {
     data: { user },
   } = await supabase.auth.getUser();
   return user;
+}
+
+/** Updates the logged-in customer's own profile row. Email is deliberately
+ *  not editable here — changing it means re-verifying a new address via
+ *  Supabase Auth, a different flow from a plain profile field edit. */
+export async function updateProfile(_prev: AuthResult, formData: FormData): Promise<AuthResult> {
+  const authClient = await createServerAuthClient();
+  const {
+    data: { user },
+  } = await authClient.auth.getUser();
+  if (!user) return { error: "Please log in." };
+
+  const fullName = String(formData.get("fullName") ?? "").trim();
+  const phone = String(formData.get("phone") ?? "").trim();
+  const gender = String(formData.get("gender") ?? "").trim();
+  const address = String(formData.get("address") ?? "").trim();
+  const ageRaw = String(formData.get("age") ?? "").trim();
+
+  if (!fullName) return { error: "Enter your name." };
+
+  let age: number | null = null;
+  if (ageRaw) {
+    const parsed = Number(ageRaw);
+    if (!Number.isInteger(parsed) || parsed < 13 || parsed > 120) {
+      return { error: "Age must be a whole number between 13 and 120." };
+    }
+    age = parsed;
+  }
+
+  const { error } = await createServiceClient()
+    .from("customer_profiles")
+    .update({
+      full_name: fullName,
+      phone: phone || null,
+      gender: gender || null,
+      address: address || null,
+      age,
+    })
+    .eq("id", user.id);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/account");
+  revalidatePath("/account/profile");
+  return { notice: "Saved." };
 }

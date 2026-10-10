@@ -1,5 +1,10 @@
 import { createServiceClient } from "@/lib/supabase/server";
-import type { CustomerProfile, OrderWithItems, SavedPaymentMethod } from "@/types/database";
+import type {
+  CustomerProfile,
+  OrderWithItems,
+  SavedPaymentMethod,
+  ProductWithImages,
+} from "@/types/database";
 
 /** Every function here takes an explicit customerId (from the authed
  *  session, checked by the caller) and uses the service client scoped by
@@ -48,6 +53,28 @@ export async function getCustomerOrder(
     return null;
   }
   return data as unknown as OrderWithItems | null;
+}
+
+/** Wishlisted products, newest-saved first — joins through wishlist_items
+ *  to the full product (with images/brand/category) the same shape every
+ *  other product grid expects, so ProductCard just works here too. A
+ *  product removed/unpublished after being saved silently drops out
+ *  (the inner join on products only returns rows that still exist). */
+export async function getWishlistProducts(customerId: string): Promise<ProductWithImages[]> {
+  const supabase = createServiceClient();
+  const { data, error } = await supabase
+    .from("wishlist_items")
+    .select("created_at, products(*, product_images(*), category:categories(*), brand:brands(*))")
+    .eq("customer_id", customerId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("getWishlistProducts failed:", error.message);
+    return [];
+  }
+  return (data ?? [])
+    .map((row) => row.products)
+    .filter((p): p is NonNullable<typeof p> => p !== null) as unknown as ProductWithImages[];
 }
 
 export async function getSavedPaymentMethods(customerId: string): Promise<SavedPaymentMethod[]> {

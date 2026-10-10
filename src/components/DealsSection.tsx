@@ -14,10 +14,10 @@ export function DealsSection({ products }: { products: ProductWithImages[] }) {
   return (
     <section className="mb-14">
       <RevealOnScroll>
-        {/* Ends in a dark bronze, not accent-500 — that's now a vivid
-            yellow, and this banner carries white text the whole way
-            across it. */}
-        <div className="relative mb-5 overflow-hidden rounded-[22px] bg-gradient-to-r from-red via-[#ff5a4a] to-[#b45309] px-6 py-5 text-white shadow-glow-accent sm:px-8">
+        {/* Black-to-gold, same family as .bg-promo-gradient — the previous
+            red/orange gradient was a leftover from the old palette and
+            didn't belong next to the rest of the now-yellow-on-black site. */}
+        <div className="bg-promo-gradient relative mb-5 overflow-hidden rounded-[22px] px-6 py-5 text-white shadow-glow-accent sm:px-8">
           <div className="bg-grid-texture absolute inset-0 opacity-40" aria-hidden="true" />
           <div className="relative flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3.5">

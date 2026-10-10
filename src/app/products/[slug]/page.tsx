@@ -9,6 +9,7 @@ import {
 } from "@/lib/products";
 import { formatNaira, discountPercent } from "@/lib/money";
 import { AddToCartForm } from "@/components/AddToCartForm";
+import { WishlistButton } from "@/components/WishlistButton";
 import { ProductCarousel } from "@/components/ProductCarousel";
 import { ProductGallery } from "@/components/ProductGallery";
 import { StarRating } from "@/components/StarRating";
@@ -174,15 +175,20 @@ export default async function ProductPage({
             )}
           </div>
 
-          <AddToCartForm
-            productId={product.id}
-            slug={product.slug}
-            name={product.name}
-            priceKobo={priceKobo}
-            imageUrl={images[0]?.url ?? null}
-            stockQuantity={product.stock_quantity}
-            categoryId={product.category_id}
-          />
+          <div className="flex flex-wrap items-start gap-3">
+            <div className="min-w-0 flex-1">
+              <AddToCartForm
+                productId={product.id}
+                slug={product.slug}
+                name={product.name}
+                priceKobo={priceKobo}
+                imageUrl={images[0]?.url ?? null}
+                stockQuantity={product.stock_quantity}
+                categoryId={product.category_id}
+              />
+            </div>
+            <WishlistButton productId={product.id} showLabel className="shrink-0" />
+          </div>
 
           <div className="mt-6 flex flex-wrap gap-x-5 gap-y-1 text-[12.5px] text-white/50">
             <div>

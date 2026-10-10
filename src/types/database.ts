@@ -74,6 +74,16 @@ export interface CustomerProfile {
   id: string;
   full_name: string | null;
   phone: string | null;
+  age: number | null;
+  gender: string | null;
+  address: string | null;
+  created_at: string;
+}
+
+export interface WishlistItem {
+  id: string;
+  customer_id: string;
+  product_id: string;
   created_at: string;
 }
 

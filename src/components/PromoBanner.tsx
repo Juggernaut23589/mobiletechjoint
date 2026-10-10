@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-/** Orange-to-purple promo banner matching the approved design-system
+/** Black-to-gold promo banner matching the approved design-system
  *  mockup (Main.dc.html). The mockup's countdown timer counts down from a
  *  hardcoded number on every page load — not a real deadline, so it's
  *  omitted here rather than faking urgency with no real sale end date. */

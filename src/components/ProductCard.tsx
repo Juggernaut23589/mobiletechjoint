@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { formatNaira, discountPercent } from "@/lib/money";
 import { QuickAddButton } from "@/components/QuickAddButton";
+import { WishlistButton } from "@/components/WishlistButton";
 import { StarRating } from "@/components/StarRating";
 import { isRecentlyAdded } from "@/lib/recency";
 import type { ProductWithImages } from "@/types/database";
@@ -59,6 +60,8 @@ export function ProductCard({
               </span>
             )}
           </div>
+
+          <WishlistButton productId={product.id} className="absolute right-2.5 top-2.5" />
         </div>
 
         <div className="flex flex-1 flex-col gap-1.5 p-3.5 pt-3">
