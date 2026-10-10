@@ -23,7 +23,7 @@ export default function SignupPage() {
           </Link>
         </p>
 
-        <label htmlFor="fullName" className="mb-1 block text-sm font-medium">
+        <label htmlFor="fullName" className="mb-1 block text-sm font-medium text-neutral-800">
           Full name
         </label>
         <input
@@ -31,10 +31,10 @@ export default function SignupPage() {
           name="fullName"
           required
           autoFocus
-          className="mb-3 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
+          className="mb-3 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm text-neutral-900"
         />
 
-        <label htmlFor="email" className="mb-1 block text-sm font-medium">
+        <label htmlFor="email" className="mb-1 block text-sm font-medium text-neutral-800">
           Email
         </label>
         <input
@@ -42,20 +42,20 @@ export default function SignupPage() {
           name="email"
           type="email"
           required
-          className="mb-3 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
+          className="mb-3 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm text-neutral-900"
         />
 
-        <label htmlFor="phone" className="mb-1 block text-sm font-medium">
+        <label htmlFor="phone" className="mb-1 block text-sm font-medium text-neutral-800">
           Phone number
         </label>
         <input
           id="phone"
           name="phone"
           type="tel"
-          className="mb-3 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
+          className="mb-3 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm text-neutral-900"
         />
 
-        <label htmlFor="password" className="mb-1 block text-sm font-medium">
+        <label htmlFor="password" className="mb-1 block text-sm font-medium text-neutral-800">
           Password
         </label>
         <PasswordInput
@@ -63,7 +63,7 @@ export default function SignupPage() {
           name="password"
           required
           minLength={8}
-          className="mb-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
+          className="mb-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm text-neutral-900"
         />
         <p className="mb-3 text-xs text-neutral-400">At least 8 characters.</p>
 

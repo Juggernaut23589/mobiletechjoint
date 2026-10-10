@@ -30,7 +30,7 @@ function LoginForm() {
         </p>
         <input type="hidden" name="next" value={next} />
 
-        <label htmlFor="email" className="mb-1 block text-sm font-medium">
+        <label htmlFor="email" className="mb-1 block text-sm font-medium text-neutral-800">
           Email
         </label>
         <input
@@ -39,17 +39,17 @@ function LoginForm() {
           type="email"
           required
           autoFocus
-          className="mb-3 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
+          className="mb-3 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm text-neutral-900"
         />
 
-        <label htmlFor="password" className="mb-1 block text-sm font-medium">
+        <label htmlFor="password" className="mb-1 block text-sm font-medium text-neutral-800">
           Password
         </label>
         <PasswordInput
           id="password"
           name="password"
           required
-          className="mb-3 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
+          className="mb-3 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm text-neutral-900"
         />
 
         {state.error && (
