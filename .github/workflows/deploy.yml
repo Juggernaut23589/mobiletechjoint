@@ -12,7 +12,7 @@ concurrency:
 env:
   APP_DIR: /home/deploy/mobiletechjoint-store
   PM2_NAME: mobiletechjoint-store
-  HEALTH_URL: https://mobiletechjoint.com/
+  HEALTH_URL: https://www.mobiletechjoint.com/
 
 jobs:
   build:
