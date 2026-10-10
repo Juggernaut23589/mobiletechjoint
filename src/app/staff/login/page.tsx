@@ -13,7 +13,7 @@ function LoginForm() {
     <div className="mx-auto flex min-h-[80vh] max-w-[380px] flex-col items-center justify-center px-4 py-10">
       <div className="mb-8 flex items-center gap-2">
         <Logo size={30} />
-        <span className="font-display text-[18px] text-brand-900">
+        <span className="font-display text-[18px] text-white">
           mobile<span className="font-bold">techjoint</span>
         </span>
       </div>
@@ -38,7 +38,7 @@ function LoginForm() {
               required
               autoFocus
               placeholder="you@mobiletechjoint.com"
-              className="w-full rounded-[10px] border border-neutral-200 px-3.5 py-3 text-sm outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100"
+              className="w-full rounded-[10px] border border-neutral-200 px-3.5 py-3 text-sm text-neutral-900 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100"
             />
           </div>
           <div className="mb-1">
@@ -56,7 +56,7 @@ function LoginForm() {
               type="password"
               required
               placeholder="••••••••"
-              className="w-full rounded-[10px] border border-neutral-200 px-3.5 py-3 text-sm outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100"
+              className="w-full rounded-[10px] border border-neutral-200 px-3.5 py-3 text-sm text-neutral-900 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100"
             />
           </div>
 
@@ -92,7 +92,7 @@ function LoginForm() {
         </div>
       </div>
 
-      <p className="mt-4.5 text-[12.5px] text-neutral-500">
+      <p className="mt-4.5 text-[12.5px] text-white/50">
         New staff member? Ask an admin for an invite link.
       </p>
     </div>
