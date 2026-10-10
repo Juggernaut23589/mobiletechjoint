@@ -59,7 +59,10 @@ export default function CartPage() {
               exit={{ opacity: 0, x: -24, transition: { duration: 0.2 } }}
               className="flex flex-wrap items-center gap-4 rounded-2xl border border-neutral-200 bg-white p-4"
             >
-              <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-neutral-100">
+              <Link
+                href={`/products/${item.slug}`}
+                className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-neutral-100"
+              >
                 {item.imageUrl ? (
                   <Image
                     src={item.imageUrl}
@@ -69,7 +72,7 @@ export default function CartPage() {
                     className="object-cover"
                   />
                 ) : null}
-              </div>
+              </Link>
 
               <div className="flex min-w-0 flex-1 basis-40 flex-col gap-1">
                 <Link

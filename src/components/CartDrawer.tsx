@@ -91,15 +91,23 @@ export function CartDrawer() {
                     key={item.productId}
                     className="flex gap-3 border-b border-neutral-100 py-4 last:border-0"
                   >
-                    <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-neutral-100">
+                    <Link
+                      href={`/products/${item.slug}`}
+                      onClick={closeCart}
+                      className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-neutral-100"
+                    >
                       {item.imageUrl ? (
                         <Image src={item.imageUrl} alt={item.name} fill className="object-cover" />
                       ) : null}
-                    </div>
+                    </Link>
                     <div className="min-w-0 flex-1">
-                      <p className="line-clamp-2 text-sm font-medium text-neutral-900">
+                      <Link
+                        href={`/products/${item.slug}`}
+                        onClick={closeCart}
+                        className="line-clamp-2 text-sm font-medium text-neutral-900 hover:underline"
+                      >
                         {item.name}
-                      </p>
+                      </Link>
                       <p className="mb-2 text-sm text-neutral-500">
                         {formatNaira(item.priceKoboSnapshot)}
                       </p>
