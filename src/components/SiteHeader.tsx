@@ -6,6 +6,7 @@ import { MobileCategoryMenu } from "@/components/MobileCategoryMenu";
 import { DesktopNav } from "@/components/DesktopNav";
 import { Logo } from "@/components/Logo";
 import { SearchBar } from "@/components/SearchBar";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 /** Dark navbar matching the approved design-system mockup (Main.dc.html):
  *  logo, search box, top-category nav links (DesktopNav, fetched
@@ -33,6 +34,7 @@ export function SiteHeader() {
         <DesktopNav />
 
         <div className="ml-auto flex shrink-0 items-center gap-4 sm:gap-5">
+          <ThemeToggle />
           <AccountLink />
           <CartLink />
         </div>
