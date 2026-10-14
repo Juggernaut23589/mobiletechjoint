@@ -65,8 +65,8 @@ export default async function ProductPage({
 
   return (
     <div className="mx-auto max-w-[1360px] px-4 py-6 sm:px-8">
-      <div className="mb-5 text-[13px] text-white/50">
-        <Link href="/" className="text-accent-400 hover:text-white">
+      <div className="mb-5 text-[13px] text-ink/50">
+        <Link href="/" className="text-link hover:text-ink">
           Home
         </Link>
         {product.category && (
@@ -74,14 +74,14 @@ export default async function ProductPage({
             <span className="mx-1.5">/</span>
             <Link
               href={`/category/${product.category.slug}`}
-              className="text-accent-400 hover:text-white"
+              className="text-link hover:text-ink"
             >
               {product.category.name}
             </Link>
           </>
         )}
         <span className="mx-1.5">/</span>
-        <span className="text-white">{product.name}</span>
+        <span className="text-ink">{product.name}</span>
       </div>
 
       {/* Not wrapped in any reveal/fade animation: this is the gallery and
@@ -97,31 +97,31 @@ export default async function ProductPage({
 
         <div className="flex flex-col gap-1">
           {(product.brand || product.category) && (
-            <span className="mb-1.5 text-[12.5px] font-semibold uppercase tracking-wide text-white/50">
+            <span className="mb-1.5 text-[12.5px] font-semibold uppercase tracking-wide text-ink/50">
               {product.brand?.name ?? product.category?.name}
             </span>
           )}
-          <h1 className="font-display mb-2.5 text-[26px] leading-tight text-white">
+          <h1 className="font-display mb-2.5 text-[26px] leading-tight text-ink">
             {product.name}
           </h1>
 
           {product.rating_count > 0 && product.rating_avg !== null && (
             <a href="#reviews" className="mb-2.5 flex items-center gap-2 text-[13px]">
               <StarRating rating={product.rating_avg} />
-              <span className="font-semibold text-white/80">{product.rating_avg.toFixed(1)}</span>
-              <span className="text-white/40">
+              <span className="font-semibold text-ink/80">{product.rating_avg.toFixed(1)}</span>
+              <span className="text-ink/40">
                 ({product.rating_count} review{product.rating_count === 1 ? "" : "s"})
               </span>
             </a>
           )}
 
           <div className="mb-4.5 flex flex-wrap items-baseline gap-3">
-            <p className="font-display text-[30px] font-bold text-white">
+            <p className="font-display text-[30px] font-bold text-ink">
               {formatNaira(priceKobo)}
             </p>
             {discount !== null && (
               <>
-                <p className="text-base text-white/35 line-through">
+                <p className="text-base text-ink/35 line-through">
                   {formatNaira(product.compare_at_price_kobo!)}
                 </p>
                 <span className="rounded-full bg-[#16C784] px-2.5 py-1 text-[11px] font-bold text-white">
@@ -133,7 +133,7 @@ export default async function ProductPage({
 
           {variants.length > 0 && (
             <div className="mb-5">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-white/50">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-ink/50">
                 Available options
               </p>
               <div className="flex flex-wrap gap-2">
@@ -142,7 +142,7 @@ export default async function ProductPage({
                     <span
                       key={v.id}
                       aria-current="true"
-                      className="rounded-full border-2 border-accent-500 bg-accent-500/15 px-3.5 py-1.5 text-[13px] font-semibold text-accent-400"
+                      className="rounded-full border-2 border-accent-500 bg-accent-500/15 px-3.5 py-1.5 text-[13px] font-semibold text-link"
                     >
                       {v.label ?? v.name}
                     </span>
@@ -150,7 +150,7 @@ export default async function ProductPage({
                     <Link
                       key={v.id}
                       href={`/products/${v.slug}`}
-                      className={`rounded-full border border-white/20 px-3.5 py-1.5 text-[13px] font-medium text-white/70 hover:border-accent-500 hover:text-accent-400 ${v.inStock ? "" : "opacity-60"}`}
+                      className={`rounded-full border border-ink/20 px-3.5 py-1.5 text-[13px] font-medium text-ink/70 hover:border-accent-500 hover:text-link ${v.inStock ? "" : "opacity-60"}`}
                     >
                       {v.label ?? v.name}
                       {!v.inStock && " · sold out"}
@@ -190,13 +190,13 @@ export default async function ProductPage({
             <WishlistButton productId={product.id} showLabel className="shrink-0" />
           </div>
 
-          <div className="mt-6 flex flex-wrap gap-x-5 gap-y-1 text-[12.5px] text-white/50">
+          <div className="mt-6 flex flex-wrap gap-x-5 gap-y-1 text-[12.5px] text-ink/50">
             <div>
-              SKU: <strong className="text-white">{product.id.slice(0, 8).toUpperCase()}</strong>
+              SKU: <strong className="text-ink">{product.id.slice(0, 8).toUpperCase()}</strong>
             </div>
             {product.category && (
               <div>
-                Category: <strong className="text-white">{product.category.name}</strong>
+                Category: <strong className="text-ink">{product.category.name}</strong>
               </div>
             )}
           </div>
@@ -208,11 +208,11 @@ export default async function ProductPage({
           Cart button above — it used to push the buy box several screens
           down on products with long migrated copy. */}
       {product.description && (
-        <details className="mt-12 max-w-3xl border-t border-white/10 pt-8">
-          <summary className="cursor-pointer text-base font-semibold text-white">
+        <details className="mt-12 max-w-3xl border-t border-ink/10 pt-8">
+          <summary className="cursor-pointer text-base font-semibold text-ink">
             Full description
           </summary>
-          <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-white/60">
+          <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-ink/60">
             {product.description}
           </p>
         </details>

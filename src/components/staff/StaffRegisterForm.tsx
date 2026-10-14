@@ -10,12 +10,12 @@ export function StaffRegisterForm({ invite, email }: { invite: string; email: st
   if (state.success) {
     return (
       <div className="mx-auto flex min-h-[70vh] max-w-sm flex-col items-center justify-center px-4 py-8 text-center">
-        <h1 className="mb-2 text-xl font-bold text-brand-900">Account created</h1>
-        <p className="mb-6 text-sm text-neutral-500">
+        <h1 className="mb-2 text-xl font-bold text-ink">Account created</h1>
+        <p className="mb-6 text-sm text-ink/60">
           A super admin needs to approve your account before you can log in. You&apos;ll be able
           to sign in once that happens.
         </p>
-        <Link href="/staff/login" className="text-sm font-medium text-brand-600 hover:underline">
+        <Link href="/staff/login" className="text-sm font-medium text-link hover:underline">
           Go to staff login
         </Link>
       </div>
@@ -26,10 +26,10 @@ export function StaffRegisterForm({ invite, email }: { invite: string; email: st
     <div className="mx-auto flex min-h-[70vh] max-w-sm items-center px-4 py-8">
       <form action={formAction} className="w-full">
         <input type="hidden" name="invite" value={invite} />
-        <h1 className="mb-1 text-xl font-bold text-brand-900">Staff registration</h1>
-        <p className="mb-6 text-sm text-neutral-500">
+        <h1 className="mb-1 text-xl font-bold text-ink">Staff registration</h1>
+        <p className="mb-6 text-sm text-ink/60">
           Already have an account?{" "}
-          <Link href="/staff/login" className="font-medium text-brand-600 hover:underline">
+          <Link href="/staff/login" className="font-medium text-link hover:underline">
             Log in
           </Link>
         </p>
@@ -88,7 +88,7 @@ export function StaffRegisterForm({ invite, email }: { invite: string; email: st
           minLength={8}
           className="mb-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
         />
-        <p className="mb-3 text-xs text-neutral-400">At least 8 characters.</p>
+        <p className="mb-3 text-xs text-ink/40">At least 8 characters.</p>
 
         {state.error && (
           <p className="mb-3 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">

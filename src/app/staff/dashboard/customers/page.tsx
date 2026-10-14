@@ -61,8 +61,8 @@ export default async function StaffCustomersPage({
     <div>
       <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-brand-900">Customers</h1>
-          <p className="text-sm text-neutral-500">
+          <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-ink">Customers</h1>
+          <p className="text-sm text-ink/60">
             {rows.length.toLocaleString()} {segment || tag || q ? "matching" : "registered"} customer
             {rows.length === 1 ? "" : "s"} · {formatNaira(totalSpent)} lifetime spend (net of refunds).
           </p>
@@ -114,7 +114,7 @@ export default async function StaffCustomersPage({
       </form>
 
       {customers.length === 0 ? (
-        <p className="text-sm text-neutral-500">No customers match.</p>
+        <p className="text-sm text-ink/60">No customers match.</p>
       ) : (
         <div className="flex flex-col divide-y divide-neutral-200 rounded-lg border border-neutral-200 bg-white">
           {customers.map((customer) => (
@@ -124,7 +124,7 @@ export default async function StaffCustomersPage({
               className="flex flex-wrap items-center justify-between gap-2 p-4 hover:bg-neutral-50"
             >
               <div className="min-w-0">
-                <p className="truncate text-sm font-medium">
+                <p className="truncate text-sm font-medium text-neutral-900">
                   {customer.full_name ?? "Unnamed customer"}
                   {customerSegments(customer).includes("vip") && (
                     <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700">VIP</span>
@@ -145,7 +145,7 @@ export default async function StaffCustomersPage({
                 )}
               </div>
               <div className="text-right text-sm">
-                <p className="font-semibold">{formatNaira(customer.total_spent_kobo)}</p>
+                <p className="font-semibold text-neutral-900">{formatNaira(customer.total_spent_kobo)}</p>
                 <p className="text-xs text-neutral-500">
                   {customer.order_count} paid order{customer.order_count === 1 ? "" : "s"}
                 </p>

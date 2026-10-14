@@ -54,16 +54,16 @@ export default async function StaffOverviewPage() {
 
   return (
     <div>
-      <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-brand-900">
+      <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-ink">
         Welcome, {session.fullName.split(" ")[0]}
       </h1>
-      <p className="mb-6 text-sm text-neutral-500">
+      <p className="mb-6 text-sm text-ink/60">
         {isSuper ? "Super admin — full access." : "Staff — access below is exactly what's been granted to you."}
       </p>
 
       {todo.length > 0 && (
         <div className="mb-8">
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-neutral-500">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-ink/60">
             Needs attention
           </h2>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -109,7 +109,7 @@ export default async function StaffOverviewPage() {
 
       {!isSuper && (
         <div className="mt-8">
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-neutral-500">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-ink/60">
             Your granted abilities
           </h2>
           <div className="flex flex-wrap gap-2">

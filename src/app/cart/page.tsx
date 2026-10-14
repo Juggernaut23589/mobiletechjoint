@@ -28,9 +28,9 @@ export default function CartPage() {
   if (items.length === 0) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-20 text-center">
-        <ShoppingBag className="mx-auto mb-4 h-10 w-10 text-white/25" />
-        <h1 className="mb-2 text-xl font-semibold text-white">Your cart is empty</h1>
-        <Link href="/" className="text-sm font-medium text-accent-400 hover:text-white">
+        <ShoppingBag className="mx-auto mb-4 h-10 w-10 text-ink/25" />
+        <h1 className="mb-2 text-xl font-semibold text-ink">Your cart is empty</h1>
+        <Link href="/" className="text-sm font-medium text-link hover:text-ink">
           Continue shopping
         </Link>
       </div>
@@ -44,7 +44,7 @@ export default function CartPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12 sm:py-16">
-      <h1 className="font-display mb-6 text-2xl font-bold tracking-tight text-white">
+      <h1 className="font-display mb-6 text-2xl font-bold tracking-tight text-ink">
         Your Cart
       </h1>
 
@@ -122,7 +122,7 @@ export default function CartPage() {
         </AnimatePresence>
       </div>
 
-      <p className="mt-4 text-xs text-white/35">
+      <p className="mt-4 text-xs text-ink/35">
         Prices shown are estimates — the exact amount charged is verified against current
         product prices at checkout.
       </p>

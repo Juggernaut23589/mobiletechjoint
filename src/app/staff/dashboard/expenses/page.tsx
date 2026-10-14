@@ -33,8 +33,8 @@ export default async function StaffExpensesPage({
 
   return (
     <div>
-      <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-brand-900">Expenses</h1>
-      <p className="mb-6 text-sm text-neutral-500">
+      <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-ink">Expenses</h1>
+      <p className="mb-6 text-sm text-ink/60">
         {period.label}: {formatNaira(counted.reduce((s, e) => s + e.amount_kobo, 0))} approved on this page
         {pending.length > 0 && ` · ${pending.length} awaiting approval`}. Mistakes are voided, never deleted, so
         the books keep a full record.
@@ -61,7 +61,7 @@ export default async function StaffExpensesPage({
       </div>
 
       {expenses.length === 0 ? (
-        <p className="text-sm text-neutral-500">No expenses recorded in this period.</p>
+        <p className="text-sm text-ink/60">No expenses recorded in this period.</p>
       ) : (
         <div className="flex flex-col divide-y divide-neutral-200 rounded-lg border border-neutral-200 bg-white">
           {expenses.map((expense) => (

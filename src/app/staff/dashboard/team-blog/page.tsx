@@ -20,8 +20,8 @@ export default async function TeamBlogPage() {
     <div>
       <div className="mb-6 flex items-start justify-between">
         <div>
-          <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-brand-900">Team blog</h1>
-          <p className="text-sm text-neutral-500">
+          <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-ink">Team blog</h1>
+          <p className="text-sm text-ink/60">
             The &quot;Meet the team&quot; profiles shown on the homepage and /team. Only published
             profiles appear on the live site.
           </p>
@@ -35,7 +35,7 @@ export default async function TeamBlogPage() {
       </div>
 
       {!members || members.length === 0 ? (
-        <p className="text-sm text-neutral-500">No team members yet.</p>
+        <p className="text-sm text-ink/60">No team members yet.</p>
       ) : (
         <div className="flex flex-col divide-y divide-neutral-200 rounded-lg border border-neutral-200 bg-white">
           {members.map((m) => (

@@ -79,23 +79,23 @@ export default async function PurchaseOrderPage({ params }: { params: Promise<{ 
     <div>
       <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="mb-1 text-xs text-neutral-500">
+          <p className="mb-1 text-xs text-ink/60">
             <Link href="/staff/dashboard/purchase-orders" className="hover:underline">
               Purchase orders
             </Link>{" "}
             /
           </p>
-          <h1 className="font-display flex items-center gap-3 text-2xl font-bold tracking-tight text-brand-900">
+          <h1 className="font-display flex items-center gap-3 text-2xl font-bold tracking-tight text-ink">
             {po.po_number} <PurchaseOrderStatusBadge status={po.status} />
           </h1>
-          <p className="text-sm text-neutral-500">
+          <p className="text-sm text-ink/60">
             {po.supplier?.name}
             {po.supplier?.phone && ` · ${po.supplier.phone}`} · {po.currency}
             {po.currency === "USD" && ` at ₦${rate.toLocaleString()}/$`} · created by {po.created_by_name}{" "}
             {new Date(po.created_at).toLocaleDateString()}
             {po.expected_date && ` · expected ${po.expected_date}`}
           </p>
-          {po.notes && <p className="mt-1 text-sm text-neutral-600">{po.notes}</p>}
+          {po.notes && <p className="mt-1 text-sm text-ink/70">{po.notes}</p>}
         </div>
         <PurchaseOrderStatusButtons
           poId={po.id}
@@ -137,22 +137,22 @@ export default async function PurchaseOrderPage({ params }: { params: Promise<{ 
                 {items.map((i) => (
                   <tr key={i.id}>
                     <td className="px-3 py-2">
-                      <Link href={`/staff/dashboard/products/${i.product_id}/edit`} className="hover:text-brand-700 hover:underline">
+                      <Link href={`/staff/dashboard/products/${i.product_id}/edit`} className="text-neutral-900 hover:text-brand-700 hover:underline">
                         {i.product?.name}
                       </Link>
                       <span className="block text-xs text-neutral-400">In stock now: {i.product?.stock_quantity}</span>
                     </td>
-                    <td className="px-3 py-2 text-right font-mono">{i.quantity_ordered}</td>
-                    <td className={`px-3 py-2 text-right font-mono ${i.quantity_received === i.quantity_ordered ? "text-green-700" : ""}`}>
+                    <td className="px-3 py-2 text-right font-mono text-neutral-900">{i.quantity_ordered}</td>
+                    <td className={`px-3 py-2 text-right font-mono ${i.quantity_received === i.quantity_ordered ? "text-green-700" : "text-neutral-900"}`}>
                       {i.quantity_received}
                     </td>
-                    <td className="px-3 py-2 text-right font-mono">
+                    <td className="px-3 py-2 text-right font-mono text-neutral-900">
                       {money(i.unit_cost_minor)}
                       {po.currency === "USD" && (
                         <span className="block text-xs text-neutral-400">≈ {formatNaira(toKobo(i.unit_cost_minor, "USD", rate))}</span>
                       )}
                     </td>
-                    <td className="px-3 py-2 text-right font-mono">{money(i.unit_cost_minor * i.quantity_ordered)}</td>
+                    <td className="px-3 py-2 text-right font-mono text-neutral-900">{money(i.unit_cost_minor * i.quantity_ordered)}</td>
                     {po.status === "draft" && (
                       <td className="px-3 py-2 text-right">
                         <RemoveLineButton poId={po.id} itemId={i.id} />
@@ -185,7 +185,7 @@ export default async function PurchaseOrderPage({ params }: { params: Promise<{ 
             ) : (
               <ul className="mt-2 divide-y divide-neutral-100">
                 {paymentList.map((p) => (
-                  <li key={p.id} className="py-1.5 text-xs">
+                  <li key={p.id} className="py-1.5 text-xs text-neutral-900">
                     <span className="font-semibold">{money(p.amount_minor)}</span> on {p.paid_on}
                     {p.method && ` · ${p.method}`}
                     <span className="block text-neutral-400">
@@ -202,7 +202,7 @@ export default async function PurchaseOrderPage({ params }: { params: Promise<{ 
         </div>
       </div>
 
-      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-neutral-500">Timeline</h2>
+      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-ink/60">Timeline</h2>
       <ActivityList rows={(timeline ?? []) as ActivityRow[]} emptyText="No activity yet." />
     </div>
   );

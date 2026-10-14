@@ -49,8 +49,8 @@ export default async function StaffReviewsPage() {
 
   return (
     <div>
-      <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-brand-900">Reviews</h1>
-      <p className="mb-6 text-sm text-neutral-500">
+      <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-ink">Reviews</h1>
+      <p className="mb-6 text-sm text-ink/60">
         Customer product reviews — only approved reviews appear on the live site.
       </p>
 

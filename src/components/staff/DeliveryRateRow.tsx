@@ -26,7 +26,7 @@ export function DeliveryRateRow({ rate }: { rate: DeliveryRate }) {
   return (
     <div className="flex items-center gap-3 border-b border-neutral-200 py-2.5">
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium">{rate.state}</p>
+        <p className="truncate text-sm font-medium text-neutral-900">{rate.state}</p>
         {unpriced && <p className="text-xs text-amber-600">Not priced yet</p>}
       </div>
       <span className="text-xs text-neutral-400">{formatNaira(rate.price_kobo)}</span>

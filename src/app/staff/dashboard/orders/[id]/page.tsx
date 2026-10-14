@@ -54,22 +54,22 @@ export default async function StaffOrderDetailPage({
     <div>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h1 className="font-display text-xl font-bold tracking-tight text-brand-900">
+          <h1 className="font-display text-xl font-bold tracking-tight text-ink">
             {order.paystack_reference}
           </h1>
-          <p className="text-sm text-neutral-500">
+          <p className="text-sm text-ink/60">
             Placed {new Date(order.created_at).toLocaleString()}
             {order.paystack_verified_at && ` · Paid ${new Date(order.paystack_verified_at).toLocaleString()}`}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-neutral-500">Payment</span>
+          <span className="text-xs text-ink/60">Payment</span>
           <OrderStatusBadge status={order.status} />
         </div>
       </div>
 
       <div className="mb-6 grid gap-4 lg:grid-cols-3">
-        <div className="rounded-lg border border-neutral-200 bg-white p-4 text-sm">
+        <div className="rounded-lg border border-neutral-200 bg-white p-4 text-sm text-neutral-900">
           <p className="mb-1 font-medium text-neutral-900">Customer</p>
           <p>{order.customer_name}</p>
           <p>{order.customer_email}</p>
@@ -129,12 +129,12 @@ export default async function StaffOrderDetailPage({
         {order.order_items.map((item) => (
           <div key={item.id} className="flex items-center justify-between gap-4 p-4">
             <div className="min-w-0">
-              <p className="truncate text-sm font-medium">{item.product_name_snapshot}</p>
+              <p className="truncate text-sm font-medium text-neutral-900">{item.product_name_snapshot}</p>
               <p className="text-xs text-neutral-500">
                 {formatNaira(item.unit_price_kobo_snapshot)} × {item.quantity}
               </p>
             </div>
-            <p className="shrink-0 text-sm font-semibold">
+            <p className="shrink-0 text-sm font-semibold text-neutral-900">
               {formatNaira(item.unit_price_kobo_snapshot * item.quantity)}
             </p>
           </div>
@@ -157,7 +157,7 @@ export default async function StaffOrderDetailPage({
         )}
       </div>
 
-      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-neutral-500">Timeline</h2>
+      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-ink/60">Timeline</h2>
       <ActivityList rows={(timeline ?? []) as ActivityRow[]} emptyText="No staff actions on this order yet." />
     </div>
   );

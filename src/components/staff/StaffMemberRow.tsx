@@ -47,7 +47,7 @@ export function StaffMemberRow({
     <div className="p-4">
       <div className="flex flex-wrap items-center gap-3">
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium">
+          <p className="text-sm font-medium text-neutral-900">
             {member.full_name}{" "}
             {isSelf && <span className="text-xs text-neutral-400">(you)</span>}
           </p>

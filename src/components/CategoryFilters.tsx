@@ -29,11 +29,11 @@ export function CategoryFilters({
   return (
     <form method="GET" action={`/category/${categorySlug}`} className="w-[260px] shrink-0">
       <div className="mb-1.5 flex items-center justify-between">
-        <h3 className="text-[15px] font-semibold text-white">Filters</h3>
+        <h3 className="text-[15px] font-semibold text-ink">Filters</h3>
         {hasActiveFilters && (
           <a
             href={`/category/${categorySlug}`}
-            className="text-[12.5px] font-semibold text-accent-400 hover:text-white"
+            className="text-[12.5px] font-semibold text-link hover:text-ink"
           >
             Clear All
           </a>
@@ -41,13 +41,13 @@ export function CategoryFilters({
       </div>
 
       {brands.length > 0 && (
-        <div className="border-b border-white/10 py-5">
-          <div className="mb-3 text-xs font-bold tracking-wide text-white/70">BRAND</div>
+        <div className="border-b border-ink/10 py-5">
+          <div className="mb-3 text-xs font-bold tracking-wide text-ink/70">BRAND</div>
           <div className="flex flex-col">
             {brands.map((b) => (
               <label
                 key={b.id}
-                className="flex cursor-pointer items-center gap-2 py-1.5 text-[13.5px] text-white/90"
+                className="flex cursor-pointer items-center gap-2 py-1.5 text-[13.5px] text-ink/90"
               >
                 <input
                   type="checkbox"
@@ -57,7 +57,7 @@ export function CategoryFilters({
                   className="h-4 w-4 accent-accent-500"
                 />
                 {b.name}
-                <span className="ml-auto text-white/35">({b.product_count})</span>
+                <span className="ml-auto text-ink/35">({b.product_count})</span>
               </label>
             ))}
           </div>
@@ -65,8 +65,8 @@ export function CategoryFilters({
       )}
 
       {maxPriceKobo > 0 && (
-        <div className="border-b border-white/10 py-5">
-          <div className="mb-3 text-xs font-bold tracking-wide text-white/70">
+        <div className="border-b border-ink/10 py-5">
+          <div className="mb-3 text-xs font-bold tracking-wide text-ink/70">
             PRICE RANGE
           </div>
           <PriceRangeInput max={maxPriceKobo} initial={currentMaxPriceKobo} />
@@ -74,10 +74,10 @@ export function CategoryFilters({
       )}
 
       <div className="py-5">
-        <div className="mb-3 text-xs font-bold tracking-wide text-white/70">
+        <div className="mb-3 text-xs font-bold tracking-wide text-ink/70">
           AVAILABILITY
         </div>
-        <label className="flex cursor-pointer items-center gap-2 text-[13.5px] text-white/90">
+        <label className="flex cursor-pointer items-center gap-2 text-[13.5px] text-ink/90">
           <input
             type="checkbox"
             name="inStock"

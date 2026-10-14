@@ -44,8 +44,8 @@ export default async function DiscountsPage() {
 
   return (
     <div>
-      <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-brand-900">Discount codes</h1>
-      <p className="mb-6 text-sm text-neutral-500">
+      <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-ink">Discount codes</h1>
+      <p className="mb-6 text-sm text-ink/60">
         Codes customers enter at checkout. Figures below count paid orders only.
       </p>
 
@@ -57,7 +57,7 @@ export default async function DiscountsPage() {
       </details>
 
       {list.length === 0 ? (
-        <p className="text-sm text-neutral-500">No discount codes yet.</p>
+        <p className="text-sm text-ink/60">No discount codes yet.</p>
       ) : (
         <div className="overflow-x-auto rounded-lg border border-neutral-200 bg-white">
           <table className="w-full text-sm">
@@ -87,14 +87,14 @@ export default async function DiscountsPage() {
                 return (
                   <tr key={c.id}>
                     <td className="px-3 py-2">
-                      <span className="font-mono font-semibold">{c.code}</span>
+                      <span className="font-mono font-semibold text-neutral-900">{c.code}</span>
                       {c.description && <span className="block text-xs text-neutral-400">{c.description}</span>}
                     </td>
-                    <td className="px-3 py-2">{describeDiscount(c)}</td>
+                    <td className="px-3 py-2 text-neutral-900">{describeDiscount(c)}</td>
                     <td className="px-3 py-2 text-xs text-neutral-500">{rules.join(" · ") || "—"}</td>
-                    <td className="px-3 py-2 text-right font-mono">{s.uses}</td>
-                    <td className="px-3 py-2 text-right font-mono">{formatNaira(s.discountKobo)}</td>
-                    <td className="px-3 py-2 text-right font-mono">{formatNaira(s.revenueKobo)}</td>
+                    <td className="px-3 py-2 text-right font-mono text-neutral-900">{s.uses}</td>
+                    <td className="px-3 py-2 text-right font-mono text-neutral-900">{formatNaira(s.discountKobo)}</td>
+                    <td className="px-3 py-2 text-right font-mono text-neutral-900">{formatNaira(s.revenueKobo)}</td>
                     <td className="px-3 py-2">
                       <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${st.tone}`}>{st.label}</span>
                     </td>

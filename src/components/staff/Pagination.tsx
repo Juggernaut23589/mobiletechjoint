@@ -29,10 +29,10 @@ export function Pagination({
   const linkClass =
     "rounded-full border border-neutral-300 bg-white px-3 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-50";
   const disabledClass =
-    "rounded-full border border-neutral-200 px-3 py-1.5 text-xs font-medium text-neutral-300";
+    "rounded-full border border-ink/15 px-3 py-1.5 text-xs font-medium text-ink/30";
 
   return (
-    <div className="mt-4 flex items-center justify-between gap-3 text-xs text-neutral-500">
+    <div className="mt-4 flex items-center justify-between gap-3 text-xs text-ink/60">
       <span>
         Page {page} of {pageCount} · {total.toLocaleString()} total
       </span>

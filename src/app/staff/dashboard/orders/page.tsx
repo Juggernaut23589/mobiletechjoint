@@ -72,8 +72,8 @@ export default async function StaffOrdersPage({
 
   return (
     <div>
-      <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-brand-900">Orders</h1>
-      <p className="mb-6 text-sm text-neutral-500">
+      <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-ink">Orders</h1>
+      <p className="mb-6 text-sm text-ink/60">
         {(count ?? 0).toLocaleString()} {hasFilters ? "matching" : "total"} order{count === 1 ? "" : "s"}.
       </p>
 
@@ -108,11 +108,11 @@ export default async function StaffOrdersPage({
             </option>
           ))}
         </select>
-        <label className="flex items-center gap-1 text-xs text-neutral-500">
+        <label className="flex items-center gap-1 text-xs text-ink/60">
           From
           <input name="from" type="date" defaultValue={from} className="rounded-md border border-neutral-300 bg-white px-2 py-2 text-sm" />
         </label>
-        <label className="flex items-center gap-1 text-xs text-neutral-500">
+        <label className="flex items-center gap-1 text-xs text-ink/60">
           To
           <input name="to" type="date" defaultValue={to} className="rounded-md border border-neutral-300 bg-white px-2 py-2 text-sm" />
         </label>
@@ -120,14 +120,14 @@ export default async function StaffOrdersPage({
           Filter
         </button>
         {hasFilters && (
-          <Link href="/staff/dashboard/orders" className="self-center text-xs text-neutral-500 hover:underline">
+          <Link href="/staff/dashboard/orders" className="self-center text-xs text-ink/60 hover:underline">
             Clear
           </Link>
         )}
       </form>
 
       {!orders || orders.length === 0 ? (
-        <p className="text-sm text-neutral-500">{hasFilters ? "No orders match these filters." : "No orders yet."}</p>
+        <p className="text-sm text-ink/60">{hasFilters ? "No orders match these filters." : "No orders yet."}</p>
       ) : (
         <div className="flex flex-col divide-y divide-neutral-200 rounded-lg border border-neutral-200 bg-white">
           {orders.map((order) => (
@@ -137,7 +137,7 @@ export default async function StaffOrdersPage({
               className="flex flex-wrap items-center justify-between gap-2 p-4 hover:bg-neutral-50"
             >
               <div className="min-w-0">
-                <p className="truncate text-sm font-medium">
+                <p className="truncate text-sm font-medium text-neutral-900">
                   {order.customer_name} · {order.customer_email}
                 </p>
                 <p className="text-xs text-neutral-500">
@@ -146,7 +146,7 @@ export default async function StaffOrdersPage({
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-sm font-semibold">{formatNaira(order.total_kobo)}</span>
+                <span className="text-sm font-semibold text-neutral-900">{formatNaira(order.total_kobo)}</span>
                 <OrderStatusBadge status={order.status} />
                 {(order.status === "paid" || order.status === "refunded") && (
                   <FulfillmentBadge status={order.fulfillment_status} />

@@ -18,7 +18,7 @@ export function SupplierRow({
     <div className="p-4">
       <div className="flex flex-wrap items-center gap-3">
         <div className="min-w-0 flex-1">
-          <p className={`text-sm font-medium ${supplier.is_active ? "" : "text-neutral-400 line-through"}`}>
+          <p className={`text-sm font-medium ${supplier.is_active ? "text-neutral-900" : "text-neutral-400 line-through"}`}>
             {supplier.name}
           </p>
           <p className="text-xs text-neutral-500">
@@ -34,7 +34,7 @@ export function SupplierRow({
         <button
           type="button"
           onClick={() => setEditing((v) => !v)}
-          className="rounded-full border border-neutral-300 px-3 py-1 text-xs font-medium hover:bg-neutral-50"
+          className="rounded-full border border-neutral-300 px-3 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
         >
           {editing ? "Close" : "Edit"}
         </button>

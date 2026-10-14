@@ -25,15 +25,15 @@ export default async function StaffProductNewPage() {
     <div>
       <Link
         href="/staff/dashboard/products"
-        className="mb-4 inline-flex items-center gap-1.5 text-xs font-medium text-neutral-500 hover:text-neutral-900"
+        className="mb-4 inline-flex items-center gap-1.5 text-xs font-medium text-ink/60 hover:text-ink"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         All products
       </Link>
-      <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-brand-900">
+      <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-ink">
         Add a product
       </h1>
-      <p className="mb-6 text-sm text-neutral-500">
+      <p className="mb-6 text-sm text-ink/60">
         Fill in what you know now — everything can be changed later from the edit page.
       </p>
 

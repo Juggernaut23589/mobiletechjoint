@@ -51,10 +51,10 @@ export default async function StaffCustomerDetailPage({
 
   return (
     <div>
-      <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-brand-900">
+      <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-ink">
         {profile.full_name ?? "Unnamed customer"}
       </h1>
-      <p className="mb-2 text-sm text-neutral-500">
+      <p className="mb-2 text-sm text-ink/60">
         {authUser.user?.email ?? "No email"} · {profile.phone ?? "No phone on file"} · Joined{" "}
         {new Date(profile.created_at).toLocaleDateString()}
       </p>
@@ -106,13 +106,13 @@ export default async function StaffCustomerDetailPage({
 
       {paymentMethods.length > 0 && (
         <div className="mb-6">
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-neutral-500">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-ink/60">
             Saved payment methods
           </h2>
           <div className="flex flex-col divide-y divide-neutral-200 rounded-lg border border-neutral-200 bg-white">
             {paymentMethods.map((method) => (
               <div key={method.id} className="flex items-center justify-between p-3 text-sm">
-                <span className="capitalize">
+                <span className="capitalize text-neutral-900">
                   {method.card_type ?? "Card"} •••• {method.last4}
                   {method.is_default && (
                     <span className="ml-2 rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-700">
@@ -129,11 +129,11 @@ export default async function StaffCustomerDetailPage({
         </div>
       )}
 
-      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-neutral-500">
+      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-ink/60">
         Order history
       </h2>
       {orders.length === 0 ? (
-        <p className="text-sm text-neutral-500">No orders yet.</p>
+        <p className="text-sm text-ink/60">No orders yet.</p>
       ) : (
         <div className="flex flex-col divide-y divide-neutral-200 rounded-lg border border-neutral-200 bg-white">
           {orders.map((order) => (
@@ -143,13 +143,13 @@ export default async function StaffCustomerDetailPage({
               className="flex flex-wrap items-center justify-between gap-2 p-4 hover:bg-neutral-50"
             >
               <div>
-                <p className="text-sm font-medium">{order.paystack_reference}</p>
+                <p className="text-sm font-medium text-neutral-900">{order.paystack_reference}</p>
                 <p className="text-xs text-neutral-500">
                   {new Date(order.created_at).toLocaleDateString()}
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-sm font-semibold">{formatNaira(order.total_kobo)}</span>
+                <span className="text-sm font-semibold text-neutral-900">{formatNaira(order.total_kobo)}</span>
                 <OrderStatusBadge status={order.status} />
               </div>
             </Link>

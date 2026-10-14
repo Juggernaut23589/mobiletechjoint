@@ -4,10 +4,9 @@ import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 
 /** One header system for every homepage section: a small coloured
  *  eyebrow, a display heading, optional subtitle, and an optional
- *  right-aligned action. Always light-on-dark now that the whole page is
- *  black — the old light/dark "tone" prop (for a navy band on an
- *  otherwise-white page) no longer has a reason to exist now that there's
- *  no light page to contrast it against. */
+ *  right-aligned action. Uses the theme-aware ink/link tokens (not
+ *  hardcoded white) so it reads correctly in both dark and light mode —
+ *  see globals.css. */
 export function SectionHeader({
   eyebrow,
   title,
@@ -33,15 +32,15 @@ export function SectionHeader({
     >
       <div className={centered ? "max-w-2xl" : "max-w-2xl"}>
         {eyebrow && (
-          <span className="mb-2 inline-block text-[11.5px] font-bold uppercase tracking-[0.16em] text-accent-400">
+          <span className="mb-2 inline-block text-[11.5px] font-bold uppercase tracking-[0.16em] text-link">
             {eyebrow}
           </span>
         )}
-        <h2 className="font-display text-[26px] font-bold leading-[1.1] tracking-tight text-white sm:text-[32px]">
+        <h2 className="font-display text-[26px] font-bold leading-[1.1] tracking-tight text-ink sm:text-[32px]">
           {title}
         </h2>
         {subtitle && (
-          <p className="mt-2 text-[15px] leading-relaxed text-white/60">
+          <p className="mt-2 text-[15px] leading-relaxed text-ink/60">
             {subtitle}
           </p>
         )}
@@ -49,7 +48,7 @@ export function SectionHeader({
       {action && (
         <Link
           href={action.href}
-          className="group inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-white/80 transition-colors hover:text-white"
+          className="group inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-ink/80 transition-colors hover:text-ink"
         >
           {action.label}
           <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />

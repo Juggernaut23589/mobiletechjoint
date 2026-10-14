@@ -51,8 +51,8 @@ export default async function StaffActivityPage({
 
   return (
     <div>
-      <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-brand-900">Activity log</h1>
-      <p className="mb-6 text-sm text-neutral-500">
+      <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-ink">Activity log</h1>
+      <p className="mb-6 text-sm text-ink/60">
         Every change made from the staff dashboard — who did it, when, and what changed.
       </p>
 

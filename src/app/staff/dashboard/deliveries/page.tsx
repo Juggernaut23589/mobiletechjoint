@@ -17,10 +17,10 @@ export default async function StaffDeliveriesPage() {
 
   return (
     <div>
-      <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-brand-900">
+      <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-ink">
         Delivery Pricing
       </h1>
-      <p className="mb-6 text-sm text-neutral-500">
+      <p className="mb-6 text-sm text-ink/60">
         One price per state — customers pick their exact local government area at checkout for
         the delivery address, but the fee is quoted by state.
         {unpricedCount > 0 && ` ${unpricedCount} states still need a price set.`}

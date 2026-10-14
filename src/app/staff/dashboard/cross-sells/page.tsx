@@ -27,10 +27,10 @@ export default async function StaffCrossSellsPage() {
 
   return (
     <div>
-      <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-brand-900">
+      <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-ink">
         Cross-sell Pairings
       </h1>
-      <p className="mb-6 text-sm text-neutral-500">
+      <p className="mb-6 text-sm text-ink/60">
         When a shopper views a product in the first category, they&apos;ll see cross-sells
         pulled from the second category. E.g. Cameras → Lenses &amp; Filters, Memory Cards
         &amp; Storage.
@@ -39,11 +39,11 @@ export default async function StaffCrossSellsPage() {
       <CategoryComplementForm categories={(categories ?? []) as Category[]} />
 
       <div className="mt-8">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-neutral-500">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-ink/60">
           Existing pairings
         </h2>
         {!complements || complements.length === 0 ? (
-          <p className="text-sm text-neutral-500">No pairings set up yet.</p>
+          <p className="text-sm text-ink/60">No pairings set up yet.</p>
         ) : (
           <div className="flex flex-col divide-y divide-neutral-200 rounded-lg border border-neutral-200 bg-white">
             {(complements as unknown as { id: string; category: Category; complement: Category }[]).map(

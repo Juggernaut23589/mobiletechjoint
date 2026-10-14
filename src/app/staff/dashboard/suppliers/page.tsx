@@ -49,8 +49,8 @@ export default async function SuppliersPage() {
 
   return (
     <div>
-      <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-brand-900">Suppliers</h1>
-      <p className="mb-6 text-sm text-neutral-500">
+      <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-ink">Suppliers</h1>
+      <p className="mb-6 text-sm text-ink/60">
         Local distributors and importers you buy stock from. &quot;Owed&quot; is what&apos;s still unpaid on orders
         that have been placed.
       </p>
@@ -63,7 +63,7 @@ export default async function SuppliersPage() {
       </details>
 
       {list.length === 0 ? (
-        <p className="text-sm text-neutral-500">No suppliers yet.</p>
+        <p className="text-sm text-ink/60">No suppliers yet.</p>
       ) : (
         <div className="flex flex-col divide-y divide-neutral-200 rounded-lg border border-neutral-200 bg-white">
           {list.map((s) => {

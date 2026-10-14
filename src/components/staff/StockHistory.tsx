@@ -4,7 +4,7 @@ import type { StockMovement } from "@/types/database";
 
 export function StockHistory({ movements }: { movements: StockMovement[] }) {
   if (movements.length === 0) {
-    return <p className="text-sm text-neutral-500">No stock movements recorded yet.</p>;
+    return <p className="text-sm text-ink/60">No stock movements recorded yet.</p>;
   }
 
   return (
@@ -25,7 +25,7 @@ export function StockHistory({ movements }: { movements: StockMovement[] }) {
               <td className="whitespace-nowrap px-3 py-2 text-xs text-neutral-500">
                 {new Date(m.created_at).toLocaleString()}
               </td>
-              <td className="px-3 py-2">
+              <td className="px-3 py-2 text-neutral-900">
                 {STOCK_REASON_LABELS[m.reason]}
                 {m.order_id && (
                   <Link href={`/staff/dashboard/orders/${m.order_id}`} className="ml-1 text-xs text-brand-600 hover:underline">
@@ -38,7 +38,7 @@ export function StockHistory({ movements }: { movements: StockMovement[] }) {
                 {m.delta > 0 ? "+" : ""}
                 {m.delta}
               </td>
-              <td className="px-3 py-2 text-right font-mono">{m.quantity_after}</td>
+              <td className="px-3 py-2 text-right font-mono text-neutral-900">{m.quantity_after}</td>
               <td className="px-3 py-2 text-xs text-neutral-500">{m.staff_name ?? "System"}</td>
             </tr>
           ))}

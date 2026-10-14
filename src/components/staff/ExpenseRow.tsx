@@ -13,7 +13,7 @@ export function ExpenseRow({ expense, isSuperAdmin }: { expense: Expense; isSupe
     <div className={`p-3 ${voided ? "bg-neutral-50" : ""}`}>
       <div className="flex flex-wrap items-center gap-3">
         <div className="min-w-0 flex-1">
-          <p className={`truncate text-sm font-medium ${voided ? "text-neutral-400 line-through" : ""}`}>
+          <p className={`truncate text-sm font-medium ${voided ? "text-neutral-400 line-through" : "text-neutral-900"}`}>
             {expense.description}
           </p>
           <p className="text-xs text-neutral-500">
@@ -41,7 +41,7 @@ export function ExpenseRow({ expense, isSuperAdmin }: { expense: Expense; isSupe
         {!voided && expense.status === "rejected" && (
           <span className="rounded-full bg-neutral-200 px-2 py-0.5 text-xs font-medium text-neutral-600">Rejected</span>
         )}
-        <span className={`shrink-0 text-sm font-semibold ${voided || expense.status !== "approved" ? "text-neutral-400" : ""}`}>
+        <span className={`shrink-0 text-sm font-semibold ${voided || expense.status !== "approved" ? "text-neutral-400" : "text-neutral-900"}`}>
           {formatNaira(expense.amount_kobo)}
         </span>
         {!voided && expense.status === "pending_approval" && isSuperAdmin && (
@@ -50,7 +50,7 @@ export function ExpenseRow({ expense, isSuperAdmin }: { expense: Expense; isSupe
             <button name="decision" value="approve" className="rounded-full bg-brand-900 px-3 py-1 text-xs font-semibold text-white">
               Approve
             </button>
-            <button name="decision" value="reject" className="rounded-full border border-neutral-300 px-3 py-1 text-xs font-medium">
+            <button name="decision" value="reject" className="rounded-full border border-neutral-300 px-3 py-1 text-xs font-medium text-neutral-700">
               Reject
             </button>
           </form>

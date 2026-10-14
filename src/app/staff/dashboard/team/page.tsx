@@ -21,8 +21,8 @@ export default async function TeamPage() {
 
   return (
     <div>
-      <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-brand-900">Team</h1>
-      <p className="mb-6 text-sm text-neutral-500">
+      <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-ink">Team</h1>
+      <p className="mb-6 text-sm text-ink/60">
         Invite staff, approve their accounts, and grant exactly the abilities each person needs.
       </p>
 
@@ -44,11 +44,11 @@ export default async function TeamPage() {
       )}
 
       <div>
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-neutral-500">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-ink/60">
           Team members ({active.length})
         </h2>
         {active.length === 0 ? (
-          <p className="text-sm text-neutral-500">No approved staff yet.</p>
+          <p className="text-sm text-ink/60">No approved staff yet.</p>
         ) : (
           <div className="flex flex-col divide-y divide-neutral-200 rounded-lg border border-neutral-200 bg-white">
             {active.map((member) => (

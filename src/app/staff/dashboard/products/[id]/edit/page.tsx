@@ -63,10 +63,10 @@ export default async function StaffProductEditPage({
 
   return (
     <div>
-      <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-brand-900">
+      <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-ink">
         Edit product
       </h1>
-      <p className="mb-6 text-sm text-neutral-500">{product.name}</p>
+      <p className="mb-6 text-sm text-ink/60">{product.name}</p>
 
       {created && (
         <p className="mb-5 rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800">
@@ -106,14 +106,14 @@ export default async function StaffProductEditPage({
       )}
 
       <div id="stock-history" className="mt-10 scroll-mt-24">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-neutral-500">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-ink/60">
           Stock history
         </h2>
         <StockHistory movements={(movements ?? []) as StockMovement[]} />
       </div>
 
       <div className="mt-10">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-neutral-500">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-ink/60">
           Edit history
         </h2>
         <ActivityList

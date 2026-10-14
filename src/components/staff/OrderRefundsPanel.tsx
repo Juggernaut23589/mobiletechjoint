@@ -63,7 +63,7 @@ function PendingDecision({ refundId }: { refundId: string }) {
           const note = prompt("Reason for rejecting (optional):");
           if (note !== null) run(rejectRefund, { note });
         }}
-        className="rounded-full border border-neutral-300 px-3 py-1 text-xs font-medium disabled:opacity-50"
+        className="rounded-full border border-neutral-300 px-3 py-1 text-xs font-medium text-neutral-700 disabled:opacity-50"
       >
         Reject
       </button>
@@ -92,7 +92,7 @@ export function OrderRefundsPanel({
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="rounded-full border border-neutral-300 px-3 py-1 text-xs font-medium hover:bg-neutral-50"
+            className="rounded-full border border-neutral-300 px-3 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
           >
             Issue refund
           </button>
@@ -106,7 +106,7 @@ export function OrderRefundsPanel({
           {refunds.map((r) => (
             <li key={r.id} className="py-2">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="font-semibold">{formatNaira(r.amount_kobo)}</span>
+                <span className="font-semibold text-neutral-900">{formatNaira(r.amount_kobo)}</span>
                 <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[r.status]}`}>
                   {STATUS_LABELS[r.status]}
                 </span>
@@ -159,7 +159,7 @@ export function OrderRefundsPanel({
               className="mt-1 w-full rounded-md border border-neutral-300 bg-white px-2 py-1.5 text-sm"
             />
           </label>
-          <div className="flex flex-col gap-1 text-xs">
+          <div className="flex flex-col gap-1 text-xs text-neutral-700">
             <label className="flex items-center gap-2">
               <input type="radio" name="method" value="paystack" defaultChecked />
               Refund to the customer&apos;s original payment (via Paystack)
@@ -174,7 +174,7 @@ export function OrderRefundsPanel({
               <p className="mb-1 font-medium text-neutral-700">Put items back into stock?</p>
               {items.map((item) => (
                 <label key={item.productId} className="flex items-center justify-between gap-2 py-0.5">
-                  <span className="truncate">{item.name}</span>
+                  <span className="truncate text-neutral-700">{item.name}</span>
                   <input
                     name={`restock_${item.productId}`}
                     type="number"

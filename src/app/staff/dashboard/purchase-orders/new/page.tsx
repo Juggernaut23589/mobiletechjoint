@@ -20,14 +20,14 @@ export default async function NewPurchaseOrderPage() {
 
   return (
     <div className="max-w-4xl">
-      <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-brand-900">New purchase order</h1>
-      <p className="mb-6 text-sm text-neutral-500">
+      <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-ink">New purchase order</h1>
+      <p className="mb-6 text-sm text-ink/60">
         Saved as a draft first, so you can check it before marking it as ordered.
       </p>
       {(suppliers ?? []).length === 0 ? (
-        <p className="text-sm text-neutral-500">
+        <p className="text-sm text-ink/60">
           You need a supplier first —{" "}
-          <Link href="/staff/dashboard/suppliers" className="text-brand-600 underline">
+          <Link href="/staff/dashboard/suppliers" className="text-link underline">
             add one
           </Link>
           .

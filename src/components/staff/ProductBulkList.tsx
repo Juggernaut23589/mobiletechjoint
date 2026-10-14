@@ -146,7 +146,7 @@ export function ProductBulkList({
                 ) : null}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium">{product.name}</p>
+                <p className="truncate text-sm font-medium text-neutral-900">{product.name}</p>
                 <p className="text-xs text-neutral-500">
                   {product.priceKobo ? formatNaira(product.priceKobo) : "No price set"} · {product.brandName ?? "No brand"} · Stock{" "}
                   {product.stock}

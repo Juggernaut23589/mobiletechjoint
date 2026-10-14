@@ -61,7 +61,7 @@ export function ProductPicker({
                 }}
                 className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm hover:bg-brand-50"
               >
-                <span className="min-w-0 truncate">
+                <span className="min-w-0 truncate text-neutral-900">
                   {p.name}
                   {p.brand && <span className="ml-1 text-xs text-neutral-400">{p.brand}</span>}
                 </span>

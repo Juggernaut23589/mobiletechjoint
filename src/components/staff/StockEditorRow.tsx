@@ -39,7 +39,7 @@ export function StockEditorRow({ product }: { product: ProductWithImages }) {
         <div className="min-w-0 flex-1 basis-32">
           <Link
             href={`/staff/dashboard/products/${product.id}/edit#stock-history`}
-            className="block truncate text-sm font-medium hover:text-brand-700 hover:underline"
+            className="block truncate text-sm font-medium text-neutral-900 hover:text-brand-700 hover:underline"
           >
             {product.name}
           </Link>

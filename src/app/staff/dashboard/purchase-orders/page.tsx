@@ -67,8 +67,8 @@ export default async function PurchaseOrdersPage({
     <div>
       <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-brand-900">Purchase orders</h1>
-          <p className="text-sm text-neutral-500">
+          <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-ink">Purchase orders</h1>
+          <p className="text-sm text-ink/60">
             Stock you&apos;ve ordered from suppliers. Receiving goods adds them to stock and updates each
             product&apos;s average cost.
           </p>
@@ -105,12 +105,12 @@ export default async function PurchaseOrdersPage({
       </form>
 
       {orders.length === 0 ? (
-        <p className="mb-8 text-sm text-neutral-500">
+        <p className="mb-8 text-sm text-ink/60">
           No purchase orders yet.{" "}
           {(suppliers ?? []).length === 0 && (
             <>
               Start by{" "}
-              <Link href="/staff/dashboard/suppliers" className="text-brand-600 underline">
+              <Link href="/staff/dashboard/suppliers" className="text-link underline">
                 adding a supplier
               </Link>
               .
@@ -131,7 +131,7 @@ export default async function PurchaseOrdersPage({
                 className="flex flex-wrap items-center justify-between gap-3 p-4 hover:bg-neutral-50"
               >
                 <div className="min-w-0">
-                  <p className="text-sm font-medium">
+                  <p className="text-sm font-medium text-neutral-900">
                     {po.po_number} · {po.supplier?.name}
                   </p>
                   <p className="text-xs text-neutral-500">
@@ -141,7 +141,7 @@ export default async function PurchaseOrdersPage({
                 </div>
                 <div className="flex items-center gap-3 text-right">
                   <div>
-                    <p className="text-sm font-semibold">{formatMoney(ordered, po.currency)}</p>
+                    <p className="text-sm font-semibold text-neutral-900">{formatMoney(ordered, po.currency)}</p>
                     <p className="text-xs text-neutral-500">
                       {po.currency === "USD" && `≈ ${formatNaira(toKobo(ordered, po.currency, Number(po.exchange_rate)))} · `}
                       {paid >= ordered ? "Paid" : `${formatMoney(ordered - paid, po.currency)} owed`}

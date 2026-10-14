@@ -70,8 +70,8 @@ export default async function StaffFinancePage({
 
   return (
     <div>
-      <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-brand-900">Finance</h1>
-      <p className="mb-5 text-sm text-neutral-500">
+      <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-ink">Finance</h1>
+      <p className="mb-5 text-sm text-ink/60">
         Profit &amp; loss for {period.label} ({period.from} to {period.to}). Sales count on the day payment
         was confirmed; stock purchases only become a cost when the item is sold.
       </p>
@@ -88,7 +88,7 @@ export default async function StaffFinancePage({
             {p.label}
           </Link>
         ))}
-        <form className="flex flex-wrap items-center gap-1 text-xs text-neutral-500">
+        <form className="flex flex-wrap items-center gap-1 text-xs text-ink/60">
           <input type="hidden" name="group" value={group} />
           <input name="from" type="date" defaultValue={period.from} className="rounded-md border border-neutral-300 bg-white px-2 py-1.5 text-sm" />
           to
@@ -151,11 +151,11 @@ export default async function StaffFinancePage({
         </div>
 
         <div>
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-neutral-500">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-ink/60">
             Net takings by day
           </h2>
           {pnl.daily.length === 0 ? (
-            <p className="text-sm text-neutral-500">No paid orders in this period.</p>
+            <p className="text-sm text-ink/60">No paid orders in this period.</p>
           ) : (
             <div className="flex max-h-80 flex-col gap-2 overflow-y-auto rounded-lg border border-neutral-200 bg-white p-4">
               {pnl.daily.map((day) => (
@@ -167,13 +167,13 @@ export default async function StaffFinancePage({
                       style={{ width: `${Math.max((Math.max(day.netKobo, 0) / maxDaily) * 100, 2)}%` }}
                     />
                   </div>
-                  <span className="w-24 shrink-0 text-right text-xs font-medium">{formatNaira(day.netKobo)}</span>
+                  <span className="w-24 shrink-0 text-right text-xs font-medium text-neutral-900">{formatNaira(day.netKobo)}</span>
                 </div>
               ))}
             </div>
           )}
 
-          <h2 className="mb-3 mt-6 text-sm font-semibold uppercase tracking-wider text-neutral-500">
+          <h2 className="mb-3 mt-6 text-sm font-semibold uppercase tracking-wider text-ink/60">
             Export for your accountant
           </h2>
           <div className="flex flex-wrap gap-2">
@@ -195,7 +195,7 @@ export default async function StaffFinancePage({
       </div>
 
       <div className="mb-3 flex flex-wrap items-center gap-2">
-        <h2 className="mr-2 text-sm font-semibold uppercase tracking-wider text-neutral-500">Margins</h2>
+        <h2 className="mr-2 text-sm font-semibold uppercase tracking-wider text-ink/60">Margins</h2>
         {GROUPS.map((g) => (
           <Link
             key={g.value}
@@ -209,7 +209,7 @@ export default async function StaffFinancePage({
         ))}
       </div>
       {rows.length === 0 ? (
-        <p className="text-sm text-neutral-500">No sales in this period.</p>
+        <p className="text-sm text-ink/60">No sales in this period.</p>
       ) : (
         <div className="overflow-x-auto rounded-lg border border-neutral-200 bg-white">
           <table className="w-full text-sm">
@@ -223,7 +223,7 @@ export default async function StaffFinancePage({
                 <th className="px-3 py-2 text-right font-medium">Margin</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-100">
+            <tbody className="divide-y divide-neutral-100 text-neutral-900">
               {rows.map((r) => (
                 <tr key={r.key}>
                   <td className="max-w-xs truncate px-3 py-2">{r.key}</td>

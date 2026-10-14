@@ -16,7 +16,7 @@ function Table({
   columns: { label: string; render: (p: ProductInsight) => React.ReactNode; right?: boolean }[];
   empty: string;
 }) {
-  if (rows.length === 0) return <p className="text-sm text-neutral-500">{empty}</p>;
+  if (rows.length === 0) return <p className="text-sm text-ink/60">{empty}</p>;
   return (
     <div className="overflow-x-auto rounded-lg border border-neutral-200 bg-white">
       <table className="w-full text-sm">
@@ -30,11 +30,11 @@ function Table({
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-neutral-100">
+        <tbody className="divide-y divide-neutral-100 text-neutral-900">
           {rows.map((p) => (
             <tr key={p.id}>
               <td className="max-w-xs px-3 py-2">
-                <Link href={`/staff/dashboard/products/${p.id}/edit#stock-history`} className="block truncate hover:text-brand-700 hover:underline">
+                <Link href={`/staff/dashboard/products/${p.id}/edit#stock-history`} className="block truncate text-neutral-900 hover:text-brand-700 hover:underline">
                   {p.name}
                 </Link>
                 {p.brand && <span className="text-xs text-neutral-400">{p.brand}</span>}
@@ -70,8 +70,8 @@ export default async function StockInsightsPage() {
 
   return (
     <div>
-      <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-brand-900">Stock insights</h1>
-      <p className="mb-6 text-sm text-neutral-500">
+      <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-ink">Stock insights</h1>
+      <p className="mb-6 text-sm text-ink/60">
         Based on sales over the last 90 days, for published products. Reorder suggestions assume a{" "}
         {LEAD_TIME_DAYS}-day supplier lead time and aim to cover {TARGET_COVER_DAYS} days of sales on arrival.
       </p>
@@ -93,7 +93,7 @@ export default async function StockInsightsPage() {
         ))}
       </div>
 
-      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-neutral-500">
+      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-ink/60">
         Reorder now ({reorder.length})
       </h2>
       <div className="mb-8">
@@ -109,7 +109,7 @@ export default async function StockInsightsPage() {
         />
       </div>
 
-      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-neutral-500">Best sellers (30 days)</h2>
+      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-ink/60">Best sellers (30 days)</h2>
       <div className="mb-8">
         <Table
           rows={bestSellers}
@@ -123,10 +123,10 @@ export default async function StockInsightsPage() {
         />
       </div>
 
-      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-neutral-500">
+      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-ink/60">
         Slow movers — in stock, no sales in 90 days ({slow.length})
       </h2>
-      <p className="mb-3 text-xs text-neutral-500">
+      <p className="mb-3 text-xs text-ink/60">
         Candidates for a promotion or a discount code. Biggest value tied up first; top 50 shown. Value is
         {showCost ? " at cost where known, otherwise at selling price" : " at selling price"}.
       </p>

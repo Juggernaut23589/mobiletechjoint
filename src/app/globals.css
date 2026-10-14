@@ -19,6 +19,12 @@
   --color-surface-raised: #ffffff;
   --color-ink: #f5f5f0;
 
+  /* Semantic link/eyebrow colour for text that sits directly on `surface`
+     (not inside a card): accent-400 pops on the black dark-mode surface,
+     but fails contrast outright on the light-mode surface below, so this
+     is swapped per-theme rather than hardcoding accent-400 at call sites. */
+  --color-link: var(--color-accent-400);
+
   /* Two yellow ramps, not one, because they do different jobs:
      brand-* is TEXT/link colour that has to stay legible sitting
      directly on white cards (link text, secondary-button text, the
@@ -59,20 +65,25 @@
   --shadow-color: 0 0% 4%;
 }
 
-/* Light mode: restores the page's pre-rebrand resting background/text
-   pair (the light brand-blue surface + dark ink from before the
-   black-and-yellow reskin) via the toggle in SiteHeader. Every other
-   color — navbar/hero/footer shells, cards, buttons, brand/accent
-   ramps — is untouched, same as the dark mode default. */
+/* Light mode: a warm ivory surface + near-black ink designed to match the
+   black-and-gold identity (the old override just restored a leftover
+   pre-rebrand blue, which both clashed with the brand and was never paired
+   with a legible link colour — accent-400 is a pale yellow tuned to pop on
+   black and nearly disappears on anything light). --color-link follows
+   suit: brand-700 is the same "dark gold on a pale card" colour the auth
+   form and other white islands already use, so it carries AA contrast on
+   this surface the way accent-400 does on the black one. */
 :root[data-theme="light"] {
-  --color-surface: #dde7fb;
-  --color-ink: #12141a;
+  --color-surface: #faf8f2;
+  --color-ink: #1a1712;
+  --color-link: var(--color-brand-700);
 }
 
 @theme inline {
   --color-surface: var(--color-surface);
   --color-surface-raised: var(--color-surface-raised);
   --color-ink: var(--color-ink);
+  --color-link: var(--color-link);
 
   --color-brand-50: var(--color-brand-50);
   --color-brand-100: var(--color-brand-100);

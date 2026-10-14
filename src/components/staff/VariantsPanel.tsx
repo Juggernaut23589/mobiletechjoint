@@ -50,7 +50,7 @@ export function VariantsPanel({ productId, members }: { productId: string; membe
                 }}
                 className="w-28 rounded border border-neutral-300 px-2 py-1 text-xs"
               />
-              <span className="min-w-0 flex-1 truncate text-xs">
+              <span className="min-w-0 flex-1 truncate text-xs text-neutral-900">
                 {m.id === productId ? (
                   <strong>{m.name} (this product)</strong>
                 ) : (

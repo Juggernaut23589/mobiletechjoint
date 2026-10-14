@@ -29,13 +29,13 @@ export default async function StaffDashboardLayout({ children }: { children: Rea
   if (session.isPending) {
     return (
       <div className="mx-auto flex min-h-[70vh] max-w-md flex-col items-center justify-center px-4 text-center">
-        <h1 className="font-display mb-2 text-xl text-brand-900">Awaiting approval</h1>
-        <p className="mb-6 text-sm text-neutral-500">
+        <h1 className="font-display mb-2 text-xl text-ink">Awaiting approval</h1>
+        <p className="mb-6 text-sm text-ink/60">
           Hi {session.fullName.split(" ")[0]} — your staff account has been created but a super
           admin still needs to approve it and grant you access before you can use the dashboard.
         </p>
         <form action={logoutStaff}>
-          <button type="submit" className="text-sm text-neutral-400 hover:text-neutral-900">
+          <button type="submit" className="text-sm text-ink/50 hover:text-ink">
             Log out
           </button>
         </form>

@@ -105,7 +105,7 @@ export function PurchaseOrderForm({ suppliers }: { suppliers: SupplierOption[] }
             <tbody className="divide-y divide-neutral-100">
               {lines.map((l, i) => (
                 <tr key={l.productId}>
-                  <td className="py-2 pr-2">{l.name}</td>
+                  <td className="py-2 pr-2 text-neutral-900">{l.name}</td>
                   <td className="py-2 pr-2">
                     <input
                       type="number"
@@ -125,7 +125,7 @@ export function PurchaseOrderForm({ suppliers }: { suppliers: SupplierOption[] }
                       className="w-32 rounded border border-neutral-300 px-2 py-1"
                     />
                   </td>
-                  <td className="py-2 text-right font-mono">
+                  <td className="py-2 text-right font-mono text-neutral-900">
                     {formatMoney((Number(l.quantity) || 0) * toMinor(l.unitCost), currency)}
                   </td>
                   <td className="py-2 text-right">
@@ -142,10 +142,10 @@ export function PurchaseOrderForm({ suppliers }: { suppliers: SupplierOption[] }
             </tbody>
             <tfoot>
               <tr>
-                <td colSpan={3} className="pt-3 text-right text-sm font-semibold">
+                <td colSpan={3} className="pt-3 text-right text-sm font-semibold text-neutral-900">
                   Total
                 </td>
-                <td className="pt-3 text-right font-mono font-semibold">{formatMoney(total, currency)}</td>
+                <td className="pt-3 text-right font-mono font-semibold text-neutral-900">{formatMoney(total, currency)}</td>
                 <td />
               </tr>
             </tfoot>

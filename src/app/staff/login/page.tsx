@@ -13,7 +13,7 @@ function LoginForm() {
     <div className="mx-auto flex min-h-[80vh] max-w-[380px] flex-col items-center justify-center px-4 py-10">
       <div className="mb-8 flex items-center gap-2">
         <Logo size={30} />
-        <span className="font-display text-[18px] text-white">
+        <span className="font-display text-[18px] text-ink">
           mobile<span className="font-bold">techjoint</span>
         </span>
       </div>
@@ -92,7 +92,7 @@ function LoginForm() {
         </div>
       </div>
 
-      <p className="mt-4.5 text-[12.5px] text-white/50">
+      <p className="mt-4.5 text-[12.5px] text-ink/50">
         New staff member? Ask an admin for an invite link.
       </p>
     </div>

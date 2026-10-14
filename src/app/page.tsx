@@ -80,7 +80,7 @@ export default async function HomePage() {
         <div className="flex justify-center pb-16">
           <Link
             href="/brands"
-            className="group inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.03] px-6 py-3 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:border-accent-500 hover:text-accent-400"
+            className="group inline-flex items-center gap-2 rounded-full border border-ink/15 bg-ink/[0.03] px-6 py-3 text-sm font-semibold text-ink transition-all hover:-translate-y-0.5 hover:border-accent-500 hover:text-link"
           >
             View all brands
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />

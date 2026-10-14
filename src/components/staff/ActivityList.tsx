@@ -20,7 +20,7 @@ function entityHref(row: ActivityRow): string | null {
 }
 
 export function ActivityList({ rows, emptyText }: { rows: ActivityRow[]; emptyText: string }) {
-  if (rows.length === 0) return <p className="text-sm text-neutral-500">{emptyText}</p>;
+  if (rows.length === 0) return <p className="text-sm text-ink/60">{emptyText}</p>;
 
   return (
     <div className="flex flex-col divide-y divide-neutral-200 rounded-lg border border-neutral-200 bg-white">

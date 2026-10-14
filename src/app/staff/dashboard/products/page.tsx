@@ -73,8 +73,8 @@ export default async function StaffProductsPage({
     <div>
       <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-brand-900">Products</h1>
-          <p className="text-sm text-neutral-500">
+          <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-ink">Products</h1>
+          <p className="text-sm text-ink/60">
             {(count ?? 0).toLocaleString()} {hasFilters ? "matching" : "total"} — most recent first.
           </p>
         </div>
@@ -131,7 +131,7 @@ export default async function StaffProductsPage({
           Filter
         </button>
         {hasFilters && (
-          <Link href="/staff/dashboard/products" className="self-center text-xs text-neutral-500 hover:underline">
+          <Link href="/staff/dashboard/products" className="self-center text-xs text-ink/60 hover:underline">
             Clear
           </Link>
         )}

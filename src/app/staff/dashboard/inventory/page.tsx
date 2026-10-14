@@ -62,8 +62,8 @@ export default async function StaffInventoryPage({
 
   return (
     <div>
-      <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-brand-900">Inventory</h1>
-      <p className="mb-6 text-sm text-neutral-500">
+      <h1 className="font-display mb-1 text-2xl font-bold tracking-tight text-ink">Inventory</h1>
+      <p className="mb-6 text-sm text-ink/60">
         {totalCount ?? 0} published products ·{" "}
         <Link href="/staff/dashboard/inventory?stock=out" className="text-red-600 hover:underline">
           {outCount ?? 0} out of stock
@@ -112,7 +112,7 @@ export default async function StaffInventoryPage({
       </form>
 
       {items.length === 0 ? (
-        <p className="text-sm text-neutral-500">No products match these filters.</p>
+        <p className="text-sm text-ink/60">No products match these filters.</p>
       ) : (
         <div className="flex flex-col rounded-lg border border-neutral-200 bg-white px-4">
           {items.map((product) => (

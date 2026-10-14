@@ -92,7 +92,7 @@ export function OrderFulfillmentPanel({ orderId, status, canFulfil, dispatch, ti
 
           {needsDispatchInfo && (
             <div className="flex flex-col gap-2">
-              <div className="flex gap-3 text-xs">
+              <div className="flex gap-3 text-xs text-neutral-700">
                 {(["courier", "rider"] as const).map((m) => (
                   <label key={m} className="flex items-center gap-1">
                     <input
@@ -141,14 +141,14 @@ export function OrderFulfillmentPanel({ orderId, status, canFulfil, dispatch, ti
           )}
 
           {isRestockable && (
-            <label className="flex items-center gap-2 text-xs">
+            <label className="flex items-center gap-2 text-xs text-neutral-700">
               <input type="checkbox" name="restock" defaultChecked />
               Put the items back into stock
             </label>
           )}
 
           {(to === "dispatched" || to === "delivered") && (
-            <label className="flex items-center gap-2 text-xs">
+            <label className="flex items-center gap-2 text-xs text-neutral-700">
               <input
                 type="checkbox"
                 defaultChecked

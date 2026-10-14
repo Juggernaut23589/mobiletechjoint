@@ -55,7 +55,7 @@ export function StaffInviteForm() {
                 navigator.clipboard.writeText(state.link!);
                 setCopied(true);
               }}
-              className="rounded-full border border-neutral-300 px-3 py-1 font-medium hover:bg-white"
+              className="rounded-full border border-neutral-300 px-3 py-1 font-medium text-neutral-700 hover:bg-white"
             >
               {copied ? "Copied" : "Copy"}
             </button>

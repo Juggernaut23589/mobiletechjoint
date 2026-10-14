@@ -61,7 +61,7 @@ export function PurchaseOrderStatusButtons({
           onClick={() => {
             if (confirm("Cancel this purchase order?")) move("cancelled");
           }}
-          className="rounded-full border border-neutral-300 px-4 py-1.5 text-xs font-medium text-neutral-600 disabled:opacity-50"
+          className="rounded-full border border-neutral-300 px-4 py-1.5 text-xs font-medium text-ink/70 disabled:opacity-50"
         >
           Cancel order
         </button>
@@ -107,7 +107,7 @@ export function AddLineForm({ poId, currency, existingIds }: { poId: string; cur
         <form action={formAction} className="flex flex-wrap items-center gap-2">
           <input type="hidden" name="poId" value={poId} />
           <input type="hidden" name="productId" value={product.id} />
-          <span className="min-w-0 flex-1 truncate text-sm">{product.name}</span>
+          <span className="min-w-0 flex-1 truncate text-sm text-neutral-900">{product.name}</span>
           <input name="quantity" type="number" min={1} defaultValue={1} required className={`${input} w-20`} />
           <input
             name="unitCost"
@@ -155,7 +155,7 @@ export function ReceiveGoodsForm({
       <div className="mb-3 flex flex-col gap-1.5">
         {open.map((l) => (
           <label key={l.id} className="flex items-center justify-between gap-3">
-            <span className="min-w-0 truncate text-xs">{l.name}</span>
+            <span className="min-w-0 truncate text-xs text-neutral-900">{l.name}</span>
             <span className="flex shrink-0 items-center gap-1 text-xs text-neutral-500">
               <input name={`receive_${l.id}`} type="number" min={0} max={l.remaining} defaultValue={l.remaining} className={`${input} w-20`} />
               of {l.remaining}
