@@ -112,6 +112,10 @@ export async function getCategoriesWithCounts(): Promise<CategoryWithCount[]> {
   }
 
   return (categories ?? [])
+    // "Uncategorized" is a real row, created as WooCommerce's catch-all
+    // during the product migration (see scripts/migrate-woocommerce.ts) —
+    // not a category customers should be able to browse into.
+    .filter((c) => c.name !== "Uncategorized")
     .map((c) => ({ ...c, product_count: counts.get(c.id) ?? 0 }))
     .sort((a, b) => b.product_count - a.product_count);
 }

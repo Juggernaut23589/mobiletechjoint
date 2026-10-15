@@ -8,6 +8,7 @@ import {
 } from "@/lib/products";
 import { ProductCard } from "@/components/ProductCard";
 import { CategoryFilters } from "@/components/CategoryFilters";
+import { CategorySidebar } from "@/components/CategorySidebar";
 import { SortSelect } from "@/components/SortSelect";
 
 export const revalidate = 60;
@@ -96,15 +97,20 @@ export default async function CategoryPage({
       </div>
 
       <div className="flex flex-col gap-8 lg:flex-row">
-        <CategoryFilters
-          categorySlug={slug}
-          brands={brands}
-          selectedBrandSlugs={brandSlugs}
-          maxPriceKobo={categoryMaxPrice}
-          currentMaxPriceKobo={maxPrice ?? categoryMaxPrice}
-          inStockOnly={inStockOnly}
-          hasActiveFilters={hasActiveFilters}
-        />
+        <div className="flex flex-col gap-6 lg:sticky lg:top-[88px] lg:max-h-[calc(100vh-112px)] lg:w-[260px] lg:shrink-0 lg:self-start lg:overflow-y-auto">
+          <div className="hidden border-b border-ink/10 pb-6 lg:block">
+            <CategorySidebar embedded />
+          </div>
+          <CategoryFilters
+            categorySlug={slug}
+            brands={brands}
+            selectedBrandSlugs={brandSlugs}
+            maxPriceKobo={categoryMaxPrice}
+            currentMaxPriceKobo={maxPrice ?? categoryMaxPrice}
+            inStockOnly={inStockOnly}
+            hasActiveFilters={hasActiveFilters}
+          />
+        </div>
 
         <div className="min-w-0 flex-1">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-2.5">

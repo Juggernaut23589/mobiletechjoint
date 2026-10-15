@@ -20,6 +20,7 @@ import { FaqCarousel } from "@/components/FaqCarousel";
 import { TeamSection } from "@/components/TeamSection";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { SectionHeader } from "@/components/ui/SectionHeader";
+import { CategorySidebar } from "@/components/CategorySidebar";
 
 // Without this, the page is prerendered once at build time and never
 // reflects products added afterwards (manual entry, or the Instagram
@@ -55,36 +56,42 @@ export default async function HomePage() {
       <NewArrivalsMarquee products={newArrivals} />
 
       <div className="mx-auto max-w-[1360px] px-4 pt-16 sm:px-8">
-        <ProductSection
-          eyebrow="Creator favourites"
-          title="Hot Selling"
-          subtitle="The gear our customers keep coming back for."
-          products={featured}
-        />
-        <DealsSection products={deals} />
+        <div className="flex flex-col gap-8 lg:flex-row">
+          <CategorySidebar />
 
-        {shelves.length > 0 && (
-          <div className="pt-2">
-            <SectionHeader
-              eyebrow="Shop by brand"
-              title="Straight from the manufacturers we trust"
-              subtitle="Three fresh picks from each of our top brands. Open a brand to browse everything we stock from them."
-              className="mb-9"
+          <div className="min-w-0 flex-1">
+            <ProductSection
+              eyebrow="Creator favourites"
+              title="Hot Selling"
+              subtitle="The gear our customers keep coming back for."
+              products={featured}
             />
-            {shelves.map((shelf, i) => (
-              <BrandShelf key={shelf.brand.id} shelf={shelf} index={i} />
-            ))}
-          </div>
-        )}
+            <DealsSection products={deals} />
 
-        <div className="flex justify-center pb-16">
-          <Link
-            href="/brands"
-            className="group inline-flex items-center gap-2 rounded-full border border-ink/15 bg-ink/[0.03] px-6 py-3 text-sm font-semibold text-ink transition-all hover:-translate-y-0.5 hover:border-accent-500 hover:text-link"
-          >
-            View all brands
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-          </Link>
+            {shelves.length > 0 && (
+              <div className="pt-2">
+                <SectionHeader
+                  eyebrow="Shop by brand"
+                  title="Straight from the manufacturers we trust"
+                  subtitle="Three fresh picks from each of our top brands. Open a brand to browse everything we stock from them."
+                  className="mb-9"
+                />
+                {shelves.map((shelf, i) => (
+                  <BrandShelf key={shelf.brand.id} shelf={shelf} index={i} />
+                ))}
+              </div>
+            )}
+
+            <div className="flex justify-center pb-16">
+              <Link
+                href="/brands"
+                className="group inline-flex items-center gap-2 rounded-full border border-ink/15 bg-ink/[0.03] px-6 py-3 text-sm font-semibold text-ink transition-all hover:-translate-y-0.5 hover:border-accent-500 hover:text-link"
+              >
+                View all brands
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
 

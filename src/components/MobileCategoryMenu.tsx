@@ -98,12 +98,9 @@ export function MobileCategoryMenu() {
                     <Link
                       href={`/category/${c.slug}`}
                       onClick={() => setOpen(false)}
-                      className="flex items-center justify-between rounded-lg px-3 py-2.5 text-sm text-neutral-700 hover:bg-brand-50 hover:text-brand-700"
+                      className="block rounded-lg px-3 py-2.5 text-sm text-neutral-700 hover:bg-brand-50 hover:text-brand-700"
                     >
-                      <span>{c.name}</span>
-                      <span className="rounded-full bg-neutral-100 px-1.5 py-0.5 text-xs text-neutral-400">
-                        {c.product_count}
-                      </span>
+                      {c.name}
                     </Link>
                   </li>
                 ))}
