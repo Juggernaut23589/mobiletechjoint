@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Minus, Plus, Check } from "lucide-react";
 import { useCartStore } from "@/store/cart";
@@ -28,7 +28,13 @@ export function AddToCartForm({
   const addItem = useCartStore((s) => s.addItem);
   const openCart = useCartUIStore((s) => s.openCart);
   const [quantity, setQuantity] = useState(1);
-  const [added, setAdded] = useState(false);
+  // Reflects actual cart membership (persisted, so it survives navigation)
+  // rather than a timed flag that reverted the button's label on its own —
+  // "Added" now stays until the item is actually removed from cart.
+  const inCart = useCartStore((s) => s.items.some((i) => i.productId === productId));
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
 
   const outOfStock = stockQuantity <= 0;
 
@@ -37,12 +43,10 @@ export function AddToCartForm({
       { productId, slug, name, priceKoboSnapshot: priceKobo, imageUrl, categoryId },
       quantity
     );
-    setAdded(true);
     // The header's cart badge is easy to miss, especially now that this
     // button sits well above the fold — opening the drawer confirms the
     // add with the actual item, image and running subtotal.
     openCart();
-    setTimeout(() => setAdded(false), 1500);
   }
 
   function handleBuyNow() {
@@ -90,7 +94,7 @@ export function AddToCartForm({
       </div>
       <div className="flex gap-3">
         <Button onClick={handleAdd} variant="accent" className="flex-1 rounded-full">
-          {added ? (
+          {mounted && inCart ? (
             <>
               <Check className="h-4 w-4" /> Added
             </>

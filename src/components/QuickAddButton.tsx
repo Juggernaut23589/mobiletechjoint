@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Plus, Check } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCartStore } from "@/store/cart";
 import { useCartUIStore } from "@/store/cart-ui";
 
@@ -29,7 +29,13 @@ export function QuickAddButton({
 }) {
   const addItem = useCartStore((s) => s.addItem);
   const openCart = useCartUIStore((s) => s.openCart);
-  const [added, setAdded] = useState(false);
+  // Reflects actual cart membership (persisted, so it survives navigation)
+  // rather than a timed flag that reverted to the plus icon on its own —
+  // the checkmark now stays until the item is actually removed from cart.
+  const inCart = useCartStore((s) => s.items.some((i) => i.productId === productId));
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
 
   if (outOfStock) return null;
 
@@ -37,11 +43,9 @@ export function QuickAddButton({
     e.preventDefault();
     e.stopPropagation();
     addItem({ productId, slug, name, priceKoboSnapshot: priceKobo, imageUrl, categoryId }, 1);
-    setAdded(true);
     // A card-overlay click is otherwise confirmed only by a small header
     // badge changing — easy to miss while scanning a grid.
     openCart();
-    setTimeout(() => setAdded(false), 1200);
   }
 
   return (
@@ -56,7 +60,11 @@ export function QuickAddButton({
       // inside the card's <Link>.
       className="absolute right-2.5 top-[calc(100cqw-2.875rem)] flex h-9 w-9 items-center justify-center rounded-full bg-white text-brand-700 opacity-100 shadow-glow transition-opacity sm:opacity-0 sm:group-hover:opacity-100"
     >
-      {added ? <Check className="h-4 w-4" strokeWidth={2.5} /> : <Plus className="h-4 w-4" strokeWidth={2.5} />}
+      {mounted && inCart ? (
+        <Check className="h-4 w-4" strokeWidth={2.5} />
+      ) : (
+        <Plus className="h-4 w-4" strokeWidth={2.5} />
+      )}
     </motion.button>
   );
 }

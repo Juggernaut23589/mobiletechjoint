@@ -8,9 +8,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import type { HeroBrandSlide } from "@/lib/products";
 
 const SLIDE_MS = 3500;
-/** Each slide's product photos stagger in left-to-right across this
- *  window, rather than all appearing at once. */
-const IMAGE_STAGGER_WINDOW_S = 2;
 
 /** Homepage hero carousel: a fixed-height intro slide followed by one
  *  slide per brand with live stock (see getHeroBrandShowcase) — every
@@ -92,8 +89,6 @@ export function HeroCarousel({ brandSlides }: { brandSlides: HeroBrandSlide[] })
           (() => {
             const slide = brandSlides[index - 1];
             if (!slide) return null;
-            const stagger =
-              slide.products.length > 1 ? IMAGE_STAGGER_WINDOW_S / (slide.products.length - 1) : 0;
             return (
               <motion.div
                 key={slide.brandSlug}
@@ -135,21 +130,15 @@ export function HeroCarousel({ brandSlides }: { brandSlides: HeroBrandSlide[] })
                       {slide.brandName}
                     </h2>
                     <p className="mb-7 text-base leading-relaxed text-white/70">{slide.tagline}</p>
-                    <Link
-                      href={`/brand/${slide.brandSlug}`}
-                      className="inline-block rounded-full bg-white px-6.5 py-3 text-sm font-semibold text-brand-900 transition-all hover:-translate-y-0.5 hover:bg-white/90"
-                    >
+                    <span className="inline-block rounded-full bg-white px-6.5 py-3 text-sm font-semibold text-brand-900">
                       Shop {slide.brandName} →
-                    </Link>
+                    </span>
                   </div>
 
                   <div className="flex shrink-0 gap-3 sm:gap-4">
-                    {slide.products.map((p, i) => (
-                      <motion.div
+                    {slide.products.map((p) => (
+                      <div
                         key={p.imageUrl}
-                        initial={{ opacity: 0, x: -24 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.5, delay: i * stagger }}
                         className="relative h-[190px] w-[120px] shrink-0 overflow-hidden rounded-2xl bg-white p-4 shadow-2xl sm:h-[280px] sm:w-[190px]"
                       >
                         <Image
@@ -159,10 +148,16 @@ export function HeroCarousel({ brandSlides }: { brandSlides: HeroBrandSlide[] })
                           sizes="190px"
                           className="object-contain p-3"
                         />
-                      </motion.div>
+                      </div>
                     ))}
                   </div>
                 </div>
+
+                <Link
+                  href={`/brand/${slide.brandSlug}`}
+                  aria-label={`Shop ${slide.brandName}`}
+                  className="absolute inset-0 z-10"
+                />
               </motion.div>
             );
           })()

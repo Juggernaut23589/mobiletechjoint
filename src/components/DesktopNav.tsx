@@ -42,12 +42,12 @@ export function DesktopNav() {
         <Link
           key={c.id}
           href={`/category/${c.slug}`}
-          className="text-sm font-medium text-[#C7CCDA] transition-colors hover:text-white"
+          className="text-base font-medium text-[#C7CCDA] transition-colors hover:text-white"
         >
           {NAV_LABEL_OVERRIDES[c.name] ?? c.name}
         </Link>
       ))}
-      <Link href="/deals" className="text-sm font-medium text-accent-500 hover:text-accent-400">
+      <Link href="/deals" className="text-base font-medium text-accent-500 transition-colors hover:text-white">
         Deals
       </Link>
     </nav>

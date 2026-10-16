@@ -65,8 +65,8 @@
   --shadow-color: 0 0% 4%;
 }
 
-/* Light mode: a warm ivory surface + near-black ink designed to match the
-   black-and-gold identity (the old override just restored a leftover
+/* Light mode: pure white surface + near-black ink designed to match the
+   black-and-gold identity (an earlier override restored a leftover
    pre-rebrand blue, which both clashed with the brand and was never paired
    with a legible link colour — accent-400 is a pale yellow tuned to pop on
    black and nearly disappears on anything light). --color-link follows
@@ -74,7 +74,7 @@
    form and other white islands already use, so it carries AA contrast on
    this surface the way accent-400 does on the black one. */
 :root[data-theme="light"] {
-  --color-surface: #faf8f2;
+  --color-surface: #ffffff;
   --color-ink: #1a1712;
   --color-link: var(--color-brand-700);
 }

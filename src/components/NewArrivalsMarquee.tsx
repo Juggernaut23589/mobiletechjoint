@@ -41,7 +41,7 @@ export function NewArrivalsMarquee({ products }: { products: ProductWithImages[]
       <div className="relative">
         <div
           {...hoverProps}
-          className="marquee-fade-mask -my-6 overflow-hidden py-8 [container-type:inline-size]"
+          className="-my-6 overflow-hidden py-8 [container-type:inline-size]"
         >
           <div ref={trackRef} className="flex w-max gap-5 will-change-transform">
             {loop.map((product, i) => (
