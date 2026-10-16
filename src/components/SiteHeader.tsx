@@ -3,6 +3,7 @@ import { CartLink } from "@/components/CartLink";
 import { CartDrawer } from "@/components/CartDrawer";
 import { AccountLink } from "@/components/AccountLink";
 import { MobileCategoryMenu } from "@/components/MobileCategoryMenu";
+import { CategoriesMenu } from "@/components/CategoriesMenu";
 import { DesktopNav } from "@/components/DesktopNav";
 import { Logo } from "@/components/Logo";
 import { SearchBar } from "@/components/SearchBar";
@@ -31,6 +32,7 @@ export function SiteHeader() {
 
         <SearchBar className="hidden max-w-[440px] flex-1 md:block" />
 
+        <CategoriesMenu />
         <DesktopNav />
 
         <div className="ml-auto flex shrink-0 items-center gap-4 sm:gap-5">

@@ -1,7 +1,8 @@
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import type { Metadata } from "next";
-import { getPublishedProductsByBrandSlug } from "@/lib/products";
+import { getPublishedProductsByBrandSlug, getBrandBannerImages } from "@/lib/products";
 import { brandEditorial } from "@/lib/brand-editorial";
 import { ProductCard } from "@/components/ProductCard";
 import { Pagination } from "@/components/Pagination";
@@ -9,6 +10,24 @@ import { Pagination } from "@/components/Pagination";
 export const revalidate = 60;
 
 const PER_PAGE = 10;
+
+/** Picture strip configured from the staff dashboard's "Customize Brand
+ *  Assets" screen — renders nothing when the brand has no images for this
+ *  placement, rather than an empty gap. */
+function BannerStrip({ images }: { images: string[] }) {
+  if (images.length === 0) return null;
+  return (
+    <div className="mx-auto max-w-[1360px] px-4 py-6 sm:px-8">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        {images.map((url, i) => (
+          <div key={i} className="relative aspect-square overflow-hidden rounded-2xl bg-white">
+            <Image src={url} alt="" fill sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw" className="object-cover" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export async function generateMetadata({
   params,
@@ -42,6 +61,8 @@ export default async function BrandPage({
   });
 
   if (!brand) notFound();
+
+  const banners = await getBrandBannerImages(brand.id);
 
   const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
   // A stale link to a page past the end (stock got archived) lands on the
@@ -96,6 +117,8 @@ export default async function BrandPage({
         </div>
       </section>
 
+      <BannerStrip images={banners.top} />
+
       <div className="mx-auto max-w-[1360px] px-4 py-10 sm:px-8 sm:py-12">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-2 text-sm text-white/50">
           <span>
@@ -125,6 +148,8 @@ export default async function BrandPage({
 
         <Pagination page={page} totalPages={totalPages} hrefFor={hrefFor} />
       </div>
+
+      <BannerStrip images={banners.bottom} />
     </div>
   );
 }

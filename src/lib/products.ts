@@ -325,6 +325,63 @@ export async function getBrandsForCategory(categoryId: string): Promise<BrandWit
   return Array.from(counts.values()).sort((a, b) => b.product_count - a.product_count);
 }
 
+export interface CategoryBrandPreview {
+  id: string;
+  name: string;
+  slug: string;
+  imageUrl: string | null;
+}
+
+/** Top brands within a category, each with one representative product photo —
+ *  backs the navbar's categories mega-menu hover panel. Same brand/count
+ *  grouping as getBrandsForCategory, plus a photo pick (first non-video,
+ *  lowest-position image found) per brand, same logic getHeroBrandShowcase
+ *  uses below. Capped to a sample of recent products per category rather
+ *  than scanning everything — a hover preview doesn't need every product,
+ *  just enough of a sample to find `limit` photographed brands. */
+export async function getBrandPreviewsForCategory(
+  categoryId: string,
+  limit = 4
+): Promise<CategoryBrandPreview[]> {
+  const supabase = createPublicClient();
+  const { data: products, error } = await supabase
+    .from("products")
+    .select("brand_id, brand:brands(id,name,slug), product_images(url,is_video,position)")
+    .eq("status", "published")
+    .eq("category_id", categoryId)
+    .not("brand_id", "is", null)
+    .order("created_at", { ascending: false })
+    .limit(200);
+
+  if (error) {
+    console.error("getBrandPreviewsForCategory failed:", error.message);
+    return [];
+  }
+
+  const counts = new Map<string, CategoryBrandPreview & { count: number }>();
+  for (const p of products ?? []) {
+    const brand = p.brand as unknown as { id: string; name: string; slug: string } | null;
+    if (!brand) continue;
+
+    const existing = counts.get(brand.id);
+    if (existing) {
+      existing.count += 1;
+      continue;
+    }
+
+    const photo = (p.product_images as { url: string; is_video: boolean; position: number }[])
+      .filter((img) => !img.is_video)
+      .sort((a, b) => a.position - b.position)[0];
+
+    counts.set(brand.id, { ...brand, imageUrl: photo?.url ?? null, count: 1 });
+  }
+
+  return Array.from(counts.values())
+    .sort((a, b) => b.count - a.count)
+    .slice(0, limit)
+    .map((b) => ({ id: b.id, name: b.name, slug: b.slug, imageUrl: b.imageUrl }));
+}
+
 /** Published products matching a free-text query against name/description —
  *  backs the navbar search box. Empty/whitespace query returns no results
  *  rather than the full catalog, so an empty submit doesn't look broken.
@@ -610,6 +667,32 @@ export async function getPublishedProductsByBrandSlug(
     brand,
     products: (data ?? []) as unknown as ProductWithImages[],
     total: count ?? 0,
+  };
+}
+
+/** The top/bottom picture-strip images configured for a brand page from
+ *  the staff dashboard's "Customize Brand Assets" screen — see
+ *  src/app/actions/staff-brand-assets.ts. Empty arrays (not an error) for
+ *  a brand with nothing configured yet; the brand page skips rendering
+ *  that strip entirely in that case. */
+export async function getBrandBannerImages(
+  brandId: string
+): Promise<{ top: string[]; bottom: string[] }> {
+  const supabase = createPublicClient();
+  const { data, error } = await supabase
+    .from("brand_banner_images")
+    .select("image_url, placement")
+    .eq("brand_id", brandId)
+    .order("position", { ascending: true });
+
+  if (error) {
+    console.error("getBrandBannerImages failed:", error.message);
+    return { top: [], bottom: [] };
+  }
+
+  return {
+    top: (data ?? []).filter((r) => r.placement === "top").map((r) => r.image_url),
+    bottom: (data ?? []).filter((r) => r.placement === "bottom").map((r) => r.image_url),
   };
 }
 

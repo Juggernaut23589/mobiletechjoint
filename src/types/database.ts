@@ -50,6 +50,15 @@ export interface BrandWithCount extends Brand {
   product_count: number;
 }
 
+export interface BrandBannerImage {
+  id: string;
+  brand_id: string;
+  placement: "top" | "bottom";
+  image_url: string;
+  position: number;
+  created_at: string;
+}
+
 export interface CategoryComplement {
   id: string;
   category_id: string;

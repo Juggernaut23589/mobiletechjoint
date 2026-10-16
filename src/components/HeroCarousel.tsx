@@ -121,7 +121,7 @@ export function HeroCarousel({ brandSlides }: { brandSlides: HeroBrandSlide[] })
                 )}
                 <div className="absolute inset-0" style={{ background: slide.gradient, opacity: 0.82 }} />
 
-                <div className="relative z-10 mx-auto flex h-full max-w-[1360px] flex-col-reverse items-center justify-center gap-8 px-4 sm:flex-row sm:justify-between sm:px-8">
+                <div className="relative z-10 mx-auto flex h-full max-w-[1360px] items-center px-4 sm:px-8">
                   <div className="max-w-md text-center sm:text-left">
                     <span className="mb-4 inline-block text-[12.5px] font-bold uppercase tracking-[0.1em] text-white/60">
                       Featured Brand
@@ -133,23 +133,6 @@ export function HeroCarousel({ brandSlides }: { brandSlides: HeroBrandSlide[] })
                     <span className="inline-block rounded-full bg-white px-6.5 py-3 text-sm font-semibold text-brand-900">
                       Shop {slide.brandName} →
                     </span>
-                  </div>
-
-                  <div className="flex shrink-0 gap-3 sm:gap-4">
-                    {slide.products.map((p) => (
-                      <div
-                        key={p.imageUrl}
-                        className="relative h-[190px] w-[120px] shrink-0 overflow-hidden rounded-2xl bg-white p-4 shadow-2xl sm:h-[280px] sm:w-[190px]"
-                      >
-                        <Image
-                          src={p.imageUrl}
-                          alt={p.name}
-                          fill
-                          sizes="190px"
-                          className="object-contain p-3"
-                        />
-                      </div>
-                    ))}
                   </div>
                 </div>
 
