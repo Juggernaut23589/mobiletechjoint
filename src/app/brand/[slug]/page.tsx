@@ -13,15 +13,18 @@ const PER_PAGE = 10;
 
 /** Picture strip configured from the staff dashboard's "Customize Brand
  *  Assets" screen — renders nothing when the brand has no images for this
- *  placement, rather than an empty gap. */
+ *  placement, rather than an empty gap. Wide banner-shaped strips (one per
+ *  row) rather than a grid of small squares — stays inside this section's
+ *  own max-w-[1360px] container, so it never touches the product grid or
+ *  anything else on the page above or below it. */
 function BannerStrip({ images }: { images: string[] }) {
   if (images.length === 0) return null;
   return (
     <div className="mx-auto max-w-[1360px] px-4 py-6 sm:px-8">
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+      <div className="flex flex-col gap-4">
         {images.map((url, i) => (
-          <div key={i} className="relative aspect-square overflow-hidden rounded-2xl bg-white">
-            <Image src={url} alt="" fill sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw" className="object-cover" />
+          <div key={i} className="relative aspect-[21/6] overflow-hidden rounded-2xl bg-white">
+            <Image src={url} alt="" fill sizes="(min-width: 640px) 1296px, 100vw" className="object-cover" />
           </div>
         ))}
       </div>

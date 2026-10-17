@@ -5,18 +5,25 @@ import Link from "next/link";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
-import type { HeroBrandSlide } from "@/lib/products";
+import type { HeroBrandSlide, HomepageBannerSlide } from "@/lib/products";
 
 const SLIDE_MS = 3500;
 
-/** Homepage hero carousel: a fixed-height intro slide followed by one
- *  slide per brand with live stock (see getHeroBrandShowcase) — every
- *  slide fills the exact same box so nothing ever looks cropped or
- *  mismatched. Auto-advances every SLIDE_MS; the arrow buttons and dots
- *  below jump directly and reset that timer so manual navigation doesn't
- *  fight the next auto-advance. */
-export function HeroCarousel({ brandSlides }: { brandSlides: HeroBrandSlide[] }) {
-  const totalSlides = 1 + brandSlides.length;
+/** Homepage hero carousel: a fixed-height intro slide, then admin-uploaded
+ *  banners (see "Customize Banner" in the staff dashboard), then one slide
+ *  per brand with live stock (see getHeroBrandShowcase) — every slide
+ *  fills the exact same box so nothing ever looks cropped or mismatched.
+ *  Auto-advances every SLIDE_MS; the arrow buttons and dots below jump
+ *  directly and reset that timer so manual navigation doesn't fight the
+ *  next auto-advance. */
+export function HeroCarousel({
+  brandSlides,
+  banners = [],
+}: {
+  brandSlides: HeroBrandSlide[];
+  banners?: HomepageBannerSlide[];
+}) {
+  const totalSlides = 1 + banners.length + brandSlides.length;
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
@@ -85,9 +92,41 @@ export function HeroCarousel({ brandSlides }: { brandSlides: HeroBrandSlide[] })
               </div>
             </div>
           </motion.div>
+        ) : index <= banners.length ? (
+          (() => {
+            const banner = banners[index - 1];
+            if (!banner) return null;
+            const image = (
+              <Image
+                src={banner.imageUrl}
+                alt=""
+                fill
+                sizes="100vw"
+                className="object-cover"
+              />
+            );
+            return (
+              <motion.div
+                key={banner.id}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5 }}
+                className="absolute inset-0"
+              >
+                {banner.linkUrl ? (
+                  <Link href={banner.linkUrl} aria-label="Shop this banner" className="absolute inset-0">
+                    {image}
+                  </Link>
+                ) : (
+                  image
+                )}
+              </motion.div>
+            );
+          })()
         ) : (
           (() => {
-            const slide = brandSlides[index - 1];
+            const slide = brandSlides[index - 1 - banners.length];
             if (!slide) return null;
             return (
               <motion.div

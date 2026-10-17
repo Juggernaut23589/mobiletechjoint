@@ -70,6 +70,14 @@ export interface AdPlacement {
   created_at: string;
 }
 
+export interface HomepageBanner {
+  id: string;
+  image_url: string;
+  link_url: string | null;
+  position: number;
+  created_at: string;
+}
+
 export interface CategoryComplement {
   id: string;
   category_id: string;

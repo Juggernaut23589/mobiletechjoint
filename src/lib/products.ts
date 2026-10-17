@@ -753,6 +753,31 @@ export async function getAdPlacements(
   }));
 }
 
+export interface HomepageBannerSlide {
+  id: string;
+  imageUrl: string;
+  linkUrl: string | null;
+}
+
+/** Admin-uploaded homepage hero banners from the staff dashboard's
+ *  "Customize Banner" screen — rendered as extra slides in HeroCarousel,
+ *  same full-bleed box as the intro/brand slides. Empty array (not an
+ *  error) when nothing's been uploaded yet. */
+export async function getHomepageBanners(): Promise<HomepageBannerSlide[]> {
+  const supabase = createPublicClient();
+  const { data, error } = await supabase
+    .from("homepage_banners")
+    .select("id, image_url, link_url")
+    .order("position", { ascending: true });
+
+  if (error) {
+    console.error("getHomepageBanners failed:", error.message);
+    return [];
+  }
+
+  return (data ?? []).map((r) => ({ id: r.id, imageUrl: r.image_url, linkUrl: r.link_url }));
+}
+
 export interface VariantOption {
   id: string;
   slug: string;

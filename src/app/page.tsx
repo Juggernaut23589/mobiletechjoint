@@ -8,6 +8,7 @@ import {
   getHeroBrandShowcase,
   getBrandShelves,
   getAdPlacements,
+  getHomepageBanners,
 } from "@/lib/products";
 import { FAQS } from "@/lib/faqs";
 import { ProductSection } from "@/components/ProductSection";
@@ -36,13 +37,14 @@ const PRODUCTS_PER_SHELF = 3;
 const NEW_ARRIVALS = 12;
 
 export default async function HomePage() {
-  const [featured, newArrivals, deals, heroBrandSlides, footerAds] =
+  const [featured, newArrivals, deals, heroBrandSlides, footerAds, banners] =
     await Promise.all([
       getFeaturedProducts(8),
       getNewArrivals(NEW_ARRIVALS),
       getDealsProducts(8),
       getHeroBrandShowcase(),
       getAdPlacements("homepage"),
+      getHomepageBanners(),
     ]);
 
   const alreadyShown = [...featured, ...newArrivals, ...deals].map((p) => p.id);
@@ -50,7 +52,7 @@ export default async function HomePage() {
 
   return (
     <div>
-      <HeroCarousel brandSlides={heroBrandSlides} />
+      <HeroCarousel brandSlides={heroBrandSlides} banners={banners} />
       <PromoBanner />
       <NewArrivalsMarquee products={newArrivals} />
 
@@ -113,13 +115,18 @@ export default async function HomePage() {
 
       <TeamSection />
 
+      {/* Banner-width strips (full container width, one per row) rather
+          than a 3-up grid of small squarish tiles — same reasoning as the
+          brand page's BannerStrip below: wider reads more like an actual
+          ad placement, and staying inside this section's own max-w-[1360px]
+          container means it never touches the surrounding sections. */}
       {footerAds.length > 0 && (
         <section className="mx-auto max-w-[1360px] px-4 pb-16 sm:px-8">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="flex flex-col gap-4">
             {footerAds.map((ad) => {
               const tile = (
-                <div className="relative aspect-[16/9] overflow-hidden rounded-2xl bg-ink/5">
-                  <Image src={ad.imageUrl} alt={ad.caption ?? ""} fill sizes="(min-width: 1024px) 33vw, 100vw" className="object-cover" />
+                <div className="relative aspect-[21/6] overflow-hidden rounded-2xl bg-ink/5">
+                  <Image src={ad.imageUrl} alt={ad.caption ?? ""} fill sizes="(min-width: 640px) 1296px, 100vw" className="object-cover" />
                   {ad.caption && (
                     <p className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-4 py-3 text-sm font-semibold text-white">
                       {ad.caption}
