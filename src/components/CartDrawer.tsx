@@ -130,7 +130,7 @@ export function CartDrawer() {
                           >
                             <Minus className="h-3.5 w-3.5" />
                           </button>
-                          <span className="w-7 text-center text-xs">{item.quantity}</span>
+                          <span className="w-7 text-center text-xs text-neutral-900">{item.quantity}</span>
                           <button
                             type="button"
                             onClick={() => setQuantity(item.productId, item.quantity + 1)}

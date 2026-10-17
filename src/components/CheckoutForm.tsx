@@ -126,7 +126,7 @@ export function CheckoutForm({
   }
 
   const inputClass =
-    "w-full rounded-[10px] border border-neutral-200 bg-white px-3.5 py-2.5 text-[13.5px] outline-none transition-colors focus:border-brand-600 focus:ring-2 focus:ring-brand-100";
+    "w-full rounded-[10px] border border-neutral-200 bg-white px-3.5 py-2.5 text-[13.5px] text-neutral-900 placeholder-neutral-400 outline-none transition-colors focus:border-brand-600 focus:ring-2 focus:ring-brand-100";
   const labelClass = "mb-1.5 block text-[13px] font-semibold text-ink/80";
 
   return (
@@ -336,10 +336,10 @@ export function CheckoutForm({
                   <div className="h-12 w-12 shrink-0 rounded-lg bg-neutral-100" />
                 )}
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[12.5px] font-semibold">{item.name}</p>
+                  <p className="truncate text-[12.5px] font-semibold text-neutral-900">{item.name}</p>
                   <p className="text-xs text-neutral-500">Qty {item.quantity}</p>
                 </div>
-                <div className="shrink-0 text-[13px] font-semibold">
+                <div className="shrink-0 text-[13px] font-semibold text-neutral-900">
                   {formatNaira(item.priceKoboSnapshot * item.quantity)}
                 </div>
               </div>
@@ -367,13 +367,13 @@ export function CheckoutForm({
                     value={codeInput}
                     onChange={(e) => setCodeInput(e.target.value)}
                     placeholder="Discount code"
-                    className="min-w-0 flex-1 rounded-lg border border-neutral-200 px-3 py-2 text-[13px] uppercase"
+                    className="min-w-0 flex-1 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-[13px] uppercase text-neutral-900 placeholder-neutral-400"
                   />
                   <button
                     type="button"
                     onClick={applyCode}
                     disabled={applyingCode || !codeInput.trim()}
-                    className="rounded-lg border border-neutral-300 px-3 py-2 text-[13px] font-semibold disabled:opacity-50"
+                    className="rounded-lg border border-neutral-300 px-3 py-2 text-[13px] font-semibold text-neutral-900 disabled:opacity-50"
                   >
                     {applyingCode ? "…" : "Apply"}
                   </button>

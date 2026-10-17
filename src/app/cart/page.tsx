@@ -77,7 +77,7 @@ export default function CartPage() {
               <div className="flex min-w-0 flex-1 basis-40 flex-col gap-1">
                 <Link
                   href={`/products/${item.slug}`}
-                  className="truncate text-sm font-medium hover:underline"
+                  className="truncate text-sm font-medium text-neutral-900 hover:underline"
                 >
                   {item.name}
                 </Link>
@@ -95,7 +95,7 @@ export default function CartPage() {
                   >
                     <Minus className="h-3.5 w-3.5" />
                   </button>
-                  <span className="w-6 text-center text-sm font-medium">{item.quantity}</span>
+                  <span className="w-6 text-center text-sm font-medium text-neutral-900">{item.quantity}</span>
                   <button
                     onClick={() => setQuantity(item.productId, item.quantity + 1)}
                     className="flex h-8 w-8 items-center justify-center text-neutral-500 hover:text-brand-700"
