@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import {
   getFeaturedProducts,
@@ -6,6 +7,7 @@ import {
   getDealsProducts,
   getHeroBrandShowcase,
   getBrandShelves,
+  getAdPlacements,
 } from "@/lib/products";
 import { FAQS } from "@/lib/faqs";
 import { ProductSection } from "@/components/ProductSection";
@@ -34,12 +36,13 @@ const PRODUCTS_PER_SHELF = 3;
 const NEW_ARRIVALS = 12;
 
 export default async function HomePage() {
-  const [featured, newArrivals, deals, heroBrandSlides] =
+  const [featured, newArrivals, deals, heroBrandSlides, footerAds] =
     await Promise.all([
       getFeaturedProducts(8),
       getNewArrivals(NEW_ARRIVALS),
       getDealsProducts(8),
       getHeroBrandShowcase(),
+      getAdPlacements("homepage"),
     ]);
 
   const alreadyShown = [...featured, ...newArrivals, ...deals].map((p) => p.id);
@@ -109,6 +112,32 @@ export default async function HomePage() {
       </section>
 
       <TeamSection />
+
+      {footerAds.length > 0 && (
+        <section className="mx-auto max-w-[1360px] px-4 pb-16 sm:px-8">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {footerAds.map((ad) => {
+              const tile = (
+                <div className="relative aspect-[16/9] overflow-hidden rounded-2xl bg-ink/5">
+                  <Image src={ad.imageUrl} alt={ad.caption ?? ""} fill sizes="(min-width: 1024px) 33vw, 100vw" className="object-cover" />
+                  {ad.caption && (
+                    <p className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-4 py-3 text-sm font-semibold text-white">
+                      {ad.caption}
+                    </p>
+                  )}
+                </div>
+              );
+              return ad.linkUrl ? (
+                <Link key={ad.id} href={ad.linkUrl} className="block">
+                  {tile}
+                </Link>
+              ) : (
+                <div key={ad.id}>{tile}</div>
+              );
+            })}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

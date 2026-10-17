@@ -10,10 +10,17 @@ import { useCartStore } from "@/store/cart";
 import { useCartUIStore } from "@/store/cart-ui";
 import { formatNaira } from "@/lib/money";
 
-/** Slide-out cart drawer matching the approved design-system mockup
- *  (Main.dc.html). Portaled to document.body for the same reason
- *  MobileCategoryMenu is — SiteHeader has backdrop-blur, which creates a
- *  containing block that would break `position: fixed` positioning.
+/** Persistent cart panel matching the approved design-system mockup
+ *  (Main.dc.html), but non-modal on desktop: on screens ≥lg the page shell
+ *  (see AppShell.tsx) compresses left to make room instead of this
+ *  overlaying content, so a customer can keep browsing with it open —
+ *  there's no backdrop and no click-outside-to-close at that width.
+ *  Below lg there's no room to compress into, so it keeps behaving like a
+ *  normal modal drawer (backdrop + scroll lock), same as before.
+ *
+ *  Portaled to document.body for the same reason MobileCategoryMenu is —
+ *  SiteHeader has backdrop-blur, which creates a containing block that
+ *  would break `position: fixed` positioning.
  *
  *  The drawer's own "Checkout" button links to /cart rather than
  *  /checkout directly: /cart is the existing full review step (quantities,
@@ -32,6 +39,9 @@ export function CartDrawer() {
 
   useEffect(() => {
     if (!open) return;
+    // Only lock scroll in the small-screen modal mode — on desktop the
+    // cart is a non-blocking side panel and the page keeps scrolling.
+    if (window.matchMedia("(min-width: 1024px)").matches) return;
     const original = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
@@ -52,7 +62,7 @@ export function CartDrawer() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
             onClick={closeCart}
-            className="fixed inset-0 z-40 bg-brand-900/55"
+            className="fixed inset-0 z-40 bg-brand-900/55 lg:hidden"
             aria-hidden="true"
           />
           <motion.div
@@ -63,7 +73,6 @@ export function CartDrawer() {
             transition={{ type: "tween", duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             className="fixed inset-y-0 right-0 z-50 flex w-full max-w-[400px] flex-col bg-white shadow-2xl"
             role="dialog"
-            aria-modal="true"
             aria-label="Cart"
           >
             <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-4">

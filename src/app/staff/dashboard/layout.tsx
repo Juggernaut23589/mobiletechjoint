@@ -17,6 +17,8 @@ const NAV: { href: string; label: string; abilities: StaffAbility[] | null }[] =
   { href: "/staff/dashboard/discounts", label: "Discount codes", abilities: ["manage_promotions"] },
   { href: "/staff/dashboard/team-blog", label: "Manage team blog", abilities: ["manage_content"] },
   { href: "/staff/dashboard/brand-assets", label: "Customize Brand Assets", abilities: ["manage_merchandising"] },
+  { href: "/staff/dashboard/ad-placements", label: "Edit Ad Placements", abilities: ["manage_merchandising"] },
+  { href: "/staff/dashboard/new-arrivals", label: "Edit New Arrivals", abilities: ["manage_products"] },
   { href: "/staff/dashboard/reviews", label: "Reviews", abilities: ["manage_reviews"] },
   { href: "/staff/dashboard/sales", label: "Finance", abilities: ["view_sales"] },
   { href: "/staff/dashboard/expenses", label: "Expenses", abilities: ["manage_expenses"] },

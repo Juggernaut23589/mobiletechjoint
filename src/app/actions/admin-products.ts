@@ -27,7 +27,7 @@ function requireProductEditor(): Promise<StaffSession> {
 async function getProductSnapshot(productId: string) {
   const { data } = await createServiceClient()
     .from("products")
-    .select("name, description, price_kobo, compare_at_price_kobo, stock_quantity, status, brand_id, category_id, is_featured, is_trending")
+    .select("name, description, price_kobo, compare_at_price_kobo, stock_quantity, status, brand_id, category_id, is_featured, is_trending, is_new_arrival")
     .eq("id", productId)
     .maybeSingle();
   return data;
@@ -188,6 +188,7 @@ function revalidateProduct(productId: string) {
   revalidatePath(`/staff/dashboard/products/${productId}/edit`);
   revalidatePath("/products", "layout");
   revalidatePath("/staff/dashboard/products");
+  revalidatePath("/staff/dashboard/new-arrivals");
   revalidatePath("/");
   revalidatePath("/category", "layout");
   revalidatePath("/brand", "layout");
@@ -305,16 +306,18 @@ export async function assignProductCategory(formData: FormData): Promise<{ error
   return {};
 }
 
-/** Toggles the hero-carousel / trending flags. Both are admin-curated, not
- *  computed — there's no order history yet to derive real "hot selling"
- *  data from (see the merchandising migration's comment). */
+/** Toggles the hero-carousel / trending / new-arrival flags. All three are
+ *  admin-curated, not computed — there's no order history yet to derive
+ *  real "hot selling" data from (see the merchandising migration's
+ *  comment), and New Arrivals is similarly hand-picked via its own
+ *  dashboard screen (see getNewArrivals in lib/products.ts). */
 export async function toggleMerchandisingFlag(formData: FormData): Promise<{ error?: string }> {
   const actor = await requireProductEditor();
   const productId = formData.get("productId") as string;
   const field = formData.get("field") as string;
   const nextValue = formData.get("nextValue") === "true";
   if (!productId) return { error: "Missing product." };
-  if (field !== "is_featured" && field !== "is_trending") {
+  if (field !== "is_featured" && field !== "is_trending" && field !== "is_new_arrival") {
     return { error: "Invalid field." };
   }
 
@@ -327,7 +330,7 @@ export async function toggleMerchandisingFlag(formData: FormData): Promise<{ err
     .eq("id", productId);
   if (error) return { error: error.message };
 
-  const label = field === "is_featured" ? "hero" : "trending";
+  const label = field === "is_featured" ? "hero" : field === "is_trending" ? "trending" : "new arrivals";
   await logStaffActivity(actor, {
     action: "product.merchandising",
     entityType: "product",

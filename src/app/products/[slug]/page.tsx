@@ -1,11 +1,13 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import type { Metadata } from "next";
 import {
   getPublishedProductBySlug,
   getComplementaryProducts,
   getRelatedProducts,
   getVariantOptions,
+  getAdPlacements,
 } from "@/lib/products";
 import { formatNaira, discountPercent } from "@/lib/money";
 import { AddToCartForm } from "@/components/AddToCartForm";
@@ -43,10 +45,11 @@ export default async function ProductPage({
 
   if (!product) notFound();
 
-  const [frequentlyBoughtTogether, related, variants] = await Promise.all([
+  const [frequentlyBoughtTogether, related, variants, brandAds] = await Promise.all([
     getComplementaryProducts(product.category_id, product.id, 4),
     getRelatedProducts(product.category_id, product.id, 8),
     getVariantOptions(product.variant_group_id),
+    product.brand_id ? getAdPlacements("brand", product.brand_id) : Promise.resolve([]),
   ]);
 
   // price_kobo is NOT NULL for any product with status='published' — enforced
@@ -86,8 +89,11 @@ export default async function ProductPage({
 
       {/* Not wrapped in any reveal/fade animation: this is the gallery and
           buy button — the single most important content on this page. It
-          must never depend on client JS succeeding just to become visible. */}
-      <div className="grid gap-12 lg:grid-cols-2 lg:items-start">
+          must never depend on client JS succeeding just to become visible.
+          The ad column only exists in the grid template when there's
+          actually an ad for this brand — otherwise it's the plain 2-column
+          layout, unchanged. */}
+      <div className={`grid gap-12 lg:grid-cols-2 lg:items-start ${brandAds.length > 0 ? "xl:grid-cols-[1fr_1fr_280px]" : ""}`}>
         {/* Sticky on desktop so the gallery travels with the page instead of
             leaving blank space once the buy-box column scrolls past it —
             the right column used to be considerably taller than this one. */}
@@ -201,6 +207,30 @@ export default async function ProductPage({
             )}
           </div>
         </div>
+
+        {brandAds.length > 0 && (
+          <div className="flex flex-col gap-4">
+            {brandAds.map((ad) => {
+              const tile = (
+                <div className="relative aspect-square overflow-hidden rounded-2xl bg-ink/5">
+                  <Image src={ad.imageUrl} alt={ad.caption ?? ""} fill sizes="280px" className="object-cover" />
+                  {ad.caption && (
+                    <p className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-3 py-2.5 text-[13px] font-semibold text-white">
+                      {ad.caption}
+                    </p>
+                  )}
+                </div>
+              );
+              return ad.linkUrl ? (
+                <Link key={ad.id} href={ad.linkUrl} className="block">
+                  {tile}
+                </Link>
+              ) : (
+                <div key={ad.id}>{tile}</div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* The full manufacturer description now lives here, collapsed by

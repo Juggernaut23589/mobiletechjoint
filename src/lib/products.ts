@@ -160,11 +160,30 @@ export async function getTrendingProducts(limit = 8): Promise<ProductWithImages[
   return getPublishedProducts(limit);
 }
 
-/** Genuinely real, not curated: just the newest published products. */
+/** Admin-curated via the staff dashboard's "Edit New Arrivals" screen
+ *  (is_new_arrival, toggled the same way is_featured/is_trending are) when
+ *  at least one product's been picked — falls back to just the newest
+ *  in-stock published products otherwise, so the section is never empty
+ *  before anyone's used the new screen. In-stock only in the fallback
+ *  case — this carousel used to be dominated by out-of-stock items
+ *  competing equally with things a shopper could actually buy, wasting
+ *  the homepage's most prominent "what's new" real estate. The curated
+ *  case trusts the admin's picks as-is, no in-stock filter. */
 export async function getNewArrivals(limit = 8): Promise<ProductWithImages[]> {
-  // In-stock only — this carousel used to be dominated by out-of-stock
-  // items competing equally with things a shopper could actually buy,
-  // wasting the homepage's most prominent "what's new" real estate.
+  const supabase = createPublicClient();
+  const { data: curated, error } = await supabase
+    .from("products")
+    .select("*, product_images(*), category:categories(*), brand:brands(*)")
+    .eq("status", "published")
+    .eq("is_new_arrival", true)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.error("getNewArrivals failed:", error.message);
+    return getPublishedProducts(limit, { inStockOnly: true });
+  }
+  if (curated && curated.length > 0) return curated as unknown as ProductWithImages[];
   return getPublishedProducts(limit, { inStockOnly: true });
 }
 
@@ -694,6 +713,44 @@ export async function getBrandBannerImages(
     top: (data ?? []).filter((r) => r.placement === "top").map((r) => r.image_url),
     bottom: (data ?? []).filter((r) => r.placement === "bottom").map((r) => r.image_url),
   };
+}
+
+export interface AdPreview {
+  id: string;
+  imageUrl: string;
+  caption: string | null;
+  linkUrl: string | null;
+}
+
+/** Ad placements configured from the staff dashboard's "Edit Ad
+ *  Placements" screen — see src/app/actions/staff-ads.ts. Pass a
+ *  `brandId` for the 'brand' placement (ads shown beside the video on
+ *  that brand's product pages); omit it for 'homepage'. Empty array (not
+ *  an error) when nothing's configured for that spot. */
+export async function getAdPlacements(
+  placement: "homepage" | "brand",
+  brandId?: string
+): Promise<AdPreview[]> {
+  const supabase = createPublicClient();
+  let query = supabase
+    .from("ad_placements")
+    .select("id, image_url, caption, link_url")
+    .eq("placement", placement)
+    .order("position", { ascending: true });
+  query = placement === "brand" ? query.eq("brand_id", brandId ?? "") : query.is("brand_id", null);
+
+  const { data, error } = await query;
+  if (error) {
+    console.error("getAdPlacements failed:", error.message);
+    return [];
+  }
+
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    imageUrl: r.image_url,
+    caption: r.caption,
+    linkUrl: r.link_url,
+  }));
 }
 
 export interface VariantOption {

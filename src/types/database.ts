@@ -59,6 +59,17 @@ export interface BrandBannerImage {
   created_at: string;
 }
 
+export interface AdPlacement {
+  id: string;
+  placement: "homepage" | "brand";
+  brand_id: string | null;
+  image_url: string;
+  caption: string | null;
+  link_url: string | null;
+  position: number;
+  created_at: string;
+}
+
 export interface CategoryComplement {
   id: string;
   category_id: string;
@@ -143,6 +154,10 @@ export interface Product {
   /** Admin-curated, same reasoning as is_featured. Shown in the "Trending
    *  Now" section. */
   is_trending: boolean;
+  /** Admin-curated, same reasoning as is_featured. Shown in the homepage's
+   *  "New Arrivals" section when at least one product has this set —
+   *  falls back to recency otherwise (see getNewArrivals). */
+  is_new_arrival: boolean;
   /** Manufacturer facet within a category (Cameras -> Sony). Backfilled by
    *  title keyword-matching for the WooCommerce import — imperfect, null
    *  for anything that didn't match a known brand name. */
