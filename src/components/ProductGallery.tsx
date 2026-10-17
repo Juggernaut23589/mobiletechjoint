@@ -2,17 +2,24 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import type { ProductImage } from "@/types/database";
+import type { AdPreview } from "@/lib/products";
 
 export function ProductGallery({
   images,
   videos,
   productName,
+  ads = [],
 }: {
   images: ProductImage[];
   videos: ProductImage[];
   productName: string;
+  /** Up to 2 brand ads, rendered beside the video itself (not elsewhere on
+   *  the page) so they stay visually tied to it regardless of how the
+   *  buy-box column beside this sticky gallery scrolls. */
+  ads?: AdPreview[];
 }) {
   const [activeId, setActiveId] = useState(images[0]?.id);
   const active = images.find((img) => img.id === activeId) ?? images[0] ?? null;
@@ -69,8 +76,8 @@ export function ProductGallery({
 
       {videos.map((video) => {
         const embedUrl = toYouTubeEmbedUrl(video.url);
-        return embedUrl ? (
-          <div key={video.id} className="aspect-video w-full overflow-hidden rounded-2xl bg-black">
+        const player = embedUrl ? (
+          <div className="aspect-video w-full overflow-hidden rounded-2xl bg-black">
             <iframe
               src={embedUrl}
               title={`${productName} video`}
@@ -80,13 +87,38 @@ export function ProductGallery({
             />
           </div>
         ) : (
-          <video
-            key={video.id}
-            src={video.url}
-            controls
-            playsInline
-            className="w-full rounded-2xl bg-black"
-          />
+          <video src={video.url} controls playsInline className="w-full rounded-2xl bg-black" />
+        );
+
+        if (ads.length === 0) {
+          return <div key={video.id}>{player}</div>;
+        }
+
+        return (
+          <div key={video.id} className="flex gap-3">
+            <div className="min-w-0 flex-1">{player}</div>
+            <div className="hidden shrink-0 gap-2 md:flex">
+              {ads.slice(0, 2).map((ad) => {
+                const tile = (
+                  <div className="relative aspect-square w-24 overflow-hidden rounded-xl bg-neutral-100 lg:w-28">
+                    <Image src={ad.imageUrl} alt={ad.caption ?? ""} fill sizes="112px" className="object-cover" />
+                    {ad.caption && (
+                      <p className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/70 to-transparent px-1.5 py-1 text-[10px] font-semibold text-white">
+                        {ad.caption}
+                      </p>
+                    )}
+                  </div>
+                );
+                return ad.linkUrl ? (
+                  <Link key={ad.id} href={ad.linkUrl} className="block">
+                    {tile}
+                  </Link>
+                ) : (
+                  <div key={ad.id}>{tile}</div>
+                );
+              })}
+            </div>
+          </div>
         );
       })}
     </div>

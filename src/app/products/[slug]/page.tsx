@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import type { Metadata } from "next";
 import {
   getPublishedProductBySlug,
@@ -90,15 +89,20 @@ export default async function ProductPage({
       {/* Not wrapped in any reveal/fade animation: this is the gallery and
           buy button — the single most important content on this page. It
           must never depend on client JS succeeding just to become visible.
-          The ad column only exists in the grid template when there's
-          actually an ad for this brand — otherwise it's the plain 2-column
-          layout, unchanged. */}
-      <div className={`grid gap-12 lg:grid-cols-2 lg:items-start ${brandAds.length > 0 ? "xl:grid-cols-[1fr_1fr_280px]" : ""}`}>
+          Brand ads render INSIDE ProductGallery, beside the video element
+          itself — rendering them in this grid's second column instead
+          looked right at first glance but actually scrolled away with the
+          buy-box content well before the (sticky) video came into view,
+          since the buy-box column is much shorter. Tying them to the
+          video directly is the only way they're reliably "beside" it.
+          When ads exist, the gallery column gets more width (xl+) so the
+          video isn't squeezed by the ad tiles sitting beside it. */}
+      <div className={`grid gap-12 lg:grid-cols-2 lg:items-start ${brandAds.length > 0 ? "xl:grid-cols-[3fr_2fr]" : ""}`}>
         {/* Sticky on desktop so the gallery travels with the page instead of
             leaving blank space once the buy-box column scrolls past it —
             the right column used to be considerably taller than this one. */}
         <div className="lg:sticky lg:top-24">
-          <ProductGallery images={images} videos={videos} productName={product.name} />
+          <ProductGallery images={images} videos={videos} productName={product.name} ads={brandAds} />
         </div>
 
         <div className="flex flex-col gap-1">
@@ -207,30 +211,6 @@ export default async function ProductPage({
             )}
           </div>
         </div>
-
-        {brandAds.length > 0 && (
-          <div className="flex flex-col gap-4">
-            {brandAds.map((ad) => {
-              const tile = (
-                <div className="relative aspect-square overflow-hidden rounded-2xl bg-ink/5">
-                  <Image src={ad.imageUrl} alt={ad.caption ?? ""} fill sizes="280px" className="object-cover" />
-                  {ad.caption && (
-                    <p className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-3 py-2.5 text-[13px] font-semibold text-white">
-                      {ad.caption}
-                    </p>
-                  )}
-                </div>
-              );
-              return ad.linkUrl ? (
-                <Link key={ad.id} href={ad.linkUrl} className="block">
-                  {tile}
-                </Link>
-              ) : (
-                <div key={ad.id}>{tile}</div>
-              );
-            })}
-          </div>
-        )}
       </div>
 
       {/* The full manufacturer description now lives here, collapsed by

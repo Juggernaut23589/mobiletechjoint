@@ -9,6 +9,8 @@ import type { StaffSession } from "@/lib/staff-auth";
 type Result = { error?: string };
 type Placement = "homepage" | "brand";
 
+const BRAND_AD_LIMIT = 2;
+
 function requireAdEditor(): Promise<StaffSession> {
   return requireStaffAbility("manage_merchandising");
 }
@@ -36,13 +38,15 @@ export async function uploadAd(formData: FormData): Promise<Result> {
   const placement = formData.get("placement") as Placement;
   const brandId = (formData.get("brandId") as string) || null;
   const brandSlug = (formData.get("brandSlug") as string) || undefined;
-  const caption = (formData.get("caption") as string) || null;
-  const linkUrl = (formData.get("linkUrl") as string) || null;
+  const caption = ((formData.get("caption") as string) || "").trim();
+  const linkUrl = ((formData.get("linkUrl") as string) || "").trim();
   const file = formData.get("file") as File | null;
 
   if (placement !== "homepage" && placement !== "brand") return { error: "Invalid placement." };
   if (placement === "brand" && !brandId) return { error: "Choose a brand." };
   if (!file || file.size === 0) return { error: "Choose an image first." };
+  if (!caption) return { error: "A caption is required before an ad can be published." };
+  if (!linkUrl) return { error: "A link is required before an ad can be published." };
 
   const supabase = createServiceClient();
 
@@ -51,6 +55,10 @@ export async function uploadAd(formData: FormData): Promise<Result> {
     .select("*", { count: "exact", head: true })
     .eq("placement", placement);
   const { count } = placement === "brand" ? await countQuery.eq("brand_id", brandId) : await countQuery.is("brand_id", null);
+
+  if (placement === "brand" && (count ?? 0) >= BRAND_AD_LIMIT) {
+    return { error: `Only ${BRAND_AD_LIMIT} brand ads are allowed per brand — remove one first.` };
+  }
 
   const ext = file.name.split(".").pop() ?? "jpg";
   const path = `ads/${placement}/${brandId ?? "homepage"}/${Date.now()}.${ext}`;

@@ -79,6 +79,20 @@
   --color-link: var(--color-brand-700);
 }
 
+/* The staff dashboard is a hardcoded light admin UI (white cards,
+   text-neutral-900 labels, bg-white inputs) that was never designed to
+   flip with the storefront's dark/light toggle — its own inputs have no
+   explicit text colour, so in dark mode they inherited the near-white
+   --color-ink from :root onto a white input background and became
+   unreadable. Pinning the same light values here, scoped to the
+   dashboard's own subtree via this attribute, fixes every current and
+   future input there without auditing each component individually. */
+[data-force-theme="light"] {
+  --color-surface: #ffffff;
+  --color-ink: #1a1712;
+  --color-link: var(--color-brand-700);
+}
+
 @theme inline {
   --color-surface: var(--color-surface);
   --color-surface-raised: var(--color-surface-raised);

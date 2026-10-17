@@ -360,7 +360,7 @@ export interface CategoryBrandPreview {
  *  just enough of a sample to find `limit` photographed brands. */
 export async function getBrandPreviewsForCategory(
   categoryId: string,
-  limit = 4
+  limit = 48
 ): Promise<CategoryBrandPreview[]> {
   const supabase = createPublicClient();
   const { data: products, error } = await supabase

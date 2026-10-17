@@ -15,8 +15,9 @@ interface BrandPreview {
 
 /** Desktop-only "Categories" button next to DesktopNav's inline links —
  *  opens a two-column dropdown: category list on the left, and on the
- *  right, 3-4 brand thumbnails for whichever category is hovered, each
- *  linking straight through to that brand's page. Brand previews are
+ *  right, every photographed brand for whichever category is hovered
+ *  (scrollable once the panel's max height fills up), each linking
+ *  straight through to that brand's page. Brand previews are
  *  fetched lazily per category and cached in state so re-hovering one
  *  already seen this session doesn't refetch. Click-to-open/close mirrors
  *  SearchBar's outside-click pattern; mobile keeps using
@@ -84,8 +85,8 @@ export function CategoriesMenu() {
       </button>
 
       {open && (
-        <div className="absolute left-0 top-[calc(100%+12px)] z-50 flex w-[560px] max-w-[85vw] overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-2xl">
-          <ul className="w-[200px] shrink-0 border-r border-neutral-100 py-2">
+        <div className="absolute left-0 top-[calc(100%+12px)] z-50 flex w-[820px] max-w-[90vw] overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-2xl">
+          <ul className="max-h-[70vh] w-[200px] shrink-0 overflow-y-auto border-r border-neutral-100 py-2">
             {!loaded ? (
               <li className="px-4 py-2.5 text-sm text-neutral-400">Loading…</li>
             ) : categories.length === 0 ? (
@@ -110,7 +111,7 @@ export function CategoriesMenu() {
             )}
           </ul>
 
-          <div className="min-w-0 flex-1 p-4">
+          <div className="min-w-0 flex-1 overflow-y-auto p-4" style={{ maxHeight: "70vh" }}>
             {!activePreview ? (
               <p className="px-1 py-2 text-sm text-neutral-400">
                 {activeCategoryId ? "Loading brands…" : "Hover a category"}
@@ -118,7 +119,7 @@ export function CategoriesMenu() {
             ) : activePreview.length === 0 ? (
               <p className="px-1 py-2 text-sm text-neutral-400">No brands yet in this category.</p>
             ) : (
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-2.5">
                 {activePreview.map((brand) => (
                   <Link
                     key={brand.id}

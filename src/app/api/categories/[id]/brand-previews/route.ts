@@ -7,6 +7,6 @@ import { getBrandPreviewsForCategory } from "@/lib/products";
  *  header" reasoning as /api/categories. */
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const brands = await getBrandPreviewsForCategory(id, 4);
+  const brands = await getBrandPreviewsForCategory(id);
   return NextResponse.json({ brands });
 }

@@ -65,7 +65,7 @@ export default async function StaffDashboardLayout({ children }: { children: Rea
     .toUpperCase();
 
   return (
-    <div className="flex min-h-[calc(100vh-64px)]">
+    <div data-force-theme="light" className="flex min-h-[calc(100vh-64px)]">
       <aside className="w-[230px] shrink-0 bg-[#0F1219] py-5">
         <div className="mb-3.5 flex items-center gap-2 px-5">
           <Logo size={26} />
