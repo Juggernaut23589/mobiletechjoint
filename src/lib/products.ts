@@ -1,7 +1,6 @@
 import { createPublicClient } from "@/lib/supabase/server";
 import {
   BRAND_SHELF_PRIORITY,
-  HERO_BRAND_ORDER,
   brandEditorial,
   type BrandEditorial,
 } from "@/lib/brand-editorial";
@@ -518,16 +517,30 @@ export interface HeroBrandSlide {
 }
 
 /** Live product photos for each curated brand look, for the homepage hero
- *  carousel. Only brands with at least one published, photographed
- *  product become a slide — brands with no live stock are skipped rather
- *  than showing an empty slide. */
+ *  carousel. Admin-curated via the staff dashboard's "Customize Banner"
+ *  screen (homepage_hero_brands), in the order they were added — this
+ *  used to be a hardcoded HERO_BRAND_ORDER array, invisible and
+ *  unremovable from the admin dashboard. Only brands with at least one
+ *  published, photographed product become a slide — brands with no live
+ *  stock are skipped rather than showing an empty slide. */
 export async function getHeroBrandShowcase(): Promise<HeroBrandSlide[]> {
   const supabase = createPublicClient();
 
+  const { data: curatedRows, error: curatedError } = await supabase
+    .from("homepage_hero_brands")
+    .select("brand_id")
+    .order("position", { ascending: true });
+
+  if (curatedError || !curatedRows || curatedRows.length === 0) {
+    if (curatedError) console.error("getHeroBrandShowcase failed (curated):", curatedError.message);
+    return [];
+  }
+
+  const brandIds = curatedRows.map((r) => r.brand_id as string);
   const { data: brands, error: brandError } = await supabase
     .from("brands")
     .select("id, name, slug")
-    .in("slug", HERO_BRAND_ORDER);
+    .in("id", brandIds);
 
   if (brandError || !brands) {
     console.error("getHeroBrandShowcase failed (brands):", brandError?.message);
@@ -535,8 +548,8 @@ export async function getHeroBrandShowcase(): Promise<HeroBrandSlide[]> {
   }
 
   const slides = await Promise.all(
-    HERO_BRAND_ORDER.map(async (slug) => {
-      const brand = brands.find((b) => b.slug === slug);
+    brandIds.map(async (brandId) => {
+      const brand = brands.find((b) => b.id === brandId);
       if (!brand) return null;
       const look = brandEditorial(brand.slug, brand.name);
 
@@ -575,7 +588,7 @@ export async function getHeroBrandShowcase(): Promise<HeroBrandSlide[]> {
     })
   );
 
-  return slides.filter((s): s is HeroBrandSlide => s !== null).slice(0, 9);
+  return slides.filter((s): s is HeroBrandSlide => s !== null);
 }
 
 /** Every brand with at least one published product, most-stocked first.
