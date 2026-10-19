@@ -187,10 +187,27 @@ export async function getNewArrivals(limit = 8): Promise<ProductWithImages[]> {
   return getPublishedProducts(limit, { inStockOnly: true });
 }
 
-/** Products with a real admin-entered "was" price — never a fabricated
- *  discount. Empty array (not a fallback) if nobody's set one yet. */
+/** Admin-curated via the staff dashboard's "Edit Deals" screen (is_deal,
+ *  toggled the same way is_featured/is_new_arrival are) when at least one
+ *  product's been picked — falls back to every published product with a
+ *  real admin-entered "was" price otherwise (never a fabricated discount). */
 export async function getDealsProducts(limit?: number): Promise<ProductWithImages[]> {
   const supabase = createPublicClient();
+  let curatedQuery = supabase
+    .from("products")
+    .select("*, product_images(*), category:categories(*), brand:brands(*)")
+    .eq("status", "published")
+    .eq("is_deal", true)
+    .order("created_at", { ascending: false });
+  if (limit) curatedQuery = curatedQuery.limit(limit);
+  const { data: curated, error: curatedError } = await curatedQuery;
+
+  if (curatedError) {
+    console.error("getDealsProducts failed:", curatedError.message);
+    return [];
+  }
+  if (curated && curated.length > 0) return curated as unknown as ProductWithImages[];
+
   let query = supabase
     .from("products")
     .select("*, product_images(*), category:categories(*), brand:brands(*)")
@@ -610,18 +627,37 @@ export interface BrandShelf {
   products: ProductWithImages[];
 }
 
-/** The homepage "shop by brand" shelves: the top `maxBrands` brands by
- *  published stock, each with `perBrand` of its newest products. Replaces
- *  the old all-products grid, which made the homepage scroll forever.
- *  `excludeIds` are products already on screen higher up (new arrivals,
- *  hot selling, deals) — shelves skip those when the brand has enough
- *  other stock, so the page doesn't show the same three items four times. */
+/** The homepage "shop by brand" shelves. Admin-curated via the staff
+ *  dashboard's "Edit Shop by Brand" screen (homepage_brand_shelves) when
+ *  any brands have been picked, in the order they were added — falls back
+ *  to the top `maxBrands` brands by published stock otherwise. Each shelf
+ *  shows `perBrand` of the brand's newest products. Replaces the old
+ *  all-products grid, which made the homepage scroll forever. `excludeIds`
+ *  are products already on screen higher up (new arrivals, hot selling,
+ *  deals) — shelves skip those when the brand has enough other stock, so
+ *  the page doesn't show the same three items four times. */
 export async function getBrandShelves(
   maxBrands = 8,
   perBrand = 3,
   excludeIds: Iterable<string> = []
 ): Promise<BrandShelf[]> {
-  const brands = (await getBrandsWithCounts()).slice(0, maxBrands);
+  const allBrands = await getBrandsWithCounts();
+
+  const curatedSupabase = createPublicClient();
+  const { data: curatedShelves } = await curatedSupabase
+    .from("homepage_brand_shelves")
+    .select("brand_id")
+    .order("position", { ascending: true });
+
+  let brands: BrandWithCount[];
+  if (curatedShelves && curatedShelves.length > 0) {
+    const byId = new Map(allBrands.map((b) => [b.id, b]));
+    brands = curatedShelves
+      .map((row) => byId.get(row.brand_id))
+      .filter((b): b is BrandWithCount => b != null);
+  } else {
+    brands = allBrands.slice(0, maxBrands);
+  }
   if (brands.length === 0) return [];
 
   const excluded = new Set(excludeIds);

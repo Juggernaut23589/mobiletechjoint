@@ -16,7 +16,8 @@ export type ActivityEntityType =
   | "product_review"
   | "brand"
   | "ad_placement"
-  | "homepage_banner";
+  | "homepage_banner"
+  | "homepage_brand_shelf";
 
 export type FieldChanges = Record<string, { from: unknown; to: unknown }>;
 

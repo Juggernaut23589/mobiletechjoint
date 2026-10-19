@@ -43,7 +43,7 @@ export const STAFF_ABILITIES: { key: StaffAbility; label: string; description: s
   { key: "manage_purchasing", label: "Purchasing", description: "Manage suppliers and purchase orders, receive stock, record supplier payments, and set product cost prices." },
   { key: "manage_content", label: "Team blog", description: "Add, edit, remove and publish the \"Meet the team\" profiles shown on the homepage and /team." },
   { key: "manage_reviews", label: "Reviews", description: "Approve or reject customer product reviews before they go public." },
-  { key: "manage_merchandising", label: "Merchandising", description: "Customize brand-page picture banners, homepage banners, and ad placements across the site." },
+  { key: "manage_merchandising", label: "Merchandising", description: "Customize brand-page picture banners, homepage banners, homepage brand shelves, and ad placements across the site." },
 ];
 
 export interface StaffSession {

@@ -7,6 +7,9 @@ import { Logo } from "@/components/Logo";
 const NAV: { href: string; label: string; abilities: StaffAbility[] | null }[] = [
   { href: "/staff/dashboard", label: "Overview", abilities: null },
   { href: "/staff/dashboard/products", label: "Products", abilities: ["manage_products"] },
+  { href: "/staff/dashboard/hot-selling", label: "Edit Hot Selling", abilities: ["manage_products"] },
+  { href: "/staff/dashboard/deals", label: "Edit Deals", abilities: ["manage_products"] },
+  { href: "/staff/dashboard/brand-shelves", label: "Edit Shop by Brand", abilities: ["manage_merchandising"] },
   { href: "/staff/dashboard/inventory", label: "Inventory", abilities: ["manage_inventory"] },
   { href: "/staff/dashboard/stock-insights", label: "Stock insights", abilities: ["manage_inventory"] },
   { href: "/staff/dashboard/customers", label: "Customers", abilities: ["manage_customers"] },

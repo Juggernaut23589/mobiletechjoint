@@ -27,7 +27,7 @@ function requireProductEditor(): Promise<StaffSession> {
 async function getProductSnapshot(productId: string) {
   const { data } = await createServiceClient()
     .from("products")
-    .select("name, description, price_kobo, compare_at_price_kobo, stock_quantity, status, brand_id, category_id, is_featured, is_trending, is_new_arrival")
+    .select("name, description, price_kobo, compare_at_price_kobo, stock_quantity, status, brand_id, category_id, is_featured, is_trending, is_new_arrival, is_deal")
     .eq("id", productId)
     .maybeSingle();
   return data;
@@ -317,7 +317,12 @@ export async function toggleMerchandisingFlag(formData: FormData): Promise<{ err
   const field = formData.get("field") as string;
   const nextValue = formData.get("nextValue") === "true";
   if (!productId) return { error: "Missing product." };
-  if (field !== "is_featured" && field !== "is_trending" && field !== "is_new_arrival") {
+  if (
+    field !== "is_featured" &&
+    field !== "is_trending" &&
+    field !== "is_new_arrival" &&
+    field !== "is_deal"
+  ) {
     return { error: "Invalid field." };
   }
 
@@ -330,7 +335,14 @@ export async function toggleMerchandisingFlag(formData: FormData): Promise<{ err
     .eq("id", productId);
   if (error) return { error: error.message };
 
-  const label = field === "is_featured" ? "hero" : field === "is_trending" ? "trending" : "new arrivals";
+  const label =
+    field === "is_featured"
+      ? "hero"
+      : field === "is_trending"
+        ? "trending"
+        : field === "is_deal"
+          ? "deals"
+          : "new arrivals";
   await logStaffActivity(actor, {
     action: "product.merchandising",
     entityType: "product",
