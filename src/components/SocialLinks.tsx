@@ -118,7 +118,7 @@ export function WhatsAppLink({ className = "" }: { className?: string }) {
       href={`https://wa.me/${number.replace(/[^0-9]/g, "")}`}
       target="_blank"
       rel="noopener noreferrer"
-      className={`flex items-center gap-2 hover:text-white ${className}`}
+      className={`flex items-center gap-2 transition-opacity hover:opacity-75 ${className}`}
     >
       <WhatsAppIcon />
       Chat on WhatsApp

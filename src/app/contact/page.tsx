@@ -21,59 +21,59 @@ export default function ContactPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12 sm:px-8 sm:py-16">
-      <div className="mb-5 text-[13px] text-white/50">
-        <Link href="/" className="text-accent-400 hover:text-white">
+      <div className="mb-5 text-[13px] text-ink/50">
+        <Link href="/" className="text-link hover:text-ink">
           Home
         </Link>
         <span className="mx-1.5">/</span>
-        <span className="text-white">Contact Us</span>
+        <span className="text-ink">Contact Us</span>
       </div>
-      <h1 className="font-display mb-2 text-3xl font-bold tracking-tight text-white">
+      <h1 className="font-display mb-2 text-3xl font-bold tracking-tight text-ink">
         Contact Us
       </h1>
-      <p className="mb-10 max-w-xl text-[15px] leading-relaxed text-white/70">
+      <p className="mb-10 max-w-xl text-[15px] leading-relaxed text-ink/70">
         Questions about an order, a product, or anything else — we&apos;re happy to help.
       </p>
 
       <div className="flex flex-col gap-3 text-[15px]">
-        <WhatsAppLink className="rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 text-white/80" />
+        <WhatsAppLink className="rounded-2xl border border-ink/10 bg-ink/[0.03] px-5 py-4 text-ink/80" />
         {supportEmail && (
           <a
             href={`mailto:${supportEmail}`}
-            className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 text-white/80 hover:text-white"
+            className="flex items-center gap-3 rounded-2xl border border-ink/10 bg-ink/[0.03] px-5 py-4 text-ink/80 hover:text-ink"
           >
-            <Mail className="h-5 w-5 shrink-0 text-accent-400" />
+            <Mail className="h-5 w-5 shrink-0 text-link" />
             {supportEmail}
           </a>
         )}
         {supportPhone && (
           <a
             href={`tel:${supportPhone}`}
-            className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 text-white/80 hover:text-white"
+            className="flex items-center gap-3 rounded-2xl border border-ink/10 bg-ink/[0.03] px-5 py-4 text-ink/80 hover:text-ink"
           >
-            <Phone className="h-5 w-5 shrink-0 text-accent-400" />
+            <Phone className="h-5 w-5 shrink-0 text-link" />
             {supportPhone}
           </a>
         )}
         {supportPhone2 && (
           <a
             href={`tel:${supportPhone2}`}
-            className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 text-white/80 hover:text-white"
+            className="flex items-center gap-3 rounded-2xl border border-ink/10 bg-ink/[0.03] px-5 py-4 text-ink/80 hover:text-ink"
           >
-            <Phone className="h-5 w-5 shrink-0 text-accent-400" />
+            <Phone className="h-5 w-5 shrink-0 text-link" />
             {supportPhone2}
           </a>
         )}
         {supportAddress && (
-          <div className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 text-white/80">
-            <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-accent-400" />
+          <div className="flex items-start gap-3 rounded-2xl border border-ink/10 bg-ink/[0.03] px-5 py-4 text-ink/80">
+            <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-link" />
             <span>{supportAddress}</span>
           </div>
         )}
       </div>
 
       <div className="mt-8">
-        <h2 className="font-display mb-3 text-lg font-bold text-white">Follow us</h2>
+        <h2 className="font-display mb-3 text-lg font-bold text-ink">Follow us</h2>
         <SocialLinks />
       </div>
     </div>

@@ -14,18 +14,18 @@ export function LegalPage({
 }) {
   return (
     <div className="mx-auto max-w-3xl px-4 py-12 sm:px-8 sm:py-16">
-      <div className="mb-5 text-[13px] text-white/50">
-        <Link href="/" className="text-accent-400 hover:text-white">
+      <div className="mb-5 text-[13px] text-ink/50">
+        <Link href="/" className="text-link hover:text-ink">
           Home
         </Link>
         <span className="mx-1.5">/</span>
-        <span className="text-white">{title}</span>
+        <span className="text-ink">{title}</span>
       </div>
-      <h1 className="font-display mb-2 text-3xl font-bold tracking-tight text-white">
+      <h1 className="font-display mb-2 text-3xl font-bold tracking-tight text-ink">
         {title}
       </h1>
-      <p className="mb-10 text-sm text-white/50">Last updated {updated}</p>
-      <div className="flex flex-col gap-6 text-[15px] leading-relaxed text-white/70 [&_h2]:font-display [&_h2]:mt-4 [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-white [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:flex [&_ul]:flex-col [&_ul]:gap-1.5 [&_strong]:font-semibold [&_strong]:text-white [&_a]:text-accent-400 [&_a]:underline">
+      <p className="mb-10 text-sm text-ink/50">Last updated {updated}</p>
+      <div className="flex flex-col gap-6 text-[15px] leading-relaxed text-ink/70 [&_h2]:font-display [&_h2]:mt-4 [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-ink [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:flex [&_ul]:flex-col [&_ul]:gap-1.5 [&_strong]:font-semibold [&_strong]:text-ink [&_a]:text-link [&_a]:underline">
         {children}
       </div>
     </div>
