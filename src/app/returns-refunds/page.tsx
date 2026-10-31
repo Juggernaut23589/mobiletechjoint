@@ -6,6 +6,11 @@ export const metadata: Metadata = {
   description: "MobileTechJoint's Terms of Sale, Returns, Refunds & Consumer Protection Policy.",
 };
 
+// See about/page.tsx for why this is needed: the shared SiteFooter reads
+// runtime-only env vars the build step never has, so a fully static page
+// would bake those in as empty forever without a revalidate window.
+export const revalidate = 60;
+
 export default function ReturnsRefundsPage() {
   return (
     <LegalPage title="Terms of Sale, Returns, Refunds & Consumer Protection Policy" updated="October 2026">

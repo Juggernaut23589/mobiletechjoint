@@ -8,6 +8,15 @@ export const metadata: Metadata = {
   description: "Get in touch with MobileTechJoint.",
 };
 
+// This page reads server-only env vars (SUPPORT_EMAIL, WHATSAPP_NUMBER,
+// the social URLs, etc.) that the build step never has access to (see
+// .github/workflows/deploy.yml — only a specific whitelist is passed to
+// `next build`). Without a revalidate window this would statically bake
+// in whatever those vars happened to be (nothing) at build time and never
+// pick up the real values the VM's .env.production.local sets at
+// runtime — same reasoning as the homepage's `revalidate = 60`.
+export const revalidate = 60;
+
 /** Dedicated contact page — same no-fabricated-details pattern as
  *  SiteFooter: every contact row only renders when its env var is
  *  actually set (SUPPORT_EMAIL, SUPPORT_PHONE, SUPPORT_PHONE_2,

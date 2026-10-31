@@ -6,6 +6,13 @@ export const metadata: Metadata = {
   description: "Who MobileTechJoint is and what we do.",
 };
 
+// The shared SiteFooter (root layout) reads server-only env vars the
+// build step never has (SUPPORT_EMAIL, WHATSAPP_NUMBER, social URLs —
+// see .github/workflows/deploy.yml). Without a revalidate window this
+// page would statically bake in whatever those vars were (nothing) at
+// build time and never pick up the real values set at runtime on the VM.
+export const revalidate = 60;
+
 export default function AboutPage() {
   return (
     <LegalPage title="About Us" updated="October 2026">

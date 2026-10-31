@@ -6,6 +6,11 @@ export const metadata: Metadata = {
   description: "How MobileTechJoint uses cookies and similar technologies.",
 };
 
+// See about/page.tsx for why this is needed: the shared SiteFooter reads
+// runtime-only env vars the build step never has, so a fully static page
+// would bake those in as empty forever without a revalidate window.
+export const revalidate = 60;
+
 export default function CookiePolicyPage() {
   return (
     <LegalPage title="Cookie Notice" updated="28 October 2026">
