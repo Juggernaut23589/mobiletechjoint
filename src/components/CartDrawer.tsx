@@ -9,6 +9,7 @@ import { X, Minus, Plus } from "lucide-react";
 import { useCartStore } from "@/store/cart";
 import { useCartUIStore } from "@/store/cart-ui";
 import { formatNaira } from "@/lib/money";
+import { Logo } from "@/components/Logo";
 
 /** Persistent cart panel matching the approved design-system mockup
  *  (Main.dc.html), but non-modal on desktop: on screens ≥lg the page shell
@@ -76,9 +77,12 @@ export function CartDrawer() {
             aria-label="Cart"
           >
             <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-4">
-              <h2 className="font-display text-lg font-bold text-brand-900">
-                Your Cart ({items.reduce((s, i) => s + i.quantity, 0)})
-              </h2>
+              <div className="flex items-center gap-2">
+                <Logo size={22} />
+                <h2 className="font-display text-lg font-bold text-brand-900">
+                  Your Cart ({items.reduce((s, i) => s + i.quantity, 0)})
+                </h2>
+              </div>
               <button
                 type="button"
                 onClick={closeCart}

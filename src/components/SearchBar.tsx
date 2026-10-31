@@ -75,10 +75,10 @@ export function SearchBar({ id, className = "" }: { id?: string; className?: str
           if (e.key === "Escape") setOpen(false);
         }}
         placeholder="Search cameras, mics, gimbals..."
-        className="w-full rounded-full border border-white/10 bg-[#181C26] py-2.5 pl-9 pr-4 text-[13.5px] text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-brand-600"
+        className="w-full rounded-full border border-transparent bg-white py-2.5 pl-9 pr-4 text-[13.5px] text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-brand-600"
       />
       <Search
-        className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7A8299]"
+        className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400"
         strokeWidth={2}
       />
 

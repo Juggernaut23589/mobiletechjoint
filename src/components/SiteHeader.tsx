@@ -30,7 +30,7 @@ export function SiteHeader() {
           </Link>
         </div>
 
-        <SearchBar className="hidden max-w-[440px] flex-1 md:block" />
+        <SearchBar className="hidden max-w-[560px] flex-1 md:block" />
 
         <CategoriesMenu />
         <DesktopNav />

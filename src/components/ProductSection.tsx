@@ -24,7 +24,7 @@ export function ProductSection({
           a shopper is actively scroll-hunting for, not decoration. A scroll
           past this grid at normal speed left entire rows of product cards
           rendering as blank space until the viewport settled. */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
         {products.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}

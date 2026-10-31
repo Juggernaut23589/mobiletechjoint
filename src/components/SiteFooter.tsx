@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { Mail, Phone, AtSign, MapPin, ShieldCheck } from "lucide-react";
+import { Mail, Phone, MapPin, ShieldCheck } from "lucide-react";
 import { FooterCategoryLinks } from "@/components/FooterCategoryLinks";
 import { Logo } from "@/components/Logo";
 import { VisaMark, MastercardMark, PaystackMark } from "@/components/PaymentLogos";
+import { SocialLinks, WhatsAppLink } from "@/components/SocialLinks";
 
 /** Dark footer matching the approved design-system mockup (Main.dc.html):
  *  brand blurb, real category links, payment trust badges, and contact —
@@ -14,10 +15,10 @@ export function SiteFooter() {
   const supportEmail = process.env.SUPPORT_EMAIL;
   const supportPhone = process.env.SUPPORT_PHONE;
   const supportPhone2 = process.env.SUPPORT_PHONE_2;
-  const instagramUrl = process.env.INSTAGRAM_URL;
   const supportAddress = process.env.SUPPORT_ADDRESS;
+  const whatsappNumber = process.env.WHATSAPP_NUMBER;
 
-  const hasContact = supportEmail || supportPhone || supportPhone2 || instagramUrl || supportAddress;
+  const hasContact = supportEmail || supportPhone || supportPhone2 || supportAddress || whatsappNumber;
 
   return (
     <footer className="bg-[#080A0F] px-4 pb-7 pt-14 text-[#8A91A5] sm:px-8">
@@ -29,10 +30,11 @@ export function SiteFooter() {
               mobile<span className="font-bold">techjoint</span>
             </span>
           </div>
-          <p className="max-w-[280px] text-[13px] leading-relaxed">
+          <p className="mb-4 max-w-[280px] text-[13px] leading-relaxed">
             Cameras, lighting, tripods, and audio gear for content creators and media teams
             in Nigeria.
           </p>
+          <SocialLinks />
         </div>
 
         <div>
@@ -64,6 +66,16 @@ export function SiteFooter() {
               </Link>
             </li>
             <li>
+              <Link href="/about" className="hover:text-white">
+                About Us
+              </Link>
+            </li>
+            <li>
+              <Link href="/contact" className="hover:text-white">
+                Contact Us
+              </Link>
+            </li>
+            <li>
               <Link href="/privacy-policy" className="hover:text-white">
                 Privacy Policy
               </Link>
@@ -71,6 +83,11 @@ export function SiteFooter() {
             <li>
               <Link href="/terms-of-service" className="hover:text-white">
                 Terms of Service
+              </Link>
+            </li>
+            <li>
+              <Link href="/cookie-policy" className="hover:text-white">
+                Cookie Policy
               </Link>
             </li>
           </ul>
@@ -103,17 +120,7 @@ export function SiteFooter() {
                   {supportPhone2}
                 </a>
               )}
-              {instagramUrl && (
-                <a
-                  href={instagramUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 hover:text-white"
-                >
-                  <AtSign className="h-4 w-4 shrink-0" />
-                  Follow on Instagram
-                </a>
-              )}
+              <WhatsAppLink />
               {supportAddress && (
                 <div className="flex items-start gap-2">
                   <MapPin className="mt-0.5 h-4 w-4 shrink-0" />

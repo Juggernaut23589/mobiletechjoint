@@ -17,7 +17,8 @@ export type ActivityEntityType =
   | "brand"
   | "ad_placement"
   | "homepage_banner"
-  | "homepage_brand_shelf";
+  | "homepage_brand_shelf"
+  | "category";
 
 export type FieldChanges = Record<string, { from: unknown; to: unknown }>;
 
