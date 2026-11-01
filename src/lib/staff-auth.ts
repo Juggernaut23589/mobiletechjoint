@@ -27,7 +27,8 @@ export type StaffAbility =
   | "manage_promotions"
   | "manage_content"
   | "manage_reviews"
-  | "manage_merchandising";
+  | "manage_merchandising"
+  | "manage_blog";
 
 export const STAFF_ABILITIES: { key: StaffAbility; label: string; description: string }[] = [
   { key: "manage_products", label: "Products", description: "Edit product postings — images, videos, descriptions, price, publish/archive, brand, category, deals." },
@@ -44,6 +45,7 @@ export const STAFF_ABILITIES: { key: StaffAbility; label: string; description: s
   { key: "manage_content", label: "Team blog", description: "Add, edit, remove and publish the \"Meet the team\" profiles shown on the homepage and /team." },
   { key: "manage_reviews", label: "Reviews", description: "Approve or reject customer product reviews before they go public." },
   { key: "manage_merchandising", label: "Merchandising", description: "Customize brand-page picture banners, homepage banners, homepage brand shelves, and ad placements across the site." },
+  { key: "manage_blog", label: "Blog", description: "Write, edit, publish, and delete blog posts — product writeups, reviews, and upcoming-product previews." },
 ];
 
 export interface StaffSession {

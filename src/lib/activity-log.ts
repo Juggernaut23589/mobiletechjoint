@@ -18,7 +18,8 @@ export type ActivityEntityType =
   | "ad_placement"
   | "homepage_banner"
   | "homepage_brand_shelf"
-  | "category";
+  | "category"
+  | "blog_post";
 
 export type FieldChanges = Record<string, { from: unknown; to: unknown }>;
 

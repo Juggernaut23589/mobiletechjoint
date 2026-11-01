@@ -78,6 +78,24 @@ export interface HomepageBanner {
   created_at: string;
 }
 
+export type BlogPostType = "review" | "upcoming" | "article";
+export type BlogPostStatus = "draft" | "published";
+
+export interface BlogPost {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  cover_image_url: string | null;
+  post_type: BlogPostType;
+  author_name: string;
+  body: string;
+  status: BlogPostStatus;
+  published_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface CategoryComplement {
   id: string;
   category_id: string;

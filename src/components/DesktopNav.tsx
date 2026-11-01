@@ -50,6 +50,9 @@ export function DesktopNav() {
       <Link href="/deals" className="text-base font-medium text-accent-500 transition-colors hover:text-white">
         Deals
       </Link>
+      <Link href="/blog" className="text-base font-medium text-[#C7CCDA] transition-colors hover:text-white">
+        Blog
+      </Link>
     </nav>
   );
 }

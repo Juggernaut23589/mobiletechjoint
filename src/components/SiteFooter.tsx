@@ -61,6 +61,11 @@ export function SiteFooter() {
               </Link>
             </li>
             <li>
+              <Link href="/blog" className="hover:text-white">
+                Blog
+              </Link>
+            </li>
+            <li>
               <Link href="/returns-refunds" className="hover:text-white">
                 Returns &amp; Refunds
               </Link>

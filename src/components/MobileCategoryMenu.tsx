@@ -106,6 +106,23 @@ export function MobileCategoryMenu() {
                 ))}
               </ul>
             )}
+
+            <div className="mt-3 flex flex-col gap-1 border-t border-neutral-100 pt-3">
+              <Link
+                href="/deals"
+                onClick={() => setOpen(false)}
+                className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-brand-700 hover:bg-brand-50"
+              >
+                Deals
+              </Link>
+              <Link
+                href="/blog"
+                onClick={() => setOpen(false)}
+                className="block rounded-lg px-3 py-2.5 text-sm text-neutral-700 hover:bg-brand-50 hover:text-brand-700"
+              >
+                Blog
+              </Link>
+            </div>
           </motion.div>
         </>
       )}

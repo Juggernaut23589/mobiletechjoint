@@ -213,19 +213,18 @@ export default async function ProductPage({
         </div>
       </div>
 
-      {/* The full manufacturer description now lives here, collapsed by
-          default, instead of standing between the shopper and the Add to
-          Cart button above — it used to push the buy box several screens
-          down on products with long migrated copy. */}
+      {/* The full manufacturer description lives here, below the buy box,
+          instead of standing between the shopper and Add to Cart above —
+          it used to push the buy box several screens down on products
+          with long migrated copy. Fully visible, not collapsed behind a
+          click — customers shouldn't have to go hunting for it. */}
       {product.description && (
-        <details className="mt-12 max-w-3xl border-t border-ink/10 pt-8">
-          <summary className="cursor-pointer text-base font-semibold text-ink">
-            Full description
-          </summary>
+        <div className="mt-12 max-w-3xl border-t border-ink/10 pt-8">
+          <h2 className="text-base font-semibold text-ink">Full description</h2>
           <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-ink/60">
             {product.description}
           </p>
-        </details>
+        </div>
       )}
 
       {frequentlyBoughtTogether.length > 0 && (
