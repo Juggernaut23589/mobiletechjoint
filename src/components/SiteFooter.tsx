@@ -24,10 +24,10 @@ export function SiteFooter() {
     <footer className="bg-[#080A0F] px-4 pb-7 pt-14 text-[#8A91A5] sm:px-8">
       <div className="mx-auto grid max-w-[1360px] gap-8 sm:grid-cols-2 lg:grid-cols-4">
         <div>
-          <div className="mb-3.5 flex items-center gap-2">
-            <Logo size={28} />
-            <span className="text-base text-white">
-              mobile<span className="font-bold">techjoint</span>
+          <div className="mb-3.5 flex items-center gap-2.5">
+            <Logo size={44} />
+            <span className="text-xl font-bold text-white">
+              mobiletechjoint
             </span>
           </div>
           <p className="mb-4 max-w-[280px] text-[13px] leading-relaxed">

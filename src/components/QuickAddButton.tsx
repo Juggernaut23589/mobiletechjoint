@@ -37,30 +37,37 @@ export function QuickAddButton({
 
   useEffect(() => setMounted(true), []);
 
-  if (outOfStock) return null;
-
   function handleAdd(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
+    if (outOfStock) return;
     addItem({ productId, slug, name, priceKoboSnapshot: priceKobo, imageUrl, categoryId }, 1);
     // A card-overlay click is otherwise confirmed only by a small header
     // badge changing — easy to miss while scanning a grid.
     openCart();
   }
 
+  // Every card gets the icon — out of stock disables it (greyed out,
+  // no-op click) instead of removing it, so the grid's layout stays
+  // consistent and it's obvious at a glance why it can't be added.
   return (
     <motion.button
       type="button"
       onClick={handleAdd}
-      whileTap={{ scale: 0.9 }}
-      aria-label={`Add ${name} to cart`}
+      disabled={outOfStock}
+      whileTap={outOfStock ? undefined : { scale: 0.9 }}
+      aria-label={outOfStock ? `${name} is out of stock` : `Add ${name} to cart`}
       // top = image height (the image is a square as wide as the card, and
       // 100cqw is the card's inline size) minus the button + a margin, so the
       // button sits in the image's bottom-right corner without being nested
       // inside the card's <Link>.
-      className="absolute right-2.5 top-[calc(100cqw-2.375rem)] flex h-7 w-7 items-center justify-center rounded-full bg-white text-brand-700 opacity-100 shadow-glow transition-opacity sm:opacity-0 sm:group-hover:opacity-100"
+      className={`absolute right-2.5 top-[calc(100cqw-2.375rem)] flex h-7 w-7 items-center justify-center rounded-full shadow-glow transition-opacity ${
+        outOfStock
+          ? "cursor-not-allowed bg-white/70 text-neutral-400 opacity-100"
+          : "bg-white text-brand-700 opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+      }`}
     >
-      {mounted && inCart ? (
+      {mounted && inCart && !outOfStock ? (
         <Check className="h-3.5 w-3.5" strokeWidth={2.5} />
       ) : (
         <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
