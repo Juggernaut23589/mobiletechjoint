@@ -40,6 +40,7 @@ export function CheckoutForm({
   const [selectedMethodId, setSelectedMethodId] = useState<string>(
     savedMethods.find((m) => m.is_default)?.id ?? savedMethods[0]?.id ?? ""
   );
+  const [provider, setProvider] = useState<"paystack" | "opay">("paystack");
   const [useNewCard, setUseNewCard] = useState(savedMethods.length === 0);
   const [saveCard, setSaveCard] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -111,8 +112,9 @@ export function CheckoutForm({
       deliveryState: state,
       deliveryLga: lga,
       deliveryAddress: address,
+      provider,
       saveCard: useNewCard ? saveCard : false,
-      savedPaymentMethodId: !useNewCard ? selectedMethodId : undefined,
+      savedPaymentMethodId: provider === "paystack" && !useNewCard ? selectedMethodId : undefined,
       discountCode: discount?.code,
     });
 
@@ -263,7 +265,35 @@ export function CheckoutForm({
           </div>
 
           <h2 className="font-display mb-4 mt-7 text-lg text-ink">Payment Method</h2>
-          {savedMethods.length > 0 && (
+          <div className="mb-4 grid grid-cols-2 gap-2.5">
+            <label
+              className={`flex items-center gap-2.5 rounded-[14px] border-[1.5px] px-4 py-3.5 text-sm text-ink transition-colors ${
+                provider === "paystack" ? "border-accent-500 bg-accent-500/10" : "border-ink/15"
+              }`}
+            >
+              <input
+                type="radio"
+                name="provider"
+                checked={provider === "paystack"}
+                onChange={() => setProvider("paystack")}
+              />
+              <span>Card / Bank Transfer / USSD</span>
+            </label>
+            <label
+              className={`flex items-center gap-2.5 rounded-[14px] border-[1.5px] px-4 py-3.5 text-sm text-ink transition-colors ${
+                provider === "opay" ? "border-accent-500 bg-accent-500/10" : "border-ink/15"
+              }`}
+            >
+              <input
+                type="radio"
+                name="provider"
+                checked={provider === "opay"}
+                onChange={() => setProvider("opay")}
+              />
+              <span>Pay with OPay</span>
+            </label>
+          </div>
+          {provider === "paystack" && savedMethods.length > 0 && (
             <div className="mb-4 flex flex-col gap-2.5">
               {savedMethods.map((method) => (
                 <label
@@ -304,10 +334,11 @@ export function CheckoutForm({
             </div>
           )}
           <div className="rounded-[14px] border border-neutral-200 bg-white p-4.5 text-[13.5px] leading-relaxed text-neutral-500">
-            You&apos;ll be taken to Paystack&apos;s secure checkout to enter your card, bank
-            transfer, or USSD details — this site never sees or stores your card number.
+            {provider === "opay"
+              ? "You'll be taken to OPay's secure checkout to complete your payment — this site never sees or stores your payment details."
+              : "You'll be taken to Paystack's secure checkout to enter your card, bank transfer, or USSD details — this site never sees or stores your card number."}
           </div>
-          {useNewCard && !isGuest && (
+          {provider === "paystack" && useNewCard && !isGuest && (
             <label className="mt-3.5 flex items-center gap-2 text-sm text-ink/70">
               <input
                 type="checkbox"
@@ -409,7 +440,7 @@ export function CheckoutForm({
             </p>
 
             <Button type="submit" variant="accent" disabled={submitting} className="mt-4.5 w-full">
-              {submitting ? "Processing…" : `Pay with Paystack`}
+              {submitting ? "Processing…" : `Pay with ${provider === "opay" ? "OPay" : "Paystack"}`}
             </Button>
 
             <div className="mt-4 flex flex-col gap-2 text-xs text-neutral-500">
@@ -417,7 +448,7 @@ export function CheckoutForm({
                 <span className="text-[#16C784]">🔒</span> SSL Secured Checkout
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[#16C784]">✓</span> Secure checkout via Paystack
+                <span className="text-[#16C784]">✓</span> Secure checkout via {provider === "opay" ? "OPay" : "Paystack"}
               </div>
             </div>
           </div>

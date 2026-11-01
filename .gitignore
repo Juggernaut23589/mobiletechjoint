@@ -47,3 +47,6 @@ supabase/.temp/
 
 # Never commit — contains a live Cloudflare API token
 .cloudflare.md
+
+# Never commit — contains live OPay merchant credentials
+.opay.md

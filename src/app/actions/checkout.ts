@@ -3,6 +3,7 @@
 import crypto from "crypto";
 import { createServiceClient, createServerAuthClient } from "@/lib/supabase/server";
 import { initializeTransaction, chargeAuthorization } from "@/lib/paystack";
+import { initializeOpayTransaction } from "@/lib/opay";
 import { getDeliveryFeeKobo } from "@/lib/delivery";
 import { NIGERIA_STATES } from "@/lib/nigeria-locations";
 import { describeDiscount, validateDiscountCode } from "@/lib/discounts";
@@ -15,6 +16,10 @@ export interface CheckoutInput {
   deliveryState: string;
   deliveryLga: string;
   deliveryAddress: string;
+  /** Which gateway processes this order. Saved-card charging (below) only
+   *  exists for Paystack — OPay always goes through its hosted Cashier
+   *  page, same as a new-card Paystack payment would. */
+  provider?: "paystack" | "opay";
   /** Only meaningful when logged in. Persists the Paystack authorization
    *  returned on settlement — see settlePaidOrder in lib/paystack.ts. */
   saveCard?: boolean;
@@ -137,6 +142,7 @@ export async function initiateCheckout(input: CheckoutInput): Promise<CheckoutRe
   }
 
   const reference = `mtj_${crypto.randomBytes(12).toString("hex")}`;
+  const provider = input.provider === "opay" ? "opay" : "paystack";
 
   const { data: order, error: orderError } = await supabase
     .from("orders")
@@ -146,11 +152,13 @@ export async function initiateCheckout(input: CheckoutInput): Promise<CheckoutRe
       customer_phone: input.customerPhone || null,
       customer_id: user?.id ?? null,
       // A card can only be saved against a real account — a guest has
-      // nowhere for it to live, regardless of what the client sent.
-      save_card_requested: Boolean(input.saveCard) && Boolean(user),
+      // nowhere for it to live, regardless of what the client sent. Saved
+      // cards are Paystack-only; OPay orders never set this.
+      save_card_requested: provider === "paystack" && Boolean(input.saveCard) && Boolean(user),
       status: "pending",
       total_kobo: totalKobo,
       currency: "NGN",
+      payment_provider: provider,
       paystack_reference: reference,
       delivery_state: input.deliveryState,
       delivery_lga: input.deliveryLga,
@@ -185,7 +193,27 @@ export async function initiateCheckout(input: CheckoutInput): Promise<CheckoutRe
   }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  const callbackUrl = `${appUrl}/checkout/callback?reference=${encodeURIComponent(reference)}`;
+  // `provider` in the query string is only ever used to pick which
+  // gateway's API the callback page asks about a reference — never trusted
+  // for success/failure itself, same principle as `reference` there.
+  const callbackUrl = `${appUrl}/checkout/callback?reference=${encodeURIComponent(reference)}&provider=${provider}`;
+
+  if (provider === "opay") {
+    const result = await initializeOpayTransaction({
+      reference,
+      amountKobo: totalKobo,
+      returnUrl: callbackUrl,
+      callbackUrl: `${appUrl}/api/webhooks/opay`,
+      cancelUrl: `${appUrl}/cart`,
+      customerName: input.customerName,
+      customerEmail: input.customerEmail,
+      customerPhone: input.customerPhone || null,
+    });
+    if (!result.ok) {
+      return { ok: false, error: result.error };
+    }
+    return { ok: true, authorizationUrl: result.authorizationUrl };
+  }
 
   if (input.savedPaymentMethodId && user) {
     // Scoped by customer_id — a savedPaymentMethodId can only ever resolve

@@ -247,6 +247,10 @@ export interface Order {
   currency: string;
   paystack_reference: string;
   paystack_verified_at: string | null;
+  payment_provider: "paystack" | "opay";
+  opay_order_no: string | null;
+  opay_verified_at: string | null;
+  opay_fee_kobo: number;
   delivery_state: string | null;
   delivery_lga: string | null;
   delivery_address: string | null;
