@@ -22,6 +22,7 @@ import { TeamSection } from "@/components/TeamSection";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { CategoryTopBar } from "@/components/CategoryTopBar";
+import { WhatsAppBadge } from "@/components/SocialLinks";
 
 // Without this, the page is prerendered once at build time and never
 // reflects products added afterwards (manual entry, or the Instagram
@@ -141,6 +142,11 @@ export default async function HomePage() {
           </div>
         </section>
       )}
+
+      <section className="mx-auto flex max-w-[1360px] flex-col items-center gap-3 px-4 pb-16 text-center sm:px-8">
+        <WhatsAppBadge />
+        <p className="text-sm text-ink/60">Questions about an order or a product? Chat with us on WhatsApp.</p>
+      </section>
     </div>
   );
 }

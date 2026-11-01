@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Mail, Phone, MapPin } from "lucide-react";
-import { SocialLinks, WhatsAppLink } from "@/components/SocialLinks";
+import { SocialLinks, WhatsAppLink, WhatsAppBadge } from "@/components/SocialLinks";
 
 export const metadata: Metadata = {
   title: "Contact Us",
@@ -40,9 +40,17 @@ export default function ContactPage() {
       <h1 className="font-display mb-2 text-3xl font-bold tracking-tight text-ink">
         Contact Us
       </h1>
-      <p className="mb-10 max-w-xl text-[15px] leading-relaxed text-ink/70">
+      <p className="mb-6 max-w-xl text-[15px] leading-relaxed text-ink/70">
         Questions about an order, a product, or anything else — we&apos;re happy to help.
       </p>
+
+      <div className="mb-8 flex items-center gap-4 rounded-2xl border border-ink/10 bg-ink/[0.03] px-5 py-4">
+        <WhatsAppBadge />
+        <div>
+          <p className="font-display text-base font-bold text-ink">Fastest way to reach us</p>
+          <p className="text-sm text-ink/60">Chat with us directly on WhatsApp.</p>
+        </div>
+      </div>
 
       <div className="flex flex-col gap-3 text-[15px]">
         <WhatsAppLink className="rounded-2xl border border-ink/10 bg-ink/[0.03] px-5 py-4 text-ink/80" />

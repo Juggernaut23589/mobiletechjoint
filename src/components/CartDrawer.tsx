@@ -72,14 +72,14 @@ export function CartDrawer() {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "tween", duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-y-0 right-0 z-50 flex w-full max-w-[400px] flex-col bg-white shadow-2xl"
+            className="fixed inset-y-0 right-0 z-50 flex w-full max-w-[340px] flex-col bg-white shadow-2xl"
             role="dialog"
             aria-label="Cart"
           >
-            <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-4">
+            <div className="flex items-center justify-between border-b border-neutral-200 px-4 py-3">
               <div className="flex items-center gap-2">
-                <Logo size={22} />
-                <h2 className="font-display text-lg font-bold text-brand-900">
+                <Logo size={20} />
+                <h2 className="font-display text-base font-bold text-brand-900">
                   Your Cart ({items.reduce((s, i) => s + i.quantity, 0)})
                 </h2>
               </div>
@@ -89,11 +89,11 @@ export function CartDrawer() {
                 aria-label="Close cart"
                 className="-m-2 p-2 text-neutral-400 hover:text-neutral-900"
               >
-                <X className="h-5 w-5" />
+                <X className="h-4.5 w-4.5" />
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-5 py-3">
+            <div className="flex-1 overflow-y-auto px-4 py-2">
               {items.length === 0 ? (
                 <p className="py-16 text-center text-sm text-neutral-500">
                   Your cart is empty.
@@ -102,12 +102,12 @@ export function CartDrawer() {
                 items.map((item) => (
                   <div
                     key={item.productId}
-                    className="flex gap-3 border-b border-neutral-100 py-4 last:border-0"
+                    className="flex gap-2.5 border-b border-neutral-100 py-3 last:border-0"
                   >
                     <Link
                       href={`/products/${item.slug}`}
                       onClick={closeCart}
-                      className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-neutral-100"
+                      className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-neutral-100"
                     >
                       {item.imageUrl ? (
                         <Image src={item.imageUrl} alt={item.name} fill className="object-cover" />
@@ -117,11 +117,11 @@ export function CartDrawer() {
                       <Link
                         href={`/products/${item.slug}`}
                         onClick={closeCart}
-                        className="line-clamp-2 text-sm font-medium text-neutral-900 hover:underline"
+                        className="line-clamp-1 text-[13px] font-medium text-neutral-900 hover:underline"
                       >
                         {item.name}
                       </Link>
-                      <p className="mb-2 text-sm text-neutral-500">
+                      <p className="mb-1.5 text-[13px] text-neutral-500">
                         {formatNaira(item.priceKoboSnapshot)}
                       </p>
                       <div className="flex items-center justify-between">
@@ -129,25 +129,25 @@ export function CartDrawer() {
                           <button
                             type="button"
                             onClick={() => setQuantity(item.productId, item.quantity - 1)}
-                            className="flex h-7 w-7 items-center justify-center text-neutral-700 hover:bg-neutral-50"
+                            className="flex h-6 w-6 items-center justify-center text-neutral-700 hover:bg-neutral-50"
                             aria-label="Decrease quantity"
                           >
-                            <Minus className="h-3.5 w-3.5" />
+                            <Minus className="h-3 w-3" />
                           </button>
-                          <span className="w-7 text-center text-xs text-neutral-900">{item.quantity}</span>
+                          <span className="w-6 text-center text-xs text-neutral-900">{item.quantity}</span>
                           <button
                             type="button"
                             onClick={() => setQuantity(item.productId, item.quantity + 1)}
-                            className="flex h-7 w-7 items-center justify-center text-neutral-700 hover:bg-neutral-50"
+                            className="flex h-6 w-6 items-center justify-center text-neutral-700 hover:bg-neutral-50"
                             aria-label="Increase quantity"
                           >
-                            <Plus className="h-3.5 w-3.5" />
+                            <Plus className="h-3 w-3" />
                           </button>
                         </div>
                         <button
                           type="button"
                           onClick={() => removeItem(item.productId)}
-                          className="text-xs font-semibold text-red-500 hover:text-red-600"
+                          className="text-[11px] font-semibold text-red-500 hover:text-red-600"
                         >
                           Remove
                         </button>
@@ -158,17 +158,17 @@ export function CartDrawer() {
               )}
             </div>
 
-            <div className="border-t border-neutral-200 px-5 py-4">
-              <div className="mb-4 flex items-center justify-between">
+            <div className="border-t border-neutral-200 px-4 py-3">
+              <div className="mb-3 flex items-center justify-between">
                 <span className="text-sm text-neutral-500">Subtotal</span>
-                <span className="font-display text-lg font-bold text-brand-900">
+                <span className="font-display text-base font-bold text-brand-900">
                   {formatNaira(subtotalKobo)}
                 </span>
               </div>
               <Link
                 href="/cart"
                 onClick={closeCart}
-                className={`block w-full rounded-full py-3.5 text-center text-sm font-bold text-white ${
+                className={`block w-full rounded-full py-3 text-center text-sm font-bold text-white ${
                   items.length === 0
                     ? "pointer-events-none bg-neutral-300"
                     : "bg-brand-900 hover:bg-brand-700"

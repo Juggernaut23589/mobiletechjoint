@@ -68,9 +68,9 @@ function YouTubeIcon() {
   );
 }
 
-function WhatsAppIcon() {
+function WhatsAppIcon({ size = 18 }: { size?: number }) {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
       <rect width="24" height="24" rx="6" fill="#25D366" />
       <path
         d="M12 5.5a6.5 6.5 0 0 0-5.6 9.8L5.5 18.5l3.3-.9A6.5 6.5 0 1 0 12 5.5Zm0 1.4a5.1 5.1 0 1 1-2.7 9.4l-.3-.2-2 .5.5-1.9-.2-.3A5.1 5.1 0 0 1 12 6.9Zm-2 2.2c-.2 0-.4 0-.5.3-.2.3-.7.8-.7 1.8s.7 2 .8 2.1c.1.2 1.4 2.1 3.3 2.9 1.6.6 1.9.5 2.3.5.4 0 1.2-.5 1.4-1 .2-.4.2-.8.1-.9-.1-.1-.2-.2-.5-.3l-1.3-.6c-.2-.1-.3-.1-.5.1l-.5.6c-.1.1-.2.2-.4.1-.2-.1-.9-.3-1.7-1.1-.6-.6-1-1.3-1.1-1.5-.1-.2 0-.3.1-.4l.3-.4c.1-.1.1-.2.2-.4 0-.1 0-.3 0-.4l-.6-1.4c-.1-.3-.3-.3-.5-.3H10Z"
@@ -78,6 +78,18 @@ function WhatsAppIcon() {
       />
     </svg>
   );
+}
+
+/** A direct WHATSAPP_URL (e.g. a wa.link short link the business already
+ *  uses) always wins when set — it's the exact, deliberately-chosen
+ *  destination. WHATSAPP_NUMBER is only a fallback for building a plain
+ *  wa.me link when no ready-made URL has been provided. */
+function resolvedWhatsAppUrl(): string | null {
+  const url = process.env.WHATSAPP_URL;
+  if (url) return url;
+  const number = process.env.WHATSAPP_NUMBER;
+  if (number) return `https://wa.me/${number.replace(/[^0-9]/g, "")}`;
+  return null;
 }
 
 const PLATFORMS = [
@@ -111,17 +123,36 @@ export function SocialLinks({ className = "" }: { className?: string }) {
 }
 
 export function WhatsAppLink({ className = "" }: { className?: string }) {
-  const number = process.env.WHATSAPP_NUMBER;
-  if (!number) return null;
+  const url = resolvedWhatsAppUrl();
+  if (!url) return null;
   return (
     <a
-      href={`https://wa.me/${number.replace(/[^0-9]/g, "")}`}
+      href={url}
       target="_blank"
       rel="noopener noreferrer"
       className={`flex items-center gap-2 transition-opacity hover:opacity-75 ${className}`}
     >
       <WhatsAppIcon />
       Chat on WhatsApp
+    </a>
+  );
+}
+
+/** Standalone round WhatsApp badge — bigger than the inline WhatsAppLink,
+ *  for spots that want just the recognizable logo rather than a labeled
+ *  row (homepage, Contact page). */
+export function WhatsAppBadge({ className = "" }: { className?: string }) {
+  const url = resolvedWhatsAppUrl();
+  if (!url) return null;
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Chat on WhatsApp"
+      className={`inline-flex items-center justify-center rounded-full shadow-md transition-transform hover:-translate-y-0.5 hover:shadow-lg ${className}`}
+    >
+      <WhatsAppIcon size={56} />
     </a>
   );
 }

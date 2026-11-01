@@ -14,7 +14,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const open = useCartUIStore((s) => s.open);
 
   return (
-    <div className={`flex min-h-screen flex-col transition-[margin] duration-300 ease-out ${open ? "lg:mr-[400px]" : ""}`}>
+    <div className={`flex min-h-screen flex-col transition-[margin] duration-300 ease-out ${open ? "lg:mr-[340px]" : ""}`}>
       {children}
     </div>
   );
