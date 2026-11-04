@@ -19,7 +19,7 @@ const BADGES = [
   {
     Icon: Lock,
     title: "Secure Payments",
-    description: "Safe and encrypted transactions via Paystack, OPay & bank transfer.",
+    description: "Safe and encrypted transactions via OPay — cards, bank transfer & USSD.",
   },
 ] as const;
 

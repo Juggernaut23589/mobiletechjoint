@@ -27,7 +27,7 @@ export const FAQS: Faq[] = [
     topic: "Payment",
     question: "What payment methods do you accept?",
     answer:
-      "We accept debit and credit cards (Visa, Mastercard, Verve), bank transfer, and USSD — all processed securely through Paystack. We never see or store your full card details. Logged-in customers can save a card for faster checkout next time.",
+      "We accept debit and credit cards (Visa, Mastercard, Verve), bank transfer, and USSD — all processed securely through OPay. We never see or store your full card details.",
   },
   {
     id: "delivery",

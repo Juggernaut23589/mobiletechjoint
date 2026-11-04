@@ -29,7 +29,7 @@ export default function TermsOfServicePage() {
 
       <h2>Orders and payment</h2>
       <p>
-        An order is only confirmed once payment has been successfully processed through Paystack.
+        An order is only confirmed once payment has been successfully processed through OPay.
         We reserve the right to refuse or cancel any order — for example if an item is out of
         stock, if we suspect fraud, or if delivery isn&apos;t available to your address — in which
         case we&apos;ll notify you and refund any payment taken.

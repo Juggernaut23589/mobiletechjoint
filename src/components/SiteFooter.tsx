@@ -3,7 +3,7 @@ import { Mail, Phone, MapPin, ShieldCheck } from "lucide-react";
 import { FooterCategoryLinks } from "@/components/FooterCategoryLinks";
 import { Logo } from "@/components/Logo";
 import { TrustBadges } from "@/components/TrustBadges";
-import { VisaMark, MastercardMark, PaystackMark } from "@/components/PaymentLogos";
+import { VisaMark, MastercardMark } from "@/components/PaymentLogos";
 import { SocialLinks, WhatsAppLink } from "@/components/SocialLinks";
 
 /** Dark footer matching the approved design-system mockup (Main.dc.html):
@@ -108,7 +108,7 @@ export function SiteFooter() {
           <h4 className="mb-3.5 text-[13.5px] font-semibold text-white">Payment</h4>
           <div className="flex items-start gap-2 text-sm">
             <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-accent-500" />
-            Secure checkout via Paystack &amp; OPay — cards, bank transfer &amp; USSD
+            Secure checkout via OPay — cards, bank transfer &amp; USSD
           </div>
         </div>
 
@@ -151,7 +151,6 @@ export function SiteFooter() {
         <div className="flex items-center gap-2.5">
           <VisaMark />
           <MastercardMark />
-          <PaystackMark />
         </div>
       </div>
       </div>
