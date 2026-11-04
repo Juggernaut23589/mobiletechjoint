@@ -4,9 +4,9 @@
  *  brand colour so they read at a glance rather than as generic outline
  *  icons. Add a platform by adding its env var + icon here. */
 
-function InstagramIcon() {
+function InstagramIcon({ size = 18 }: { size?: number }) {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
       <defs>
         <radialGradient id="ig-grad" cx="30%" cy="107%" r="150%">
           <stop offset="0%" stopColor="#FFDD55" />
@@ -23,9 +23,9 @@ function InstagramIcon() {
   );
 }
 
-function FacebookIcon() {
+function FacebookIcon({ size = 18 }: { size?: number }) {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
       <rect width="24" height="24" rx="6" fill="#1877F2" />
       <path
         d="M14.5 8.5h1.7V6h-2c-2 0-3.2 1.3-3.2 3.3V11H9v2.5h2v6h2.7v-6h2.1l.4-2.5h-2.5V9.6c0-.6.2-1.1 1-1.1Z"
@@ -35,9 +35,9 @@ function FacebookIcon() {
   );
 }
 
-function TikTokIcon() {
+function TikTokIcon({ size = 18 }: { size?: number }) {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
       <rect width="24" height="24" rx="6" fill="#000" />
       <path
         d="M14.3 5.2c.3 1.6 1.3 2.6 3 2.8v2.1c-1.1 0-2.1-.3-3-.9v4.6a4.1 4.1 0 1 1-4.1-4.1c.2 0 .5 0 .7.1v2.2a2 2 0 1 0 1.4 1.9V5.2h2Z"
@@ -47,9 +47,9 @@ function TikTokIcon() {
   );
 }
 
-function XIcon() {
+function XIcon({ size = 18 }: { size?: number }) {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
       <rect width="24" height="24" rx="6" fill="#000" />
       <path
         d="M6.5 6.5 11 12.4 6.3 17.5h1.6l3.9-4.2 3.1 4.2h3L13 11.2l4.4-4.7h-1.6l-3.6 3.9-2.8-3.9h-3Z"
@@ -59,9 +59,9 @@ function XIcon() {
   );
 }
 
-function YouTubeIcon() {
+function YouTubeIcon({ size = 18 }: { size?: number }) {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
       <rect width="24" height="24" rx="6" fill="#FF0000" />
       <path d="m10.5 9 4.5 3-4.5 3V9Z" fill="#fff" />
     </svg>
@@ -100,12 +100,12 @@ const PLATFORMS = [
   { url: process.env.YOUTUBE_URL, label: "YouTube", Icon: YouTubeIcon },
 ] as const;
 
-export function SocialLinks({ className = "" }: { className?: string }) {
+export function SocialLinks({ className = "", size = 18 }: { className?: string; size?: number }) {
   const active = PLATFORMS.filter((p) => p.url);
   if (active.length === 0) return null;
 
   return (
-    <div className={`flex items-center gap-2 ${className}`}>
+    <div className={`flex items-center gap-2.5 ${className}`}>
       {active.map(({ url, label, Icon }) => (
         <a
           key={label}
@@ -115,7 +115,7 @@ export function SocialLinks({ className = "" }: { className?: string }) {
           aria-label={label}
           className="overflow-hidden rounded-lg transition-transform hover:-translate-y-0.5"
         >
-          <Icon />
+          <Icon size={size} />
         </a>
       ))}
     </div>
@@ -141,7 +141,7 @@ export function WhatsAppLink({ className = "" }: { className?: string }) {
 /** Standalone round WhatsApp badge — bigger than the inline WhatsAppLink,
  *  for spots that want just the recognizable logo rather than a labeled
  *  row (homepage, Contact page). */
-export function WhatsAppBadge({ className = "" }: { className?: string }) {
+export function WhatsAppBadge({ className = "", size = 56 }: { className?: string; size?: number }) {
   const url = resolvedWhatsAppUrl();
   if (!url) return null;
   return (
@@ -152,7 +152,7 @@ export function WhatsAppBadge({ className = "" }: { className?: string }) {
       aria-label="Chat on WhatsApp"
       className={`inline-flex items-center justify-center rounded-full shadow-md transition-transform hover:-translate-y-0.5 hover:shadow-lg ${className}`}
     >
-      <WhatsAppIcon size={56} />
+      <WhatsAppIcon size={size} />
     </a>
   );
 }

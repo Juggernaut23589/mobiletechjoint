@@ -15,13 +15,15 @@ export function CheckoutForm({
   defaultName,
   defaultEmail,
   defaultPhone,
-  savedMethods,
   isGuest,
 }: {
   defaultName: string;
   defaultEmail: string;
   defaultPhone: string;
-  savedMethods: SavedPaymentMethod[];
+  // Paystack-only — kept in the prop type so the checkout page doesn't
+  // need to change when Paystack comes back, but unused while only OPay
+  // is offered.
+  savedMethods?: SavedPaymentMethod[];
   isGuest: boolean;
 }) {
   const router = useRouter();
@@ -37,12 +39,12 @@ export function CheckoutForm({
   const [state, setState] = useState("");
   const [lga, setLga] = useState("");
   const [address, setAddress] = useState("");
-  const [selectedMethodId, setSelectedMethodId] = useState<string>(
-    savedMethods.find((m) => m.is_default)?.id ?? savedMethods[0]?.id ?? ""
-  );
-  const [provider, setProvider] = useState<"paystack" | "opay">("paystack");
-  const [useNewCard, setUseNewCard] = useState(savedMethods.length === 0);
-  const [saveCard, setSaveCard] = useState(false);
+  // Paystack is temporarily disabled at the business's request — OPay is
+  // the only option for now. The provider plumbing in initiateCheckout
+  // (checkout.ts) and the saved-card flow are untouched, so re-enabling
+  // Paystack later is just restoring the toggle UI below, not rebuilding
+  // the payment logic.
+  const provider = "opay" as const;
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [codeInput, setCodeInput] = useState("");
@@ -113,8 +115,8 @@ export function CheckoutForm({
       deliveryLga: lga,
       deliveryAddress: address,
       provider,
-      saveCard: useNewCard ? saveCard : false,
-      savedPaymentMethodId: provider === "paystack" && !useNewCard ? selectedMethodId : undefined,
+      saveCard: false,
+      savedPaymentMethodId: undefined,
       discountCode: discount?.code,
     });
 
@@ -265,89 +267,10 @@ export function CheckoutForm({
           </div>
 
           <h2 className="font-display mb-4 mt-7 text-lg text-ink">Payment Method</h2>
-          <div className="mb-4 grid grid-cols-2 gap-2.5">
-            <label
-              className={`flex items-center gap-2.5 rounded-[14px] border-[1.5px] px-4 py-3.5 text-sm text-ink transition-colors ${
-                provider === "paystack" ? "border-accent-500 bg-accent-500/10" : "border-ink/15"
-              }`}
-            >
-              <input
-                type="radio"
-                name="provider"
-                checked={provider === "paystack"}
-                onChange={() => setProvider("paystack")}
-              />
-              <span>Card / Bank Transfer / USSD</span>
-            </label>
-            <label
-              className={`flex items-center gap-2.5 rounded-[14px] border-[1.5px] px-4 py-3.5 text-sm text-ink transition-colors ${
-                provider === "opay" ? "border-accent-500 bg-accent-500/10" : "border-ink/15"
-              }`}
-            >
-              <input
-                type="radio"
-                name="provider"
-                checked={provider === "opay"}
-                onChange={() => setProvider("opay")}
-              />
-              <span>Pay with OPay</span>
-            </label>
-          </div>
-          {provider === "paystack" && savedMethods.length > 0 && (
-            <div className="mb-4 flex flex-col gap-2.5">
-              {savedMethods.map((method) => (
-                <label
-                  key={method.id}
-                  className={`flex items-center gap-2.5 rounded-[14px] border-[1.5px] px-4 py-3.5 text-sm text-ink transition-colors ${
-                    !useNewCard && selectedMethodId === method.id
-                      ? "border-accent-500 bg-accent-500/10"
-                      : "border-ink/15"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    checked={!useNewCard && selectedMethodId === method.id}
-                    onChange={() => {
-                      setUseNewCard(false);
-                      setSelectedMethodId(method.id);
-                    }}
-                  />
-                  <span className="capitalize">
-                    {method.card_type ?? "Card"} •••• {method.last4}
-                  </span>
-                </label>
-              ))}
-              <label
-                className={`flex items-center gap-2.5 rounded-[14px] border-[1.5px] px-4 py-3.5 text-sm text-ink transition-colors ${
-                  useNewCard ? "border-accent-500 bg-accent-500/10" : "border-ink/15"
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="paymentMethod"
-                  checked={useNewCard}
-                  onChange={() => setUseNewCard(true)}
-                />
-                <span>Use a new card</span>
-              </label>
-            </div>
-          )}
           <div className="rounded-[14px] border border-neutral-200 bg-white p-4.5 text-[13.5px] leading-relaxed text-neutral-500">
-            {provider === "opay"
-              ? "You'll be taken to OPay's secure checkout to complete your payment — this site never sees or stores your payment details."
-              : "You'll be taken to Paystack's secure checkout to enter your card, bank transfer, or USSD details — this site never sees or stores your card number."}
+            You&apos;ll be taken to OPay&apos;s secure checkout to complete your payment — this
+            site never sees or stores your payment details.
           </div>
-          {provider === "paystack" && useNewCard && !isGuest && (
-            <label className="mt-3.5 flex items-center gap-2 text-sm text-ink/70">
-              <input
-                type="checkbox"
-                checked={saveCard}
-                onChange={(e) => setSaveCard(e.target.checked)}
-              />
-              Save this card for future purchases
-            </label>
-          )}
 
           {error && (
             <p className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
@@ -440,7 +363,7 @@ export function CheckoutForm({
             </p>
 
             <Button type="submit" variant="accent" disabled={submitting} className="mt-4.5 w-full">
-              {submitting ? "Processing…" : `Pay with ${provider === "opay" ? "OPay" : "Paystack"}`}
+              {submitting ? "Processing…" : "Pay with OPay"}
             </Button>
 
             <div className="mt-4 flex flex-col gap-2 text-xs text-neutral-500">
@@ -448,7 +371,7 @@ export function CheckoutForm({
                 <span className="text-[#16C784]">🔒</span> SSL Secured Checkout
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[#16C784]">✓</span> Secure checkout via {provider === "opay" ? "OPay" : "Paystack"}
+                <span className="text-[#16C784]">✓</span> Secure checkout via OPay
               </div>
             </div>
           </div>

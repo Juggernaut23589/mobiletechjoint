@@ -39,7 +39,7 @@ export function SiteFooter() {
             Cameras, lighting, tripods, and audio gear for content creators and media teams
             in Nigeria.
           </p>
-          <SocialLinks />
+          <SocialLinks size={26} />
         </div>
 
         <div>

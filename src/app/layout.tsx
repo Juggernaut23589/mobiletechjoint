@@ -4,6 +4,7 @@ import Script from "next/script";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { BackToTop } from "@/components/BackToTop";
+import { WhatsAppFloatingButton } from "@/components/WhatsAppFloatingButton";
 import { AppShell } from "@/components/AppShell";
 import "./globals.css";
 
@@ -61,6 +62,7 @@ export default function RootLayout({
           </main>
           <SiteFooter />
           <BackToTop />
+          <WhatsAppFloatingButton />
         </AppShell>
       </body>
     </html>
