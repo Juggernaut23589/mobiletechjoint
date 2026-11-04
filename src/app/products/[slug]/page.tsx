@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
+import { MapPin, RotateCcw, ShieldCheck } from "lucide-react";
 import {
   getPublishedProductBySlug,
   getComplementaryProducts,
@@ -15,6 +16,7 @@ import { AddToCartForm } from "@/components/AddToCartForm";
 import { WishlistButton } from "@/components/WishlistButton";
 import { ProductCarousel } from "@/components/ProductCarousel";
 import { ProductGallery } from "@/components/ProductGallery";
+import { DeliveryEstimator } from "@/components/DeliveryEstimator";
 import { StarRating } from "@/components/StarRating";
 import { ReviewsSection } from "@/components/ReviewsSection";
 
@@ -98,7 +100,7 @@ export default async function ProductPage({
       {/* Not wrapped in any reveal/fade animation: this is the gallery and
           buy button — the single most important content on this page. It
           must never depend on client JS succeeding just to become visible. */}
-      <div className="grid gap-12 lg:grid-cols-2 lg:items-start xl:grid-cols-[3fr_2fr]">
+      <div className="grid gap-12 lg:grid-cols-2 lg:items-start xl:grid-cols-[3fr_2fr] 2xl:grid-cols-[3fr_2fr_1.3fr]">
         {/* Sticky on desktop so the gallery travels with the page instead of
             leaving blank space once the buy-box column scrolls past it —
             the right column used to be considerably taller than this one.
@@ -228,6 +230,8 @@ export default async function ProductPage({
             )}
           </div>
         </div>
+
+        <DeliveryReturnsPanel />
       </div>
 
       {frequentlyBoughtTogether.length > 0 && (
@@ -278,6 +282,71 @@ function BrandAdBanner({ ad, className = "" }: { ad: AdPreview; className?: stri
       ) : (
         tile
       )}
+    </div>
+  );
+}
+
+/** Right-side "Delivery & Returns" panel — same information shelf
+ *  marketplace product pages (Jumia, Konga) carry beside the buy box,
+ *  scaled to what this store can actually back with real data: a live
+ *  per-state delivery estimate (DeliveryEstimator, same table checkout
+ *  quotes from), the one real pickup address (only rendered if
+ *  SUPPORT_ADDRESS is actually set — same no-fabrication pattern as the
+ *  footer's contact block), and links into the real Returns & Refunds
+ *  policy rather than an invented day-count. Stacks below the buy box
+ *  until 2xl, where there's finally room for a true third column. */
+function DeliveryReturnsPanel() {
+  const pickupAddress = process.env.SUPPORT_ADDRESS;
+
+  return (
+    <div className="flex flex-col gap-5 rounded-2xl border border-ink/10 bg-ink/[0.02] p-5 2xl:sticky 2xl:top-24">
+      <h2 className="text-sm font-bold uppercase tracking-wide text-ink">Delivery &amp; Returns</h2>
+
+      <DeliveryEstimator />
+
+      {pickupAddress && (
+        <div className="flex gap-3 border-t border-ink/10 pt-5">
+          <MapPin className="mt-0.5 h-[18px] w-[18px] shrink-0 text-ink/60" />
+          <div className="min-w-0 flex-1">
+            <h3 className="text-[13.5px] font-semibold text-ink">Pickup Station</h3>
+            <p className="mt-1 text-[12.5px] leading-relaxed text-ink/50">
+              Skip delivery and collect in person at {pickupAddress}.{" "}
+              <Link href="/contact" className="font-semibold text-link hover:underline">
+                Contact us
+              </Link>{" "}
+              to arrange a pickup time.
+            </p>
+          </div>
+        </div>
+      )}
+
+      <div className="flex gap-3 border-t border-ink/10 pt-5">
+        <RotateCcw className="mt-0.5 h-[18px] w-[18px] shrink-0 text-ink/60" />
+        <div className="min-w-0 flex-1">
+          <h3 className="text-[13.5px] font-semibold text-ink">Return Policy</h3>
+          <p className="mt-1 text-[12.5px] leading-relaxed text-ink/50">
+            Faulty, incorrect, or misdescribed items are covered under our{" "}
+            <Link href="/returns-refunds" className="font-semibold text-link hover:underline">
+              Returns &amp; Refunds Policy
+            </Link>
+            .
+          </p>
+        </div>
+      </div>
+
+      <div className="flex gap-3 border-t border-ink/10 pt-5">
+        <ShieldCheck className="mt-0.5 h-[18px] w-[18px] shrink-0 text-ink/60" />
+        <div className="min-w-0 flex-1">
+          <h3 className="text-[13.5px] font-semibold text-ink">Warranty</h3>
+          <p className="mt-1 text-[12.5px] leading-relaxed text-ink/50">
+            Covered by the manufacturer&apos;s warranty — see the full description above, or{" "}
+            <Link href="/returns-refunds" className="font-semibold text-link hover:underline">
+              our warranty policy
+            </Link>{" "}
+            for how to make a claim.
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
