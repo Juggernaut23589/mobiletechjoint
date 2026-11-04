@@ -100,7 +100,7 @@ export default async function ProductPage({
       {/* Not wrapped in any reveal/fade animation: this is the gallery and
           buy button — the single most important content on this page. It
           must never depend on client JS succeeding just to become visible. */}
-      <div className="grid gap-12 lg:grid-cols-2 lg:items-start xl:grid-cols-[3fr_2fr] 2xl:grid-cols-[3fr_2fr_1.3fr]">
+      <div className="grid gap-10 lg:grid-cols-2 lg:items-start xl:grid-cols-[2.4fr_1.6fr_1.1fr] xl:gap-8">
         {/* Sticky on desktop so the gallery travels with the page instead of
             leaving blank space once the buy-box column scrolls past it —
             the right column used to be considerably taller than this one.
@@ -114,7 +114,7 @@ export default async function ProductPage({
               <ProductGallery images={images} videos={videos} productName={product.name} />
             </div>
             {product.description && (
-              <div className="xl:w-[300px] xl:shrink-0">
+              <div className="xl:w-[230px] xl:shrink-0">
                 <h2 className="text-base font-semibold text-ink">Full description</h2>
                 <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-ink/60">
                   {product.description}
