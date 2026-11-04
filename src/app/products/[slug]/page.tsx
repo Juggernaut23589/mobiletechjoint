@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import type { Metadata } from "next";
 import {
   getPublishedProductBySlug,
@@ -7,6 +8,7 @@ import {
   getRelatedProducts,
   getVariantOptions,
   getAdPlacements,
+  type AdPreview,
 } from "@/lib/products";
 import { formatNaira, discountPercent } from "@/lib/money";
 import { AddToCartForm } from "@/components/AddToCartForm";
@@ -64,6 +66,11 @@ export default async function ProductPage({
 
   const lowStock = product.stock_quantity > 0 && product.stock_quantity <= 5;
   const discount = discountPercent(priceKobo, product.compare_at_price_kobo);
+  // Brand ads (up to 2, from the "Customize Brand Assets" dashboard) now
+  // bracket the page — one at the very top, one at the very bottom —
+  // instead of sitting beside the video. With a single ad configured it
+  // only shows at the top.
+  const [topAd, bottomAd] = brandAds;
 
   return (
     <div className="mx-auto max-w-[1360px] px-4 py-6 sm:px-8">
@@ -86,23 +93,33 @@ export default async function ProductPage({
         <span className="text-ink">{product.name}</span>
       </div>
 
+      {topAd && <BrandAdBanner ad={topAd} className="mb-8" />}
+
       {/* Not wrapped in any reveal/fade animation: this is the gallery and
           buy button — the single most important content on this page. It
-          must never depend on client JS succeeding just to become visible.
-          Brand ads render INSIDE ProductGallery, beside the video element
-          itself — rendering them in this grid's second column instead
-          looked right at first glance but actually scrolled away with the
-          buy-box content well before the (sticky) video came into view,
-          since the buy-box column is much shorter. Tying them to the
-          video directly is the only way they're reliably "beside" it.
-          When ads exist, the gallery column gets more width (xl+) so the
-          video isn't squeezed by the ad tiles sitting beside it. */}
-      <div className={`grid gap-12 lg:grid-cols-2 lg:items-start ${brandAds.length > 0 ? "xl:grid-cols-[3fr_2fr]" : ""}`}>
+          must never depend on client JS succeeding just to become visible. */}
+      <div className="grid gap-12 lg:grid-cols-2 lg:items-start xl:grid-cols-[3fr_2fr]">
         {/* Sticky on desktop so the gallery travels with the page instead of
             leaving blank space once the buy-box column scrolls past it —
-            the right column used to be considerably taller than this one. */}
+            the right column used to be considerably taller than this one.
+            The description sits beside the picture/video here (where brand
+            ads used to go) rather than as a separate block further down
+            the page — it stacks below the gallery until xl, where there's
+            finally room for it to sit beside instead. */}
         <div className="lg:sticky lg:top-24">
-          <ProductGallery images={images} videos={videos} productName={product.name} ads={brandAds} />
+          <div className="flex flex-col gap-6 xl:flex-row xl:items-start">
+            <div className="min-w-0 flex-1">
+              <ProductGallery images={images} videos={videos} productName={product.name} />
+            </div>
+            {product.description && (
+              <div className="xl:w-[300px] xl:shrink-0">
+                <h2 className="text-base font-semibold text-ink">Full description</h2>
+                <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-ink/60">
+                  {product.description}
+                </p>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-col gap-1">
@@ -213,20 +230,6 @@ export default async function ProductPage({
         </div>
       </div>
 
-      {/* The full manufacturer description lives here, below the buy box,
-          instead of standing between the shopper and Add to Cart above —
-          it used to push the buy box several screens down on products
-          with long migrated copy. Fully visible, not collapsed behind a
-          click — customers shouldn't have to go hunting for it. */}
-      {product.description && (
-        <div className="mt-12 max-w-3xl border-t border-ink/10 pt-8">
-          <h2 className="text-base font-semibold text-ink">Full description</h2>
-          <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-ink/60">
-            {product.description}
-          </p>
-        </div>
-      )}
-
       {frequentlyBoughtTogether.length > 0 && (
         <div className="mt-14 border-t border-neutral-200 pt-10">
           <ProductCarousel title="Frequently Bought Together" products={frequentlyBoughtTogether} />
@@ -245,6 +248,36 @@ export default async function ProductPage({
         ratingAvg={product.rating_avg}
         ratingCount={product.rating_count}
       />
+
+      {bottomAd && <BrandAdBanner ad={bottomAd} className="mt-14" />}
+    </div>
+  );
+}
+
+/** Full-width horizontal brand ad — same banner shape as the homepage
+ *  footer ads, used here for the "top and bottom of the page only"
+ *  placement instead of the small square tiles that used to sit beside
+ *  the video. */
+function BrandAdBanner({ ad, className = "" }: { ad: AdPreview; className?: string }) {
+  const tile = (
+    <div className="relative aspect-[21/6] w-full overflow-hidden rounded-2xl bg-ink/5">
+      <Image src={ad.imageUrl} alt={ad.caption ?? ""} fill sizes="(min-width: 640px) 1296px, 100vw" className="object-cover" />
+      {ad.caption && (
+        <p className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-4 py-3 text-sm font-semibold text-white">
+          {ad.caption}
+        </p>
+      )}
+    </div>
+  );
+  return (
+    <div className={className}>
+      {ad.linkUrl ? (
+        <Link href={ad.linkUrl} className="block">
+          {tile}
+        </Link>
+      ) : (
+        tile
+      )}
     </div>
   );
 }

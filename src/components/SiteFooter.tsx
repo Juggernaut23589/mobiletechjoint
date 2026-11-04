@@ -2,15 +2,17 @@ import Link from "next/link";
 import { Mail, Phone, MapPin, ShieldCheck } from "lucide-react";
 import { FooterCategoryLinks } from "@/components/FooterCategoryLinks";
 import { Logo } from "@/components/Logo";
+import { TrustBadges } from "@/components/TrustBadges";
 import { VisaMark, MastercardMark, PaystackMark } from "@/components/PaymentLogos";
 import { SocialLinks, WhatsAppLink } from "@/components/SocialLinks";
 
 /** Dark footer matching the approved design-system mockup (Main.dc.html):
  *  brand blurb, real category links, payment trust badges, and contact —
  *  contact rows only render when the corresponding env var is set, never
- *  fabricated placeholder details (same pattern as lib/paystack.ts). "Returns"/"FAQ" links from the mockup are omitted —
- *  no such pages existed at the time; "Meet the team" / "FAQ" were added
- *  once /team and the homepage FAQ section shipped. */
+ *  fabricated placeholder details (same pattern as lib/paystack.ts).
+ *  "Company" is split into "Company info" (About/Contact/Team) and
+ *  "Customer service" (Returns/Privacy/Terms/Cookies/FAQ) per the
+ *  business's requested structure — previously one combined column. */
 export function SiteFooter() {
   const supportEmail = process.env.SUPPORT_EMAIL;
   const supportPhone = process.env.SUPPORT_PHONE;
@@ -21,8 +23,11 @@ export function SiteFooter() {
   const hasContact = supportEmail || supportPhone || supportPhone2 || supportAddress || whatsappNumber;
 
   return (
-    <footer className="bg-[#080A0F] px-4 pb-7 pt-14 text-[#8A91A5] sm:px-8">
-      <div className="mx-auto grid max-w-[1360px] gap-8 sm:grid-cols-2 lg:grid-cols-4">
+    <footer className="bg-[#080A0F]">
+      <TrustBadges />
+
+      <div className="px-4 pb-7 pt-14 text-[#8A91A5] sm:px-8">
+        <div className="mx-auto grid max-w-[1360px] gap-8 sm:grid-cols-2 lg:grid-cols-5">
         <div>
           <div className="mb-3.5 flex items-center gap-2.5">
             <Logo size={44} />
@@ -39,37 +44,20 @@ export function SiteFooter() {
 
         <div>
           <h4 className="mb-3.5 text-[13.5px] font-semibold text-white">Shop</h4>
-          <FooterCategoryLinks />
+          <div className="flex flex-col gap-2.5 text-sm">
+            <FooterCategoryLinks />
+            <Link href="/deals" className="text-white/60 hover:text-white">
+              Deals
+            </Link>
+            <Link href="/blog" className="text-white/60 hover:text-white">
+              Blog
+            </Link>
+          </div>
         </div>
 
         <div>
-          <h4 className="mb-3.5 text-[13.5px] font-semibold text-white">Company</h4>
-          <ul className="mb-6 flex flex-col gap-2.5 text-sm">
-            <li>
-              <Link href="/team" className="hover:text-white">
-                Meet the team
-              </Link>
-            </li>
-            <li>
-              <Link href="/#faq" className="hover:text-white">
-                FAQ
-              </Link>
-            </li>
-            <li>
-              <Link href="/deals" className="hover:text-white">
-                Deals
-              </Link>
-            </li>
-            <li>
-              <Link href="/blog" className="hover:text-white">
-                Blog
-              </Link>
-            </li>
-            <li>
-              <Link href="/returns-refunds" className="hover:text-white">
-                Returns &amp; Refunds
-              </Link>
-            </li>
+          <h4 className="mb-3.5 text-[13.5px] font-semibold text-white">Company info</h4>
+          <ul className="flex flex-col gap-2.5 text-sm">
             <li>
               <Link href="/about" className="hover:text-white">
                 About Us
@@ -78,6 +66,22 @@ export function SiteFooter() {
             <li>
               <Link href="/contact" className="hover:text-white">
                 Contact Us
+              </Link>
+            </li>
+            <li>
+              <Link href="/team" className="hover:text-white">
+                Meet the team
+              </Link>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 className="mb-3.5 text-[13.5px] font-semibold text-white">Customer service</h4>
+          <ul className="mb-6 flex flex-col gap-2.5 text-sm">
+            <li>
+              <Link href="/returns-refunds" className="hover:text-white">
+                Returns &amp; Refunds
               </Link>
             </li>
             <li>
@@ -95,11 +99,16 @@ export function SiteFooter() {
                 Cookie Policy
               </Link>
             </li>
+            <li>
+              <Link href="/#faq" className="hover:text-white">
+                FAQ
+              </Link>
+            </li>
           </ul>
           <h4 className="mb-3.5 text-[13.5px] font-semibold text-white">Payment</h4>
           <div className="flex items-start gap-2 text-sm">
             <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-accent-500" />
-            Secure checkout via Paystack — cards, bank transfer &amp; USSD
+            Secure checkout via Paystack &amp; OPay — cards, bank transfer &amp; USSD
           </div>
         </div>
 
@@ -144,6 +153,7 @@ export function SiteFooter() {
           <MastercardMark />
           <PaystackMark />
         </div>
+      </div>
       </div>
     </footer>
   );
