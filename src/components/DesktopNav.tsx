@@ -10,11 +10,12 @@ const NAV_LABEL_OVERRIDES: Record<string, string> = {
   "Lenses & Filters": "Lenses",
 };
 
-/** Rigs dropped from the navbar at the business's request — the category
- *  page itself (/category/rigs-accessories) and its footer link are
- *  untouched, this only keeps it out of the top-5-by-product-count nav
- *  slots so a 6th category can take its place instead. */
-const NAV_EXCLUDED = new Set(["Rigs & Accessories"]);
+/** Rigs, then Mounts, dropped from the navbar at the business's request
+ *  (to make more room for a longer search bar) — each category page and
+ *  its footer link are untouched, this only keeps them out of the
+ *  top-5-by-product-count nav slots so other categories can take their
+ *  place instead. */
+const NAV_EXCLUDED = new Set(["Rigs & Accessories", "Mounts"]);
 
 /** Top-category nav links in the desktop navbar. Fetched client-side via
  *  /api/categories rather than server-rendered in SiteHeader — SiteHeader
