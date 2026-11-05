@@ -42,9 +42,14 @@ function LoginForm() {
           className="mb-3 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm text-neutral-900"
         />
 
-        <label htmlFor="password" className="mb-1 block text-sm font-medium text-neutral-800">
-          Password
-        </label>
+        <div className="mb-1 flex items-center justify-between">
+          <label htmlFor="password" className="block text-sm font-medium text-neutral-800">
+            Password
+          </label>
+          <Link href="/account/forgot-password" className="text-xs font-medium text-brand-600 hover:underline">
+            Forgot password?
+          </Link>
+        </div>
         <PasswordInput
           id="password"
           name="password"

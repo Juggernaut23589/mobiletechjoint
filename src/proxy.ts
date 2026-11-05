@@ -55,7 +55,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/staff/dashboard", request.url));
   }
 
-  const isAuthPage = pathname === "/account/login" || pathname === "/account/signup";
+  const isAuthPage = ["/account/login", "/account/signup", "/account/forgot-password", "/account/reset-password"].includes(pathname);
   if (pathname.startsWith("/account") && !isAuthPage && !user) {
     const loginUrl = new URL("/account/login", request.url);
     loginUrl.searchParams.set("next", pathname);

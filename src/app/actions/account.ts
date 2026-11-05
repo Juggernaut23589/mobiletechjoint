@@ -2,7 +2,12 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
+import { createClient } from "@supabase/supabase-js";
 import { createServerAuthClient, createServiceClient } from "@/lib/supabase/server";
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 export interface AuthResult {
   error?: string;
@@ -57,6 +62,66 @@ export async function signIn(formData: FormData): Promise<AuthResult> {
 
   const next = String(formData.get("next") ?? "/account");
   redirect(next.startsWith("/account") ? next : "/account");
+}
+
+/** Emails a password-reset link via Supabase Auth's own mailer. Always
+ *  returns the same notice regardless of whether the email has an account,
+ *  so this form can't be used to discover who's registered — same pattern
+ *  as the staff password reset (app/actions/staff-auth.ts). */
+export async function requestAccountPasswordReset(
+  _prev: AuthResult,
+  formData: FormData
+): Promise<AuthResult> {
+  const email = String(formData.get("email") ?? "").trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { error: "Enter a valid email address." };
+
+  const h = await headers();
+  const origin = `${h.get("x-forwarded-proto") ?? "https"}://${h.get("x-forwarded-host") ?? h.get("host")}`;
+
+  // Implicit flow: the link lands on /account/reset-password with the
+  // session in the URL fragment, which never reaches any server log.
+  const anonClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { flowType: "implicit", persistSession: false, autoRefreshToken: false },
+  });
+  const { error } = await anonClient.auth.resetPasswordForEmail(email, {
+    redirectTo: `${origin}/account/reset-password`,
+  });
+
+  if (error) {
+    console.error("Account password reset email failed:", error.message);
+    if (/rate limit/i.test(error.message)) {
+      return { error: "Too many reset emails have been sent recently. Please try again in an hour." };
+    }
+  }
+
+  return { notice: "If that email has an account, a reset link is on its way. It expires in one hour — check your spam folder if it doesn't arrive." };
+}
+
+/** Second half of the reset: the page passes the access token from the
+ *  emailed link. Supabase verifies it; only then is the password changed,
+ *  and that link's session is revoked so it can't be reused. */
+export async function completeAccountPasswordReset(
+  _prev: AuthResult,
+  formData: FormData
+): Promise<AuthResult> {
+  const accessToken = String(formData.get("accessToken") ?? "");
+  const password = String(formData.get("password") ?? "");
+  const confirm = String(formData.get("confirm") ?? "");
+  if (password.length < 8) return { error: "Password must be at least 8 characters." };
+  if (password !== confirm) return { error: "The two passwords don't match." };
+
+  const anonClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: false } });
+  const { data, error } = await anonClient.auth.getUser(accessToken);
+  if (error || !data.user) {
+    return { error: "This reset link has expired or was already used. Request a new one." };
+  }
+
+  const service = createServiceClient();
+  const { error: updateError } = await service.auth.admin.updateUserById(data.user.id, { password });
+  if (updateError) return { error: updateError.message };
+  await service.auth.admin.signOut(accessToken);
+
+  return { notice: "Your password has been changed." };
 }
 
 export async function signOut(): Promise<void> {
