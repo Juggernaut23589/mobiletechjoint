@@ -16,6 +16,7 @@ import { AddToCartForm } from "@/components/AddToCartForm";
 import { WishlistButton } from "@/components/WishlistButton";
 import { ProductCarousel } from "@/components/ProductCarousel";
 import { ProductGallery } from "@/components/ProductGallery";
+import { ProductDescription } from "@/components/ProductDescription";
 import { DeliveryEstimator } from "@/components/DeliveryEstimator";
 import { StarRating } from "@/components/StarRating";
 import { ReviewsSection } from "@/components/ReviewsSection";
@@ -100,28 +101,12 @@ export default async function ProductPage({
       {/* Not wrapped in any reveal/fade animation: this is the gallery and
           buy button — the single most important content on this page. It
           must never depend on client JS succeeding just to become visible. */}
-      <div className="grid gap-10 lg:grid-cols-2 lg:items-start xl:grid-cols-[2.4fr_1.6fr_1.1fr] xl:gap-8">
+      <div className="grid gap-10 lg:grid-cols-2 lg:items-start xl:grid-cols-[2fr_1.8fr_1.1fr] xl:gap-8">
         {/* Sticky on desktop so the gallery travels with the page instead of
             leaving blank space once the buy-box column scrolls past it —
-            the right column used to be considerably taller than this one.
-            The description sits beside the picture/video here (where brand
-            ads used to go) rather than as a separate block further down
-            the page — it stacks below the gallery until xl, where there's
-            finally room for it to sit beside instead. */}
+            the right column used to be considerably taller than this one. */}
         <div className="lg:sticky lg:top-24">
-          <div className="flex flex-col gap-6 xl:flex-row xl:items-start">
-            <div className="min-w-0 flex-1">
-              <ProductGallery images={images} videos={videos} productName={product.name} />
-            </div>
-            {product.description && (
-              <div className="xl:w-[230px] xl:shrink-0">
-                <h2 className="text-base font-semibold text-ink">Full description</h2>
-                <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-ink/60">
-                  {product.description}
-                </p>
-              </div>
-            )}
-          </div>
+          <ProductGallery images={images} videos={videos} productName={product.name} />
         </div>
 
         <div className="flex flex-col gap-1">
@@ -229,6 +214,8 @@ export default async function ProductPage({
               </div>
             )}
           </div>
+
+          {product.description && <ProductDescription text={product.description} />}
         </div>
 
         <DeliveryReturnsPanel />

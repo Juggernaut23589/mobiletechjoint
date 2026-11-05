@@ -1,15 +1,19 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Plus, Check } from "lucide-react";
+import { ShoppingCart, Check } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useCartStore } from "@/store/cart";
 import { useCartUIStore } from "@/store/cart-ui";
 
 /** Overlay button on a product card's image — adds one unit without
- *  leaving the grid. Stays out of the way (opacity-0, revealed on card
- *  hover) so it doesn't compete with the "go look at this product" click
- *  target that covers the rest of the card. */
+ *  leaving the grid. Always visible, not hover-only: it used to reveal
+ *  on hover (desktop) or stay a plain "+", which (a) is invisible to
+ *  anyone who hasn't moved a mouse over the card — most mobile and
+ *  tablet traffic — and (b) a plain "+" doesn't read as "add to cart" at
+ *  a glance. Solid accent-yellow + a white ring holds contrast against
+ *  any product photo (light or dark background alike), not just the
+ *  card's own near-black shell. */
 export function QuickAddButton({
   productId,
   slug,
@@ -47,9 +51,10 @@ export function QuickAddButton({
     openCart();
   }
 
-  // Every card gets the icon — out of stock disables it (greyed out,
-  // no-op click) instead of removing it, so the grid's layout stays
-  // consistent and it's obvious at a glance why it can't be added.
+  // Every card gets the icon, always visible (no hover/opacity gating) —
+  // out of stock disables it (greyed out, no-op click) instead of
+  // removing it, so the grid's layout stays consistent and it's obvious
+  // at a glance why it can't be added.
   return (
     <motion.button
       type="button"
@@ -61,16 +66,16 @@ export function QuickAddButton({
       // 100cqw is the card's inline size) minus the button + a margin, so the
       // button sits in the image's bottom-right corner without being nested
       // inside the card's <Link>.
-      className={`absolute right-2.5 top-[calc(100cqw-2.375rem)] flex h-7 w-7 items-center justify-center rounded-full shadow-glow transition-opacity ${
+      className={`absolute right-2.5 top-[calc(100cqw-2.625rem)] flex h-8 w-8 items-center justify-center rounded-full ring-2 shadow-lg ${
         outOfStock
-          ? "cursor-not-allowed bg-white/70 text-neutral-400 opacity-100"
-          : "bg-white text-brand-700 opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+          ? "cursor-not-allowed bg-white/70 text-neutral-400 ring-white/40"
+          : "bg-accent-500 text-brand-900 ring-white/90 hover:bg-accent-400"
       }`}
     >
       {mounted && inCart && !outOfStock ? (
-        <Check className="h-3.5 w-3.5" strokeWidth={2.5} />
+        <Check className="h-4 w-4" strokeWidth={2.75} />
       ) : (
-        <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
+        <ShoppingCart className="h-4 w-4" strokeWidth={2.25} />
       )}
     </motion.button>
   );

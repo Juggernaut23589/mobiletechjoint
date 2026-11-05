@@ -7,9 +7,14 @@ import type { CategoryWithCount } from "@/types/database";
 /** Shortened labels for the navbar only — category pages, the footer, and
  *  the homepage category grid keep the full descriptive name. */
 const NAV_LABEL_OVERRIDES: Record<string, string> = {
-  "Rigs & Accessories": "Rigs",
   "Lenses & Filters": "Lenses",
 };
+
+/** Rigs dropped from the navbar at the business's request — the category
+ *  page itself (/category/rigs-accessories) and its footer link are
+ *  untouched, this only keeps it out of the top-5-by-product-count nav
+ *  slots so a 6th category can take its place instead. */
+const NAV_EXCLUDED = new Set(["Rigs & Accessories"]);
 
 /** Top-category nav links in the desktop navbar. Fetched client-side via
  *  /api/categories rather than server-rendered in SiteHeader — SiteHeader
@@ -26,7 +31,7 @@ export function DesktopNav() {
       .then((res) => res.json())
       .then((data: { categories?: CategoryWithCount[] }) => {
         const top = (data.categories ?? [])
-          .filter((c) => c.product_count > 0)
+          .filter((c) => c.product_count > 0 && !NAV_EXCLUDED.has(c.name))
           .sort((a, b) => b.product_count - a.product_count)
           .slice(0, 5);
         setCategories(top);

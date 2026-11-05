@@ -1,14 +1,15 @@
 import { WhatsAppBadge } from "@/components/SocialLinks";
 
-/** Always-visible floating WhatsApp button, fixed to the bottom-left of
- *  every page (BackToTop owns bottom-right, see its own comment) so a
- *  customer can reach chat support no matter where they've scrolled to —
- *  not just the homepage/Contact page sections. Renders nothing if no
- *  WhatsApp destination is configured, same as every other use of
- *  WhatsAppBadge. */
+/** Always-visible floating WhatsApp button, fixed to the bottom-right of
+ *  every page (the business's preferred corner) so a customer can reach
+ *  chat support no matter where they've scrolled to — not just the
+ *  homepage/Contact page sections. BackToTop shares this corner but sits
+ *  higher up (see its own comment) so the two never overlap. Renders
+ *  nothing if no WhatsApp destination is configured, same as every other
+ *  use of WhatsAppBadge. */
 export function WhatsAppFloatingButton() {
   return (
-    <div className="fixed bottom-6 left-5 z-20 sm:bottom-8 sm:left-8">
+    <div className="fixed bottom-6 right-5 z-20 sm:bottom-8 sm:right-8">
       <WhatsAppBadge size={52} />
     </div>
   );

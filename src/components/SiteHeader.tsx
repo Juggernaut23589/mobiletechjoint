@@ -19,23 +19,23 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-30 bg-brand-900">
-      <div className="mx-auto flex max-w-[1360px] items-center gap-4 px-4 py-2.5 sm:gap-7 sm:px-8">
+      <div className="mx-auto flex max-w-[1440px] items-center gap-3 px-2.5 py-2.5 sm:gap-5 sm:px-4">
         <div className="flex shrink-0 items-center gap-2">
           <MobileCategoryMenu />
           <Link href="/" className="flex items-center gap-2">
-            <Logo size={64} />
+            <Logo size={61} />
             <span className="font-display text-[17px] tracking-tight text-white">
               mobile<span className="font-bold">techjoint</span>
             </span>
           </Link>
         </div>
 
-        <SearchBar className="hidden max-w-[720px] flex-1 md:block" />
+        <SearchBar className="hidden max-w-none flex-1 md:block" />
 
         <CategoriesMenu />
         <DesktopNav />
 
-        <div className="ml-auto flex shrink-0 items-center gap-4 sm:gap-5">
+        <div className="ml-auto flex shrink-0 items-center gap-4 pr-0.5 sm:gap-5">
           <ThemeToggle />
           <AccountLink />
           <CartLink />
