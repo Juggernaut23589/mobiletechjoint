@@ -1,58 +1,13 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import type { CategoryWithCount } from "@/types/database";
 
-/** Shortened labels for the navbar only — category pages, the footer, and
- *  the homepage category grid keep the full descriptive name. */
-const NAV_LABEL_OVERRIDES: Record<string, string> = {
-  "Lenses & Filters": "Lenses",
-};
-
-/** Rigs, then Mounts, dropped from the navbar at the business's request
- *  (to make more room for a longer search bar) — each category page and
- *  its footer link are untouched, this only keeps them out of the
- *  top-5-by-product-count nav slots so other categories can take their
- *  place instead. */
-const NAV_EXCLUDED = new Set(["Rigs & Accessories", "Mounts"]);
-
-/** Top-category nav links in the desktop navbar. Fetched client-side via
- *  /api/categories rather than server-rendered in SiteHeader — SiteHeader
- *  lives in the root layout on every page, so a data fetch there would
- *  force the whole app out of static rendering (see /api/categories'
- *  own comment; same tradeoff AccountLink and MobileCategoryMenu already
- *  make). Shows real categories, highest product count first, instead of
- *  a hardcoded list that could point at a category that doesn't exist. */
+/** Static Deals/Blog links in the desktop navbar. The top-by-product-count
+ *  category links (Lighting, Lenses, Audio, Cameras, Storage) were removed
+ *  at the business's request to make more room for a wider search bar, and
+ *  deliberately not backfilled with other categories — CategoriesMenu's
+ *  dropdown and the footer still link to every category. */
 export function DesktopNav() {
-  const [categories, setCategories] = useState<CategoryWithCount[]>([]);
-
-  useEffect(() => {
-    fetch("/api/categories")
-      .then((res) => res.json())
-      .then((data: { categories?: CategoryWithCount[] }) => {
-        const top = (data.categories ?? [])
-          .filter((c) => c.product_count > 0 && !NAV_EXCLUDED.has(c.name))
-          .sort((a, b) => b.product_count - a.product_count)
-          .slice(0, 5);
-        setCategories(top);
-      })
-      .catch(() => {});
-  }, []);
-
-  if (categories.length === 0) return <div className="hidden flex-1 lg:block" />;
-
   return (
-    <nav className="hidden flex-1 items-center justify-center gap-5 lg:flex">
-      {categories.map((c) => (
-        <Link
-          key={c.id}
-          href={`/category/${c.slug}`}
-          className="text-base font-medium text-[#C7CCDA] transition-colors hover:text-white"
-        >
-          {NAV_LABEL_OVERRIDES[c.name] ?? c.name}
-        </Link>
-      ))}
+    <nav className="hidden shrink-0 items-center gap-5 lg:flex">
       <Link href="/deals" className="text-base font-medium text-accent-500 transition-colors hover:text-white">
         Deals
       </Link>

@@ -41,7 +41,7 @@ export function HeroCarousel({
   const goNext = useCallback(() => goTo(index + 1), [goTo, index]);
 
   return (
-    <section className="relative h-[560px] overflow-hidden bg-brand-900 sm:h-[600px]">
+    <section className="relative h-[504px] overflow-hidden bg-brand-900 sm:h-[540px]">
       <AnimatePresence mode="sync">
         {index === 0 ? (
           <motion.div

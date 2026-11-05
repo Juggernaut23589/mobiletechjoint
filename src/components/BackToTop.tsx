@@ -27,7 +27,7 @@ export function BackToTop() {
       aria-label="Back to top"
       // bottom offset stacked above the floating WhatsApp button, which
       // owns the lower slot in this same corner (see WhatsAppFloatingButton).
-      className="fixed bottom-24 right-5 z-20 flex h-11 w-11 items-center justify-center rounded-full bg-brand-900 text-white shadow-lg transition-opacity hover:opacity-90 sm:bottom-28 sm:right-8"
+      className="fixed bottom-36 right-5 z-20 flex h-11 w-11 items-center justify-center rounded-full bg-brand-900 text-white shadow-lg transition-opacity hover:opacity-90 sm:bottom-40 sm:right-8"
     >
       <ArrowUp className="h-5 w-5" />
     </button>

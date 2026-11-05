@@ -103,7 +103,9 @@ export function SearchBar({ id, className = "" }: { id?: string; className?: str
                         {item.brandName}
                       </p>
                     )}
-                    <p className="truncate text-[13px] font-medium text-neutral-900">{item.name}</p>
+                    <p className="line-clamp-2 text-[13px] font-medium leading-snug text-neutral-900">
+                      {item.name}
+                    </p>
                   </div>
                   <p className="shrink-0 text-[13px] font-semibold text-brand-900">
                     {formatNaira(item.priceKobo ?? 0)}

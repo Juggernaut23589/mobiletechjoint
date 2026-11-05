@@ -55,9 +55,10 @@ export default async function HomePage() {
     <div>
       <HeroCarousel brandSlides={heroBrandSlides} banners={banners} />
       <PromoBanner />
-      <NewArrivalsMarquee products={newArrivals} />
 
       <CategoryTopBar />
+
+      <NewArrivalsMarquee products={newArrivals} />
 
       <div className="mx-auto max-w-[1360px] px-4 pt-8 sm:px-8">
         <ProductSection
@@ -95,15 +96,15 @@ export default async function HomePage() {
 
       <FaqCarousel faqs={FAQS} />
 
-      <section className="bg-brand-900 px-4 py-16 text-center sm:px-8">
-        <div className="bg-grid-texture mx-auto max-w-[1360px] rounded-[28px] px-6 py-10 sm:py-12">
-          <span className="mb-3 inline-block text-[11.5px] font-bold uppercase tracking-[0.16em] text-accent-400">
+      <section className="bg-brand-900 px-4 py-10 text-center sm:px-8">
+        <div className="bg-grid-texture mx-auto max-w-[1360px] rounded-[28px] px-6 py-7 sm:py-8">
+          <span className="mb-2 inline-block text-[11.5px] font-bold uppercase tracking-[0.16em] text-accent-400">
             Stay in the loop
           </span>
-          <h2 className="font-display mb-2.5 text-2xl font-bold text-white sm:text-3xl">
+          <h2 className="font-display mb-2 text-2xl font-bold text-white sm:text-3xl">
             Get first access to drops &amp; deals
           </h2>
-          <p className="mb-7 text-sm text-white/60">
+          <p className="mb-5 text-sm text-white/60">
             Weekly gear picks, no spam. Unsubscribe anytime.
           </p>
           <NewsletterForm />

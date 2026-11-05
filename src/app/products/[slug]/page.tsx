@@ -221,6 +221,13 @@ export default async function ProductPage({
         <DeliveryReturnsPanel />
       </div>
 
+      <ReviewsSection
+        productId={product.id}
+        slug={product.slug}
+        ratingAvg={product.rating_avg}
+        ratingCount={product.rating_count}
+      />
+
       {frequentlyBoughtTogether.length > 0 && (
         <div className="mt-14 border-t border-neutral-200 pt-10">
           <ProductCarousel title="Frequently Bought Together" products={frequentlyBoughtTogether} />
@@ -232,13 +239,6 @@ export default async function ProductPage({
           <ProductCarousel title="You May Also Like" products={related} />
         </div>
       )}
-
-      <ReviewsSection
-        productId={product.id}
-        slug={product.slug}
-        ratingAvg={product.rating_avg}
-        ratingCount={product.rating_count}
-      />
 
       {bottomAd && <BrandAdBanner ad={bottomAd} className="mt-14" />}
     </div>

@@ -9,7 +9,7 @@ import { WhatsAppBadge } from "@/components/SocialLinks";
  *  use of WhatsAppBadge. */
 export function WhatsAppFloatingButton() {
   return (
-    <div className="fixed bottom-6 right-5 z-20 sm:bottom-8 sm:right-8">
+    <div className="fixed bottom-16 right-5 z-20 sm:bottom-20 sm:right-8">
       <WhatsAppBadge size={52} />
     </div>
   );
