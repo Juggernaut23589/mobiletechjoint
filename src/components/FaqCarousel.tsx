@@ -54,7 +54,7 @@ export function FaqCarousel({ faqs }: { faqs: Faq[] }) {
   return (
     <section
       id="faq"
-      className="relative overflow-hidden bg-brand-50/60 py-16 sm:py-20"
+      className="relative overflow-hidden bg-brand-50/60 py-[51px] sm:py-16"
       onClick={() => setActive(null)}
     >
       <div
@@ -77,7 +77,7 @@ export function FaqCarousel({ faqs }: { faqs: Faq[] }) {
       <div className="relative">
         <div
           {...hoverProps}
-          className="marquee-fade-mask -my-8 overflow-hidden py-12 [container-type:inline-size]"
+          className="marquee-fade-mask -my-[26px] overflow-hidden py-[38px] [container-type:inline-size]"
           onClick={(e) => e.stopPropagation()}
         >
           <div ref={trackRef} className="flex w-max gap-5 px-4 will-change-transform sm:px-8">
@@ -158,7 +158,7 @@ export function FaqCarousel({ faqs }: { faqs: Faq[] }) {
         </div>
 
         <div
-          className="mx-auto mt-6 flex max-w-[1360px] items-center justify-between px-4 sm:px-8"
+          className="mx-auto mt-[19px] flex max-w-[1360px] items-center justify-between px-4 sm:px-8"
           onClick={(e) => e.stopPropagation()}
         >
           <p className="text-xs text-neutral-400">
