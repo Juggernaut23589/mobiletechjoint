@@ -34,6 +34,7 @@ async function getProductSnapshot(productId: string) {
 }
 
 const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
+const MAX_PRODUCT_IMAGES = 4;
 
 /** Creates a brand-new product from the staff dashboard — the manual
  *  upload path that replaced the Instagram sync. Everything the edit page
@@ -66,6 +67,9 @@ export async function createProduct(
 
   if (!name) return { error: "Name is required." };
   if (status !== "draft" && status !== "published") return { error: "Invalid status." };
+  if (files.length > MAX_PRODUCT_IMAGES) {
+    return { error: `A product can have at most ${MAX_PRODUCT_IMAGES} images. Choose fewer files.` };
+  }
 
   const priceNaira = priceRaw ? Number(priceRaw) : null;
   if (priceNaira !== null && (!Number.isFinite(priceNaira) || priceNaira <= 0)) {
@@ -448,19 +452,18 @@ export async function updateProductStatus(formData: FormData): Promise<{ error?:
   return {};
 }
 
-/** Uploads a new image or video to an existing product's gallery. Reuses
- *  the same "product-media" Supabase Storage bucket everything else in
- *  this project already writes to (the WooCommerce migration, the
- *  Instagram sync). */
+/** Uploads one or more images/videos to an existing product's gallery, up
+ *  to MAX_PRODUCT_IMAGES total. Reuses the same "product-media" Supabase
+ *  Storage bucket everything else in this project already writes to (the
+ *  WooCommerce migration, the Instagram sync). */
 export async function uploadProductImage(formData: FormData): Promise<{ error?: string }> {
   const actor = await requireProductEditor();
 
   const productId = formData.get("productId") as string;
-  const file = formData.get("file") as File | null;
-  const isVideo = formData.get("isVideo") === "true";
+  const files = formData.getAll("files").filter((f): f is File => f instanceof File && f.size > 0);
 
   if (!productId) return { error: "Missing product." };
-  if (!file || file.size === 0) return { error: "Choose a file first." };
+  if (files.length === 0) return { error: "Choose a file first." };
 
   const supabase = createServiceClient();
 
@@ -468,37 +471,62 @@ export async function uploadProductImage(formData: FormData): Promise<{ error?: 
     .from("product_images")
     .select("*", { count: "exact", head: true })
     .eq("product_id", productId);
+  const existing = count ?? 0;
 
-  const ext = file.name.split(".").pop() ?? (isVideo ? "mp4" : "jpg");
-  const path = `products/${productId}/${Date.now()}.${ext}`;
-  const buffer = Buffer.from(await file.arrayBuffer());
+  if (existing + files.length > MAX_PRODUCT_IMAGES) {
+    return {
+      error: `A product can have at most ${MAX_PRODUCT_IMAGES} images. It already has ${existing} — remove some first or choose fewer files.`,
+    };
+  }
+  for (const file of files) {
+    if (file.size > MAX_UPLOAD_BYTES) return { error: `"${file.name}" is over 25MB. Compress it and try again.` };
+    if (!file.type.startsWith("image/") && !file.type.startsWith("video/")) {
+      return { error: `"${file.name}" isn't an image or video.` };
+    }
+  }
 
-  const { error: uploadError } = await supabase.storage
-    .from("product-media")
-    .upload(path, buffer, { contentType: file.type || undefined });
+  const uploadErrors: string[] = [];
+  let uploaded = 0;
+  for (const [i, file] of files.entries()) {
+    const isVideo = file.type.startsWith("video/");
+    const ext = file.name.split(".").pop() ?? (isVideo ? "mp4" : "jpg");
+    const path = `products/${productId}/${Date.now()}-${i}.${ext}`;
+    const buffer = Buffer.from(await file.arrayBuffer());
 
-  if (uploadError) return { error: uploadError.message };
+    const { error: uploadError } = await supabase.storage
+      .from("product-media")
+      .upload(path, buffer, { contentType: file.type || undefined });
+    if (uploadError) {
+      uploadErrors.push(`${file.name}: ${uploadError.message}`);
+      continue;
+    }
 
-  const { data: publicUrlData } = supabase.storage.from("product-media").getPublicUrl(path);
+    const { data: publicUrlData } = supabase.storage.from("product-media").getPublicUrl(path);
+    const { error: insertError } = await supabase.from("product_images").insert({
+      product_id: productId,
+      url: publicUrlData.publicUrl,
+      is_video: isVideo,
+      position: existing + i,
+    });
+    if (insertError) {
+      uploadErrors.push(`${file.name}: ${insertError.message}`);
+      continue;
+    }
+    uploaded++;
+  }
 
-  const { error: insertError } = await supabase.from("product_images").insert({
-    product_id: productId,
-    url: publicUrlData.publicUrl,
-    is_video: isVideo,
-    position: count ?? 0,
-  });
-
-  if (insertError) return { error: insertError.message };
-
-  const product = await getProductSnapshot(productId);
-  await logStaffActivity(actor, {
-    action: "product.media_add",
-    entityType: "product",
-    entityId: productId,
-    summary: `Added ${isVideo ? "a video" : "an image"} to ${product?.name ?? "a product"}`,
-    changes: { url: publicUrlData.publicUrl },
-  });
+  if (uploaded > 0) {
+    const product = await getProductSnapshot(productId);
+    await logStaffActivity(actor, {
+      action: "product.media_add",
+      entityType: "product",
+      entityId: productId,
+      summary: `Added ${uploaded} ${uploaded === 1 ? "file" : "files"} to ${product?.name ?? "a product"}`,
+      changes: { uploaded },
+    });
+  }
   revalidateProduct(productId);
+  if (uploadErrors.length > 0) return { error: uploadErrors.join("; ") };
   return {};
 }
 
@@ -542,6 +570,51 @@ export async function deleteProductImage(formData: FormData): Promise<{ error?: 
   }
 
   if (productId) revalidateProduct(productId);
+  return {};
+}
+
+/** Permanently deletes a product. `product_images` rows cascade-delete in
+ *  the DB automatically (on delete cascade); this also best-effort removes
+ *  their files from Storage, same technique as deleteProductImage.
+ *  Irreversible — the caller is expected to confirm with the staff member
+ *  before invoking this. */
+export async function deleteProduct(formData: FormData): Promise<{ error?: string }> {
+  const actor = await requireProductEditor();
+  const productId = formData.get("productId") as string;
+  if (!productId) return { error: "Missing product." };
+
+  const supabase = createServiceClient();
+
+  const product = await getProductSnapshot(productId);
+  if (!product) return { error: "Product not found." };
+
+  const { data: images } = await supabase.from("product_images").select("url").eq("product_id", productId);
+
+  const { error } = await supabase.from("products").delete().eq("id", productId);
+  if (error) return { error: error.message };
+
+  const marker = "/product-media/";
+  const paths = (images ?? [])
+    .map((img) => {
+      const idx = img.url.indexOf(marker);
+      return idx === -1 ? null : img.url.slice(idx + marker.length);
+    })
+    .filter((p): p is string => p !== null);
+  if (paths.length > 0) await supabase.storage.from("product-media").remove(paths);
+
+  await logStaffActivity(actor, {
+    action: "product.delete",
+    entityType: "product",
+    entityId: productId,
+    summary: `Deleted product "${product.name}"`,
+  });
+
+  revalidatePath("/staff/dashboard/products");
+  revalidatePath("/staff/dashboard/new-arrivals");
+  revalidatePath("/products", "layout");
+  revalidatePath("/");
+  revalidatePath("/category", "layout");
+  revalidatePath("/brand", "layout");
   return {};
 }
 
