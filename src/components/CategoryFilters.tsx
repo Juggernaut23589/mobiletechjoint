@@ -4,10 +4,10 @@ import type { BrandWithCount } from "@/types/database";
 /** Sidebar filters matching the approved design-system mockup
  *  (Category.dc.html) — brand checkboxes, a price-range slider bounded by
  *  the category's real max price, and an in-stock toggle. The mockup also
- *  has a star-rating filter and subcategory checkboxes; both are omitted
- *  since this catalog has no rating/review data (per the PRD decision not
- *  to build reviews yet) and a flat, single-level category taxonomy (no
- *  subcategories to filter by). Submitted as one plain GET form — no
+ *  has a star-rating filter and subcategory checkboxes; both are omitted —
+ *  the rating filter wasn't built even though real reviews now exist
+ *  (see product_reviews / rating_avg), and the category taxonomy is flat,
+ *  single-level (no subcategories to filter by). Submitted as one plain GET form — no
  *  client-side fetch required, works even without JS. */
 export function CategoryFilters({
   categorySlug,

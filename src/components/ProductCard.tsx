@@ -7,18 +7,6 @@ import { StarRating } from "@/components/StarRating";
 import { isRecentlyAdded } from "@/lib/recency";
 import type { ProductWithImages } from "@/types/database";
 
-/** Products with no real reviews yet show a placeholder rating instead of
- *  no stars at all — stable per product (not re-rolled on every render)
- *  and picked from a product id hash, alternating 4.5 and 5 rather than
- *  giving every single product the same number. Purely decorative: no
- *  review count is shown alongside it, so it never claims to be backed
- *  by real review data the way the count badge does for real ratings. */
-function placeholderRating(productId: string): number {
-  let hash = 0;
-  for (let i = 0; i < productId.length; i++) hash = (hash * 31 + productId.charCodeAt(i)) | 0;
-  return Math.abs(hash) % 2 === 0 ? 5 : 4.5;
-}
-
 export function ProductCard({
   product,
   sizes = "(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw",
@@ -89,13 +77,11 @@ export function ProductCard({
           <h3 className="line-clamp-2 text-[13.5px] font-medium leading-snug text-white">
             {product.name}
           </h3>
-          {product.rating_count > 0 && product.rating_avg !== null ? (
+          {product.rating_count > 0 && product.rating_avg !== null && (
             <div className="flex items-center gap-1.5">
               <StarRating rating={product.rating_avg} size={11} />
               <span className="text-[10.5px] text-white/40">({product.rating_count})</span>
             </div>
-          ) : (
-            <StarRating rating={placeholderRating(product.id)} size={11} />
           )}
           <div className="mt-auto flex items-end justify-between gap-2 pt-1">
             <div className="flex flex-wrap items-baseline gap-x-2">
