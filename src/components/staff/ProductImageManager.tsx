@@ -7,7 +7,7 @@ import { X, Upload } from "lucide-react";
 import { uploadProductImage, deleteProductImage } from "@/app/actions/admin-products";
 import type { ProductImage } from "@/types/database";
 
-const MAX_IMAGES = 4;
+const MAX_IMAGES = 10;
 
 interface Picked {
   id: string;

@@ -34,7 +34,7 @@ async function getProductSnapshot(productId: string) {
 }
 
 const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
-const MAX_PRODUCT_IMAGES = 4;
+const MAX_PRODUCT_IMAGES = 10;
 
 /** Creates a brand-new product from the staff dashboard — the manual
  *  upload path that replaced the Instagram sync. Everything the edit page
