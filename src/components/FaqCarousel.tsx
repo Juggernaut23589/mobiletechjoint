@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, X, HelpCircle } from "lucide-react";
+import Link from "next/link";
+import { ChevronLeft, ChevronRight, ArrowUpRight, HelpCircle } from "lucide-react";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { useMarquee } from "@/hooks/useMarquee";
 import type { Faq } from "@/lib/faqs";
@@ -17,29 +16,13 @@ const TOPIC_TINT: Record<Faq["topic"], string> = {
   Support: "#FF3B5C",
 };
 
-/** FAQ cards on a continuous left-to-right rail. Clicking a card freezes
- *  the rail and "pops" that card — it lifts, scales up and takes the
- *  topic colour; clicking it again, its close button, Escape, or anywhere
- *  outside the rail lets everything move again. Answers are always fully
- *  rendered (cards stretch to the tallest) so pinning never shifts layout
- *  inside the translated track. The arrows step the rail one card at a
+/** FAQ cards on a continuous left-to-right rail. Hovering a card pauses
+ *  the rail so it can be read; clicking one (or pressing Enter/Space on
+ *  it) takes the reader to the full FAQ page at /faq#<id>, which opens
+ *  straight to that question. The arrows step the rail one card at a
  *  time in either direction. */
 export function FaqCarousel({ faqs }: { faqs: Faq[] }) {
-  const [active, setActive] = useState<string | null>(null);
-  const { trackRef, nudge, hoverProps } = useMarquee({
-    speed: 30,
-    direction: "right",
-    paused: active !== null,
-  });
-
-  useEffect(() => {
-    if (active === null) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setActive(null);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [active]);
+  const { trackRef, nudge, hoverProps } = useMarquee({ speed: 30, direction: "right" });
 
   if (faqs.length === 0) return null;
 
@@ -52,11 +35,7 @@ export function FaqCarousel({ faqs }: { faqs: Faq[] }) {
   const loop = [...faqs, ...faqs];
 
   return (
-    <section
-      id="faq"
-      className="relative overflow-hidden bg-brand-50/60 py-[51px] sm:py-16"
-      onClick={() => setActive(null)}
-    >
+    <section id="faq" className="relative overflow-hidden bg-brand-50/60 py-[51px] sm:py-16">
       <div
         className="pointer-events-none absolute -left-32 top-10 h-72 w-72 rounded-full bg-brand-200/40 blur-3xl"
         aria-hidden="true"
@@ -70,7 +49,8 @@ export function FaqCarousel({ faqs }: { faqs: Faq[] }) {
         <SectionHeader
           eyebrow="Before you buy"
           title="Frequently asked questions"
-          subtitle="Straight answers on originality, ordering, payment, delivery and after-sales support. Tap a card to pin it while you read."
+          subtitle="Straight answers on originality, ordering, payment, delivery and after-sales support. Tap a card for the full FAQ page."
+          action={{ label: "See all FAQs", href: "/faq" }}
         />
       </div>
 
@@ -78,36 +58,17 @@ export function FaqCarousel({ faqs }: { faqs: Faq[] }) {
         <div
           {...hoverProps}
           className="marquee-fade-mask -my-[26px] overflow-hidden py-[38px] [container-type:inline-size]"
-          onClick={(e) => e.stopPropagation()}
         >
           <div ref={trackRef} className="flex w-max gap-5 px-4 will-change-transform sm:px-8">
             {loop.map((faq, i) => {
               const key = `${faq.id}-${i < faqs.length ? "a" : "b"}`;
-              // Pin by FAQ id, not by copy: the seamless wrap can swap the
-              // visible copy mid-pin, and both copies must agree.
-              const isActive = active === faq.id;
               const tint = TOPIC_TINT[faq.topic];
               return (
-                <motion.article
+                <Link
                   key={key}
-                  onClick={() => setActive(isActive ? null : faq.id)}
-                  animate={{ scale: isActive ? 1.07 : 1, y: isActive ? -10 : 0 }}
-                  transition={{ type: "spring", stiffness: 320, damping: 26 }}
-                  className={`relative flex w-[82cqw] shrink-0 cursor-pointer select-none flex-col rounded-[22px] border bg-white p-6 text-left transition-shadow sm:w-[calc((100cqw-4rem-20px)/2)] lg:w-[calc((100cqw-4rem-40px)/3)] ${
-                    isActive
-                      ? "z-10 border-transparent shadow-[0_28px_60px_-20px_rgba(11,14,20,0.45)]"
-                      : "border-neutral-200/70 shadow-[0_8px_24px_-16px_rgba(11,14,20,0.25)] hover:border-neutral-300"
-                  }`}
-                  style={{ transformOrigin: "center", borderColor: isActive ? tint : undefined }}
-                  aria-expanded={isActive}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      setActive(isActive ? null : faq.id);
-                    }
-                  }}
+                  href={`/faq#${faq.id}`}
+                  className="group relative flex w-[82cqw] shrink-0 flex-col rounded-[22px] border border-neutral-200/70 bg-white p-6 text-left shadow-[0_8px_24px_-16px_rgba(11,14,20,0.25)] transition-all hover:-translate-y-1 hover:border-transparent hover:shadow-[0_28px_60px_-20px_rgba(11,14,20,0.45)] sm:w-[calc((100cqw-4rem-20px)/2)] lg:w-[calc((100cqw-4rem-40px)/3)]"
+                  style={{ transformOrigin: "center" }}
                 >
                   <div className="mb-4 flex items-center justify-between">
                     <span
@@ -117,32 +78,14 @@ export function FaqCarousel({ faqs }: { faqs: Faq[] }) {
                       <HelpCircle className="h-3 w-3" strokeWidth={2.5} />
                       {faq.topic}
                     </span>
-                    {isActive ? (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setActive(null);
-                        }}
-                        aria-label="Close answer"
-                        className="flex h-7 w-7 items-center justify-center rounded-full bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
-                      >
-                        <X className="h-3.5 w-3.5" strokeWidth={2.5} />
-                      </button>
-                    ) : (
-                      <span className="text-[11px] font-semibold text-neutral-400">Tap to pin</span>
-                    )}
+                    <ArrowUpRight className="h-4 w-4 text-neutral-300 transition-colors group-hover:text-neutral-500" strokeWidth={2.5} />
                   </div>
 
                   <h3 className="font-display text-[17px] font-bold leading-snug tracking-tight text-brand-900">
                     {faq.question}
                   </h3>
 
-                  <p
-                    className={`mt-3 text-[14px] leading-relaxed transition-colors ${
-                      isActive ? "text-neutral-700" : "text-neutral-500"
-                    }`}
-                  >
+                  <p className="mt-3 line-clamp-3 text-[14px] leading-relaxed text-neutral-500">
                     {faq.answer}
                   </p>
 
@@ -151,19 +94,14 @@ export function FaqCarousel({ faqs }: { faqs: Faq[] }) {
                     style={{ background: tint }}
                     aria-hidden="true"
                   />
-                </motion.article>
+                </Link>
               );
             })}
           </div>
         </div>
 
-        <div
-          className="mx-auto mt-[19px] flex max-w-[1360px] items-center justify-between px-4 sm:px-8"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <p className="text-xs text-neutral-400">
-            {active ? "Paused — click the card again or press Esc to resume" : "Auto-scrolling · tap a card to pause"}
-          </p>
+        <div className="mx-auto mt-[19px] flex max-w-[1360px] items-center justify-between px-4 sm:px-8">
+          <p className="text-xs text-neutral-400">Auto-scrolling · click a card for the full answer</p>
           <div className="flex gap-2.5">
             <button
               type="button"

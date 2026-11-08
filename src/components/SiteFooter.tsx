@@ -100,7 +100,7 @@ export function SiteFooter() {
               </Link>
             </li>
             <li>
-              <Link href="/#faq" className="hover:text-white">
+              <Link href="/faq" className="hover:text-white">
                 FAQ
               </Link>
             </li>
