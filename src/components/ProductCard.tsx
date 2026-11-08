@@ -77,14 +77,12 @@ export function ProductCard({
           <h3 className="line-clamp-2 text-[13.5px] font-medium leading-snug text-white">
             {product.name}
           </h3>
-          {product.rating_count > 0 && product.rating_avg !== null && (
-            <StarRatingPopover
-              productId={product.id}
-              rating={product.rating_avg}
-              count={product.rating_count}
-              size={11}
-            />
-          )}
+          <StarRatingPopover
+            productId={product.id}
+            rating={product.rating_avg ?? 0}
+            count={product.rating_count}
+            size={11}
+          />
           <div className="mt-auto flex items-end justify-between gap-2 pt-1">
             <div className="flex flex-wrap items-baseline gap-x-2">
               {/* price_kobo is NOT NULL for any product with status='published' —

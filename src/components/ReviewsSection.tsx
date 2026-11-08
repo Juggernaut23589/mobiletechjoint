@@ -28,9 +28,9 @@ export async function ReviewsSection({
       <h2 className="font-display mb-5 text-xl font-bold text-ink">Reviews</h2>
 
       <div className="mb-7 flex items-center gap-3">
+        <StarRatingPopover productId={productId} rating={ratingAvg ?? 0} count={ratingCount} size={18} showCount={false} />
         {ratingCount > 0 && ratingAvg !== null ? (
           <>
-            <StarRatingPopover productId={productId} rating={ratingAvg} count={ratingCount} size={18} showCount={false} />
             <span className="text-sm font-semibold text-ink">{ratingAvg.toFixed(1)}</span>
             <span className="text-sm text-ink/50">
               · {ratingCount} review{ratingCount === 1 ? "" : "s"}

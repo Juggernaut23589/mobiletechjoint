@@ -119,20 +119,26 @@ export default async function ProductPage({
             {product.name}
           </h1>
 
-          {product.rating_count > 0 && product.rating_avg !== null && (
-            <div className="mb-2.5 flex items-center gap-2 text-[13px]">
-              <StarRatingPopover
-                productId={product.id}
-                rating={product.rating_avg}
-                count={product.rating_count}
-                showCount={false}
-              />
-              <span className="font-semibold text-ink/80">{product.rating_avg.toFixed(1)}</span>
+          <div className="mb-2.5 flex items-center gap-2 text-[13px]">
+            <StarRatingPopover
+              productId={product.id}
+              rating={product.rating_avg ?? 0}
+              count={product.rating_count}
+              showCount={false}
+            />
+            {product.rating_count > 0 && product.rating_avg !== null ? (
+              <>
+                <span className="font-semibold text-ink/80">{product.rating_avg.toFixed(1)}</span>
+                <a href="#reviews" className="text-ink/40 hover:underline">
+                  ({product.rating_count} review{product.rating_count === 1 ? "" : "s"})
+                </a>
+              </>
+            ) : (
               <a href="#reviews" className="text-ink/40 hover:underline">
-                ({product.rating_count} review{product.rating_count === 1 ? "" : "s"})
+                No reviews yet — be the first
               </a>
-            </div>
-          )}
+            )}
+          </div>
 
           <div className="mb-4.5 flex flex-wrap items-baseline gap-3">
             <p className="font-display text-[30px] font-bold text-ink">
