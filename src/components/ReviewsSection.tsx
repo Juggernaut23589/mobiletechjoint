@@ -3,6 +3,7 @@ import { getApprovedReviews } from "@/lib/reviews";
 import { getMyReviewForProduct } from "@/app/actions/reviews";
 import { getCurrentUser } from "@/app/actions/account";
 import { StarRating } from "@/components/StarRating";
+import { StarRatingPopover } from "@/components/StarRatingPopover";
 import { ReviewForm } from "@/components/ReviewForm";
 
 export async function ReviewsSection({
@@ -29,7 +30,7 @@ export async function ReviewsSection({
       <div className="mb-7 flex items-center gap-3">
         {ratingCount > 0 && ratingAvg !== null ? (
           <>
-            <StarRating rating={ratingAvg} size={18} />
+            <StarRatingPopover productId={productId} rating={ratingAvg} count={ratingCount} size={18} showCount={false} />
             <span className="text-sm font-semibold text-ink">{ratingAvg.toFixed(1)}</span>
             <span className="text-sm text-ink/50">
               · {ratingCount} review{ratingCount === 1 ? "" : "s"}

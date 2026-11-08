@@ -3,18 +3,20 @@ import { CartLink } from "@/components/CartLink";
 import { CartDrawer } from "@/components/CartDrawer";
 import { AccountLink } from "@/components/AccountLink";
 import { MobileCategoryMenu } from "@/components/MobileCategoryMenu";
-import { CategoriesMenu } from "@/components/CategoriesMenu";
-import { DesktopNav } from "@/components/DesktopNav";
+import { CategoryBar } from "@/components/CategoryBar";
+import { SEARCH_FORM_ID } from "@/components/CategoriesMenu";
 import { Logo } from "@/components/Logo";
 import { SearchBar } from "@/components/SearchBar";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 /** Dark navbar matching the approved design-system mockup (Main.dc.html):
- *  logo, search box, top-category nav links (DesktopNav, fetched
- *  client-side — see its own comment for why), login/account, and a cart
- *  icon that opens the CartDrawer (see CartLink). Deliberately NOT async /
- *  no server-side data fetch here: this renders in the root layout on
- *  every page, and a dynamic fetch at that level would force the whole
+ *  logo, search box, login/account, and a cart icon that opens the
+ *  CartDrawer (see CartLink). Categories/Deals/Blog and the five featured
+ *  category shortcuts live one row down, in CategoryBar — an Amazon-style
+ *  secondary strip — which is what lets the search bar claim the rest of
+ *  this row's width instead of sharing it with nav links. Deliberately NOT
+ *  async / no server-side data fetch here: this renders in the root layout
+ *  on every page, and a dynamic fetch at that level would force the whole
  *  app out of static rendering. */
 export function SiteHeader() {
   return (
@@ -30,10 +32,7 @@ export function SiteHeader() {
           </Link>
         </div>
 
-        <SearchBar className="hidden max-w-none flex-1 md:block" />
-
-        <CategoriesMenu />
-        <DesktopNav />
+        <SearchBar className="hidden max-w-none flex-1 md:block" formId={SEARCH_FORM_ID} />
 
         <div className="ml-auto flex shrink-0 items-center gap-4 pr-0.5 sm:gap-5">
           <ThemeToggle />
@@ -41,6 +40,8 @@ export function SiteHeader() {
           <CartLink />
         </div>
       </div>
+
+      <CategoryBar />
 
       {/* Mobile-only search row. The row above hides its search form below
        *  md (no room next to the hamburger/logo/cart), so without this

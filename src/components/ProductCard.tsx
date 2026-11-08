@@ -3,7 +3,7 @@ import Image from "next/image";
 import { formatNaira, discountPercent } from "@/lib/money";
 import { QuickAddButton } from "@/components/QuickAddButton";
 import { WishlistButton } from "@/components/WishlistButton";
-import { StarRating } from "@/components/StarRating";
+import { StarRatingPopover } from "@/components/StarRatingPopover";
 import { isRecentlyAdded } from "@/lib/recency";
 import type { ProductWithImages } from "@/types/database";
 
@@ -78,10 +78,12 @@ export function ProductCard({
             {product.name}
           </h3>
           {product.rating_count > 0 && product.rating_avg !== null && (
-            <div className="flex items-center gap-1.5">
-              <StarRating rating={product.rating_avg} size={11} />
-              <span className="text-[10.5px] text-white/40">({product.rating_count})</span>
-            </div>
+            <StarRatingPopover
+              productId={product.id}
+              rating={product.rating_avg}
+              count={product.rating_count}
+              size={11}
+            />
           )}
           <div className="mt-auto flex items-end justify-between gap-2 pt-1">
             <div className="flex flex-wrap items-baseline gap-x-2">

@@ -19,7 +19,17 @@ interface Suggestion {
  *  <form action="/search"> underneath — Enter or the search icon always
  *  works and lands on the full /search results page; the dropdown is a
  *  client-side shortcut on top of that, not a replacement for it. */
-export function SearchBar({ id, className = "" }: { id?: string; className?: string }) {
+export function SearchBar({
+  id,
+  formId,
+  className = "",
+}: {
+  id?: string;
+  /** Lets the secondary category bar measure this form's real rendered
+   *  width, so its "Categories" dropdown can match it exactly. */
+  formId?: string;
+  className?: string;
+}) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Suggestion[]>([]);
   const [open, setOpen] = useState(false);
@@ -58,6 +68,7 @@ export function SearchBar({ id, className = "" }: { id?: string; className?: str
   return (
     <form
       ref={rootRef}
+      id={formId}
       action="/search"
       method="GET"
       className={`relative ${className}`}

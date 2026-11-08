@@ -18,7 +18,7 @@ import { ProductCarousel } from "@/components/ProductCarousel";
 import { ProductGallery } from "@/components/ProductGallery";
 import { ProductDescription } from "@/components/ProductDescription";
 import { DeliveryEstimator } from "@/components/DeliveryEstimator";
-import { StarRating } from "@/components/StarRating";
+import { StarRatingPopover } from "@/components/StarRatingPopover";
 import { ReviewsSection } from "@/components/ReviewsSection";
 
 // See app/page.tsx — same reasoning: stock/price can change (admin edits,
@@ -120,13 +120,18 @@ export default async function ProductPage({
           </h1>
 
           {product.rating_count > 0 && product.rating_avg !== null && (
-            <a href="#reviews" className="mb-2.5 flex items-center gap-2 text-[13px]">
-              <StarRating rating={product.rating_avg} />
+            <div className="mb-2.5 flex items-center gap-2 text-[13px]">
+              <StarRatingPopover
+                productId={product.id}
+                rating={product.rating_avg}
+                count={product.rating_count}
+                showCount={false}
+              />
               <span className="font-semibold text-ink/80">{product.rating_avg.toFixed(1)}</span>
-              <span className="text-ink/40">
+              <a href="#reviews" className="text-ink/40 hover:underline">
                 ({product.rating_count} review{product.rating_count === 1 ? "" : "s"})
-              </span>
-            </a>
+              </a>
+            </div>
           )}
 
           <div className="mb-4.5 flex flex-wrap items-baseline gap-3">
