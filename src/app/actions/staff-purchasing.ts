@@ -6,7 +6,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { requireStaffAbility } from "@/lib/staff-session";
 import { logStaffActivities, logStaffActivity } from "@/lib/activity-log";
 import { formatMoney, formatNaira, type Currency } from "@/lib/money";
-import { sanitizeSearch } from "@/lib/staff-query";
+import { orIlikeFilter, sanitizeSearch } from "@/lib/staff-query";
 import {
   analyseProductSheet,
   EMPTY_SHEET_PREVIEW,
@@ -126,7 +126,7 @@ export async function searchPurchasableProducts(query: string): Promise<Purchasa
     .from("products")
     .select("id, name, stock_quantity, cost_kobo, brand:brands(name)")
     .neq("status", "archived")
-    .or(`name.ilike.%${q}%,slug.ilike.%${q}%`)
+    .or(orIlikeFilter(["name", "slug"], q))
     .order("name")
     .limit(15)
     .returns<{ id: string; name: string; stock_quantity: number; cost_kobo: number | null; brand: { name: string } | null }[]>();

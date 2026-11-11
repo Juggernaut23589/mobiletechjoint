@@ -10,11 +10,22 @@ export function pageRange(page: number, pageSize = STAFF_PAGE_SIZE): [number, nu
   return [from, from + pageSize - 1];
 }
 
-/** Free-text search goes into PostgREST `or=(…ilike…)` filters, where
- *  commas, parentheses and wildcards are syntax — strip them so a search
- *  term can't break (or widen) the filter. */
 export function sanitizeSearch(raw: string | undefined): string {
-  return (raw ?? "").replace(/[,()*%\\:"]/g, " ").replace(/\s+/g, " ").trim().slice(0, 100);
+  return (raw ?? "").trim().slice(0, 100);
+}
+
+/** Builds a PostgREST `or=(…)` ilike filter across several columns, safely
+ *  quoting the value when it contains `,` or `(`/`)` — those characters are
+ *  `.or()` filter syntax, not SQL, so stripping them (as a previous version
+ *  of this helper did) made terms like "Lens (Canon RF)" never match the
+ *  stored name, which still contains the parentheses. Quoting instead of
+ *  stripping keeps the search term intact. */
+export function orIlikeFilter(columns: string[], q: string): string {
+  const pattern = `%${q}%`;
+  const value = /[,()]/.test(pattern)
+    ? `"${pattern.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`
+    : pattern;
+  return columns.map((c) => `${c}.ilike.${value}`).join(",");
 }
 
 export function isIsoDate(raw: string | undefined): raw is string {

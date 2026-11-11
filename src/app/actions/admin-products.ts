@@ -14,7 +14,7 @@ import {
   type SheetPreview,
 } from "@/lib/sheet-import";
 import { changeStock } from "@/lib/stock";
-import { sanitizeSearch } from "@/lib/staff-query";
+import { orIlikeFilter, sanitizeSearch } from "@/lib/staff-query";
 import type { StaffSession } from "@/lib/staff-auth";
 
 /** Every product Server Action re-checks the caller itself — proxy.ts
@@ -776,7 +776,7 @@ export async function searchProductsForStaff(query: string): Promise<StaffProduc
     .from("products")
     .select("id, name, stock_quantity, brand:brands(name)")
     .neq("status", "archived")
-    .or(`name.ilike.%${q}%,slug.ilike.%${q}%`)
+    .or(orIlikeFilter(["name", "slug"], q))
     .order("name")
     .limit(15)
     .returns<{ id: string; name: string; stock_quantity: number; brand: { name: string } | null }[]>();

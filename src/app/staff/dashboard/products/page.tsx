@@ -4,7 +4,7 @@ import { Plus } from "lucide-react";
 import { getStaffSession } from "@/app/actions/staff-auth";
 import { hasAbility } from "@/lib/staff-auth";
 import { createServiceClient } from "@/lib/supabase/server";
-import { pageRange, parsePage, sanitizeSearch } from "@/lib/staff-query";
+import { orIlikeFilter, pageRange, parsePage, sanitizeSearch } from "@/lib/staff-query";
 import { Pagination } from "@/components/staff/Pagination";
 import { ProductBulkList } from "@/components/staff/ProductBulkList";
 import { SheetUpload } from "@/components/staff/SheetUpload";
@@ -56,7 +56,7 @@ export default async function StaffProductsPage({
     .select("*, product_images(*), category:categories(*), brand:brands(*)", { count: "exact" })
     .order("created_at", { ascending: false })
     .range(...pageRange(page));
-  if (q) query = query.or(`name.ilike.%${q}%,slug.ilike.%${q}%`);
+  if (q) query = query.or(orIlikeFilter(["name", "slug"], q));
   if (status) query = query.eq("status", status);
   if (brand) query = query.eq("brand_id", brand);
   if (category) query = query.eq("category_id", category);

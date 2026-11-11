@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { getStaffSession } from "@/app/actions/staff-auth";
 import { hasAbility } from "@/lib/staff-auth";
 import { createServiceClient } from "@/lib/supabase/server";
-import { isIsoDate, pageRange, parsePage, sanitizeSearch } from "@/lib/staff-query";
+import { isIsoDate, orIlikeFilter, pageRange, parsePage, sanitizeSearch } from "@/lib/staff-query";
 import { formatNaira } from "@/lib/money";
 import { FulfillmentBadge, OrderStatusBadge } from "@/components/OrderStatusBadge";
 import { TO_FULFIL } from "@/lib/fulfillment";
@@ -57,7 +57,7 @@ export default async function StaffOrdersPage({
     .range(...pageRange(page));
   if (q) {
     query = query.or(
-      `paystack_reference.ilike.%${q}%,customer_name.ilike.%${q}%,customer_email.ilike.%${q}%,customer_phone.ilike.%${q}%`
+      orIlikeFilter(["paystack_reference", "customer_name", "customer_email", "customer_phone"], q)
     );
   }
   if (status) query = query.eq("status", status);

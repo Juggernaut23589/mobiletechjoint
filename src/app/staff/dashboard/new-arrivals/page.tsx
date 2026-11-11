@@ -3,7 +3,7 @@ import Image from "next/image";
 import { getStaffSession } from "@/app/actions/staff-auth";
 import { hasAbility } from "@/lib/staff-auth";
 import { createServiceClient } from "@/lib/supabase/server";
-import { sanitizeSearch } from "@/lib/staff-query";
+import { orIlikeFilter, sanitizeSearch } from "@/lib/staff-query";
 import { NewArrivalToggleButton } from "@/components/staff/NewArrivalToggleButton";
 import { formatNaira } from "@/lib/money";
 
@@ -60,7 +60,7 @@ export default async function NewArrivalsPage({
       .eq("status", "published")
       .order("created_at", { ascending: false })
       .limit(SEARCH_LIMIT);
-    if (q) query = query.or(`name.ilike.%${q}%,slug.ilike.%${q}%`);
+    if (q) query = query.or(orIlikeFilter(["name", "slug"], q));
     if (category) query = query.eq("category_id", category);
     if (brand) query = query.eq("brand_id", brand);
     const { data } = await query;
